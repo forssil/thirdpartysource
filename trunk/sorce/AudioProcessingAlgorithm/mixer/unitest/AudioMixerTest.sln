@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioMixerTest", "AudioMixerTest.vcxproj", "{E89F35D5-0D36-444F-B22C-86EFCD26C1BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{61B1AB78-210B-4914-BBBA-3B5550391F9B} = {61B1AB78-210B-4914-BBBA-3B5550391F9B}
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826} = {D016309E-EC30-4477-9AB8-FAC8BBD35826}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioBufferBase", "..\..\..\build\win32\AudioBufferBase.vcxproj", "{D016309E-EC30-4477-9AB8-FAC8BBD35826}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioMixer", "..\..\..\build\win32\AudioMixer.vcxproj", "{61B1AB78-210B-4914-BBBA-3B5550391F9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E89F35D5-0D36-444F-B22C-86EFCD26C1BF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E89F35D5-0D36-444F-B22C-86EFCD26C1BF}.Debug|Win32.Build.0 = Debug|Win32
+		{E89F35D5-0D36-444F-B22C-86EFCD26C1BF}.Release|Win32.ActiveCfg = Release|Win32
+		{E89F35D5-0D36-444F-B22C-86EFCD26C1BF}.Release|Win32.Build.0 = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.Build.0 = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.ActiveCfg = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.Build.0 = Release|Win32
+		{61B1AB78-210B-4914-BBBA-3B5550391F9B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{61B1AB78-210B-4914-BBBA-3B5550391F9B}.Debug|Win32.Build.0 = Debug|Win32
+		{61B1AB78-210B-4914-BBBA-3B5550391F9B}.Release|Win32.ActiveCfg = Release|Win32
+		{61B1AB78-210B-4914-BBBA-3B5550391F9B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

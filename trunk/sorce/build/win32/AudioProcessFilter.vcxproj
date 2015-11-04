@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessFilter.h" />
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessFilterDefs.h" />
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessProp.h" />
+    <ClInclude Include="..\..\DShowFilter\include\IAudioProcess.h" />
+    <ClInclude Include="..\..\DShowFilter\include\transfrmextand.h" />
+    <ClInclude Include="..\..\DShowFilter\resource\resource.h" />
+    <ClInclude Include="..\..\..\include\IAudioTransport.h" />
+    <ClInclude Include="..\..\..\tools\WaveFunction\WaveIO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\DShowFilter\resource\AudioProcessFilter.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\DShowFilter\source\AudioProcessFilter.cpp" />
+    <ClCompile Include="..\..\DShowFilter\source\AudioProcessProp.cpp" />
+    <ClCompile Include="..\..\DShowFilter\source\transfrmextand.cpp" />
+    <ClCompile Include="..\..\..\tools\WaveFunction\WaveIO.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\DShowFilter\source\AudioProcessFilter.def" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{ABE848D1-7033-41B6-9B31-16892E3B1E47}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>AudioMixFilter</RootNamespace>
+    <ProjectName>AudioProcessFilter</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\..\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Visual Leak Detector\lib\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\..\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Visual Leak Detector\lib\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AUDIOMIXFILTER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\AudioBufferBase\include;..\..\AudioUtility;..\..\;..\..\..\include;..\..\AudioUtility\interface;..\..\AudioEngine\include;..\..\DShowFilter\resource;..\..\DShowFilter\include;..\..\..\thirdparty\baseclasses;..\..\AudioProcessingAlgorithm\mixer\include\interface;..\..\..\tools\WaveFunction;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\resample\include;..\..\..\..\inc\audio_processing;..\..\AudioDevice\include</AdditionalIncludeDirectories>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>..\..\DShowFilter\source\AudioProcessFilter.def</ModuleDefinitionFile>
+      <AdditionalDependencies>AEC.lib;AudioEngine.lib;MultipleSourceSync.lib;webrtc_utile.lib;AudioMixer.lib;CommonAudio.lib;resample.lib;strmbase.lib;AudioBufferBase.lib;AudioDevice.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;dmoguids.lib;msdmo.lib;amstrmid.lib;wmcodecdspuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\libs\$(Configuration)\;..\..\..\thirdparty\baseclasses\$(Configuration);../Debug</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <Profile>true</Profile>
+    </Link>
+    <PreBuildEvent>
+      <Command>del /f /q ..\..\..\release</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AUDIOMIXFILTER_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\AudioBufferBase\include;..\..\AudioUtility;..\..\;..\..\..\include;..\..\AudioUtility\interface;..\..\AudioEngine/include;..\..\DShowFilter\resource;..\..\DShowFilter\include;..\..\..\..\inc\audio_processing;..\..\..\thirdparty\baseclasses;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\mixer\include\interface;..\..\..\tools\WaveFunction</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\AudioBufferBase\include;..\..\AudioUtility;..\..\;..\..\..\include;..\..\AudioUtility\interface;..\..\AudioEngine/include;..\..\DShowFilter\resource;..\..\DShowFilter\include;..\..\..\..\inc\audio_processing;..\..\..\thirdparty\baseclasses;..\..\AudioProcessingAlgorithm\mixer\include\interface;..\..\..\tools\WaveFunction;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioDevice\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <SDLCheck>true</SDLCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>..\..\DShowFilter\source\AudioProcessFilter.def</ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>..\..\..\libs\$(Configuration)\;..\..\..\thirdparty\baseclasses\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AudioEngine.lib;MultipleSourceSync.lib;webrtc_utile.lib;AudioMixer.lib;strmbase.lib;AudioBufferBase.lib;AudioMixer.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>AEC.lib;AudioEngine.lib;MultipleSourceSync.lib;webrtc_utile.lib;AudioMixer.lib;CommonAudio.lib;resample.lib;strmbase.lib;AudioBufferBase.lib;AudioDevice.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;dmoguids.lib;msdmo.lib;amstrmid.lib;wmcodecdspuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y ..\..\..\bin\release\$(ProjectName).dll ..\..\..\release 
+copy /y  ..\..\DShowFilter\include\IAudioProcess.h ..\..\..\release</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>del /f /q ..\..\..\release</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

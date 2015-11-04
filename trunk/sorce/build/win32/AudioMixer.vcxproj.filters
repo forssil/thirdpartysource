@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\AudioMixer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\AudioMixImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Clip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Compandor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Mix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\AudioMixer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\interface\AudioMixImpl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\interface\AudioMixerDefs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Clip.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Compandor.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\interface\IAudioMixer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Mix.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{e1f1b7d2-4525-450b-b1c7-1c92c84aa8c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{09d2de96-c323-4a0a-b4c5-af5760b7f843}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

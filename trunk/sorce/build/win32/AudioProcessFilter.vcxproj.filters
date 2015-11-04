@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\DShowFilter\source\AudioProcessFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\DShowFilter\source\AudioProcessProp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\DShowFilter\source\transfrmextand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tools\WaveFunction\WaveIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessFilter.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessFilterDefs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DShowFilter\include\AudioProcessProp.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DShowFilter\include\IAudioProcess.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IAudioTransport.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DShowFilter\include\transfrmextand.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\tools\WaveFunction\WaveIO.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DShowFilter\resource\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{708cdad3-b181-49af-a7ad-57218620b899}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{825051d3-0c43-4cef-9ee9-fc53afcfdc84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{c7aa6bfc-c4ff-4ed3-87a3-5e35170088bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\DShowFilter\source\AudioProcessFilter.def">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\DShowFilter\resource\AudioProcessFilter.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

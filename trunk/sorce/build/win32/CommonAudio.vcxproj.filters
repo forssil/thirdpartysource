@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\AudioDataSorter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\basemath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\DCRemover.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\F2Ttransformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\randomization_functions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\samplerate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\SampleRateConvert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SilenceDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SPEst.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_linear.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_sinc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_zoh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\T2Ftransformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\audiodatatypecast.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\basemath.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\common.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\config.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\DCRemover.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\F2Ttransformer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\fastest_coeffs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\float_cast.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\high_qual_coeffs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\mid_qual_coeffs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\samplerate.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\SampleRateConvert.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\signal_processing_library.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SilenceDetector.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SPEst.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\T2Ftransformer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{99d2769c-036d-4e46-814f-dcb16f77ad5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0e93ebc0-0ce1-4ee1-8a96-554b1b48c8a9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

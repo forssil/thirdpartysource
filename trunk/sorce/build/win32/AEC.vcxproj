@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4D1B3771-F541-4244-94F4-CBEEFD15331C}</ProjectGuid>
+    <RootNamespace>AEC</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\..\libs\$(Configuration)</OutDir>
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>..\..\..\libs\$(Configuration)</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\AcousticEchoCancellation.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\AdapFilterGroup.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\delaybuffer.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\delayest.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface\echocancellation_interface.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\noiseest.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\noisereduction.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\postfilter.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\PSDsmooth.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\SpeechEst.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\SubbandAdap.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\subbandgroup.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\vad\include\VAD.h" />
+    <ClInclude Include="..\..\include\audiotrace.h" />
+    <ClInclude Include="..\..\include\audiotypedef.h" />
+    <ClInclude Include="..\..\include\common_types.h" />
+    <ClInclude Include="..\..\include\processingconfig.h" />
+    <ClInclude Include="..\..\include\typedefs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\AcousticEchoCancellation.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\AdapFilterGroup.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\delaybuffer.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\delayest.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\noiseest.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\noisereduction.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\postfilter.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\PSDsmooth.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\SpeechEst.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\SubbandAdap.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\vad\source\VAD.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

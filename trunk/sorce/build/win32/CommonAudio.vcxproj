@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{23E10C0F-B0FF-4990-A8D9-0FFF2343B365}</ProjectGuid>
+    <RootNamespace>CommonAudio</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\..\libs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\libs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\AudioUtility\interface;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\..\include;..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\AudioUtility\interface;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\..\include;..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\audiodatatypecast.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\basemath.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\DCRemover.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\F2Ttransformer.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\signal_processing_library.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SilenceDetector.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SPEst.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\T2Ftransformer.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\common.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\config.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\fastest_coeffs.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\float_cast.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\high_qual_coeffs.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\mid_qual_coeffs.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\samplerate.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\SampleRateConvert.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\samplerate.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\SampleRateConvert.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_linear.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_sinc.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\src\src_zoh.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\AudioDataSorter.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\basemath.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\DCRemover.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\F2Ttransformer.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\randomization_functions.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SilenceDetector.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SPEst.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\T2Ftransformer.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

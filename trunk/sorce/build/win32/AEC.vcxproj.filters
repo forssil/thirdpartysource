@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\AcousticEchoCancellation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\AdapFilterGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\delaybuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\delayest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\noiseest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\noisereduction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\postfilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\PSDsmooth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\SpeechEst.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\source\SubbandAdap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\vad\source\VAD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\AcousticEchoCancellation.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\AdapFilterGroup.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\audiotrace.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\audiotypedef.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\common_types.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\delaybuffer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\delayest.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface\echocancellation_interface.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\noiseest.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\noisereduction.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\postfilter.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\processingconfig.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\PSDsmooth.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\SpeechEst.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\SubbandAdap.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\subbandgroup.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\typedefs.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\vad\include\VAD.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{b6a2bee1-3326-4787-9844-ce6bff950898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9d6c76f5-5694-4b32-8d8b-7480d86797ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

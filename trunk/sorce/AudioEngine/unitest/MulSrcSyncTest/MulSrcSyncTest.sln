@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MulSrcSyncTest", "MulSrcSyncTest.vcxproj", "{CBD26684-B44C-426E-8288-DE0D0CE72B3E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826} = {D016309E-EC30-4477-9AB8-FAC8BBD35826}
+		{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490} = {A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}
+		{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA} = {A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultipleSourceSync", "..\..\..\build\win32\MultipleSourceSync.vcxproj", "{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_utile", "..\..\..\build\win32\webrtc_utile.vcxproj", "{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioBufferBase", "..\..\..\build\win32\AudioBufferBase.vcxproj", "{D016309E-EC30-4477-9AB8-FAC8BBD35826}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBD26684-B44C-426E-8288-DE0D0CE72B3E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CBD26684-B44C-426E-8288-DE0D0CE72B3E}.Debug|Win32.Build.0 = Debug|Win32
+		{CBD26684-B44C-426E-8288-DE0D0CE72B3E}.Release|Win32.ActiveCfg = Release|Win32
+		{CBD26684-B44C-426E-8288-DE0D0CE72B3E}.Release|Win32.Build.0 = Release|Win32
+		{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}.Debug|Win32.Build.0 = Debug|Win32
+		{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}.Release|Win32.ActiveCfg = Release|Win32
+		{A7BCD9E7-26AA-43BA-ABD0-A6677EC506BA}.Release|Win32.Build.0 = Release|Win32
+		{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}.Debug|Win32.Build.0 = Debug|Win32
+		{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}.Release|Win32.ActiveCfg = Release|Win32
+		{A297A2D4-F2B4-43E6-8D38-3FBC6FF2D490}.Release|Win32.Build.0 = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.Build.0 = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.ActiveCfg = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

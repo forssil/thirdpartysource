@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioBufferManagerTest", "AudioBufferManagerTest.vcxproj", "{02D3DD4F-8F45-4791-BDB5-1BB43862E1F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826} = {D016309E-EC30-4477-9AB8-FAC8BBD35826}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioBufferBase", "..\..\build\win32\AudioBufferBase.vcxproj", "{D016309E-EC30-4477-9AB8-FAC8BBD35826}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02D3DD4F-8F45-4791-BDB5-1BB43862E1F2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{02D3DD4F-8F45-4791-BDB5-1BB43862E1F2}.Debug|Win32.Build.0 = Debug|Win32
+		{02D3DD4F-8F45-4791-BDB5-1BB43862E1F2}.Release|Win32.ActiveCfg = Release|Win32
+		{02D3DD4F-8F45-4791-BDB5-1BB43862E1F2}.Release|Win32.Build.0 = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Debug|Win32.Build.0 = Debug|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.ActiveCfg = Release|Win32
+		{D016309E-EC30-4477-9AB8-FAC8BBD35826}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

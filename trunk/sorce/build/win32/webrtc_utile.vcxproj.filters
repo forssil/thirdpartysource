@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioUtility\source\aligned_malloc.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\atomic32_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\clock.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\condition_variable.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\condition_variable_event_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\condition_variable_native_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\cpu_features.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\cpu_info.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\critical_section.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\critical_section_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\data_log_no_op.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\event.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\event_tracer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\event_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\file_impl.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\list_no_stl.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\logging_no_op.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\map.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\rw_lock.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\rw_lock_generic.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\rw_lock_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\sleep.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\sort.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\thread.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\thread_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\tick_util.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\trace_impl.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioUtility\source\win\trace_win.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioUtility\interface\aligned_malloc.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\asm_defines.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\atomic32.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\clock.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\compile_assert.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\condition_variable_event_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\condition_variable_native_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\condition_variable_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\constructor_magic.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\cpu_features_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\cpu_info.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\critical_section_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\critical_section_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\data_log.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\data_log_c.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\data_log_impl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\event_tracer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\event_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\event_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\file_impl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\file_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\fix_interlocked_exchange_pointer_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\list_no_stl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\list_stl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\list_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\logging.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\map_no_stl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\map_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\memory_pool.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\memory_pool_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\ref_count.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\rw_lock_generic.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\rw_lock_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\rw_lock_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\scoped_ptr.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\scoped_refptr.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\set_thread_name_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\sleep.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\sort.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\static_instance.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\stringize_macros.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\thread_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\thread_wrapper.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\tick_util.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\trace.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\interface\trace_event.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\trace_impl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioUtility\source\win\trace_win.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{9d89ad49-80c7-496e-8f07-e888f3b555e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{f972e112-37b8-425e-8c52-ec4d4a7f07f3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

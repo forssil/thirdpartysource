@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioBufferBase\source\codyyAudioCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\MultipleSourceSync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{7ff4a495-f6d2-4863-9536-8e5a6a0da643}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7ee8e7c8-7402-4853-b650-87f122be157a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioEngine\include\MultipleSourceSync.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\AudioEngine\source\AudioCaptureChannel.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioDeviceManager.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioDeviceTransport.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioEngineImpl.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioPlaybackChannel.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioProcessingImpl.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioPropertyPage.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioTransportImpl.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\AudioTributaryReceiver.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\DCRemoverImpl.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioEngine\source\SharedChannel.cpp">
+      <Filter>Source Filses</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\AudioEngine\include\AudioCaptureChannel.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioChannelBase.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioDeviceManager.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioDeviceTransport.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioEngineImpl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioPlaybackChannel.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioProcessingImpl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioPropertyPage.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioTransportImpl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\AudioTributaryReceiver.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\DCRemoverImpl.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\IAudioDeviceManager.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IAudioEngine.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\IAudioPropertyPage.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\IAudioTransport.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioEngine\include\SharedChannel.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Filses">
+      <UniqueIdentifier>{abfed723-1514-46de-991f-cf19aae9edda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{1ca65ae7-4c98-44e5-ba42-4dfd2d3862b7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
