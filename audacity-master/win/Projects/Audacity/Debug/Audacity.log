@@ -1,0 +1,172 @@
+﻿Build started 4/8/2016 1:45:21 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\Audacity\Audacity.vcxproj" on node 3 (Build target(s)).
+     1>CustomBuild:
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+         Performing Custom Build Tools
+                 1 file(s) copied.
+       _copy:
+         Copying adjustable-fade.ny
+         Copying beat.ny
+         Copying clicktrack.ny
+         Copying clipfix.ny
+         Copying crossfadeclips.ny
+         Copying crossfadetracks.ny
+         Copying delay.ny
+         Copying equalabel.ny
+         Copying highpass.ny
+         Copying limiter.ny
+         Copying lowpass.ny
+         Copying notch.ny
+         Copying pluck.ny
+         Copying rissetdrum.ny
+         Copying sample-data-export.ny
+         Copying SilenceMarker.ny
+         Copying SoundFinder.ny
+         Copying SpectralEditMulti.ny
+         Copying SpectralEditParametricEQ.ny
+         Copying SpectralEditShelves.ny
+         Copying StudioFadeOut.ny
+         Copying tremolo.ny
+         Copying vocalrediso.ny
+         Copying vocalremover.ny
+         Copying vocoder.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpaafed32e4c04458db20e731e2e80a791.cmd"
+         copy /Y  "..\..\..\plug-ins\adjustable-fade.ny" ..\..\Debug\Plug-ins\adjustable-fade.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp7c1494f100384a629c92e5c627935b52.cmd"
+         copy /Y  "..\..\..\plug-ins\beat.ny" ..\..\Debug\Plug-ins\beat.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp085f81ab35cd4ca685578966eb1dd254.cmd"
+         copy /Y  "..\..\..\plug-ins\clicktrack.ny" ..\..\Debug\Plug-ins\clicktrack.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp0164ef24fc9f4172aa49d10f5a76fb30.cmd"
+         copy /Y  "..\..\..\plug-ins\clipfix.ny" ..\..\Debug\Plug-ins\clipfix.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp566c7115c28d4423a8c0eb002cc6880a.cmd"
+         copy /Y  "..\..\..\plug-ins\crossfadeclips.ny" ..\..\Debug\Plug-ins\crossfadeclips.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp1eaf955220d64dae840f7a309ea8a818.cmd"
+         copy /Y  "..\..\..\plug-ins\crossfadetracks.ny" ..\..\Debug\Plug-ins\crossfadetracks.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpf9b006f6595246598c4924a90af2033e.cmd"
+         copy /Y  "..\..\..\plug-ins\delay.ny" ..\..\Debug\Plug-ins\delay.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp58480e50ccf240a0a667b141fcba4868.cmd"
+         copy /Y  "..\..\..\plug-ins\equalabel.ny" ..\..\Debug\Plug-ins\equalabel.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpac057a4ed69d4a499fa1e2d92c3d03fb.cmd"
+         copy /Y  "..\..\..\plug-ins\highpass.ny" ..\..\Debug\Plug-ins\highpass.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpbe4dc86b056a4f1d9a6fba453107af0a.cmd"
+         copy /Y  "..\..\..\plug-ins\limiter.ny" ..\..\Debug\Plug-ins\limiter.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpa2e189e6507d41ef93273b58784dd5fa.cmd"
+         copy /Y  "..\..\..\plug-ins\lowpass.ny" ..\..\Debug\Plug-ins\lowpass.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp0f7105744b7a45bf99040f77a685f06f.cmd"
+         copy /Y  "..\..\..\plug-ins\notch.ny" ..\..\Debug\Plug-ins\notch.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpe7199fc350b44f1fb7af1aedeb3499e6.cmd"
+         copy /Y  "..\..\..\plug-ins\pluck.ny" ..\..\Debug\Plug-ins\pluck.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpf87f5fd7ec5b4c3f8626c764a91564f6.cmd"
+         copy /Y  "..\..\..\plug-ins\rissetdrum.ny" ..\..\Debug\Plug-ins\rissetdrum.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp13a816b989ce4feabf8af2eafdb9ce03.cmd"
+         copy /Y  "..\..\..\plug-ins\sample-data-export.ny" ..\..\Debug\Plug-ins\sample-data-export.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp2e6ad169441043bba55561555693785f.cmd"
+         copy /Y  "..\..\..\plug-ins\SilenceMarker.ny" ..\..\Debug\Plug-ins\SilenceMarker.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpfd8623bfc373468a9e6b8d6a34ef3594.cmd"
+         copy /Y  "..\..\..\plug-ins\SoundFinder.ny" ..\..\Debug\Plug-ins\SoundFinder.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpe32431b4f23249739d4c6ae40d31d5fe.cmd"
+         copy /Y  "..\..\..\plug-ins\SpectralEditMulti.ny" ..\..\Debug\Plug-ins\SpectralEditMulti.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpd2c2a5636f6241aba67418ce1270282d.cmd"
+         copy /Y  "..\..\..\plug-ins\SpectralEditParametricEQ.ny" ..\..\Debug\Plug-ins\SpectralEditParametricEQ.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpf46e504ae6524c6490db29783dd99741.cmd"
+         copy /Y  "..\..\..\plug-ins\SpectralEditShelves.ny" ..\..\Debug\Plug-ins\SpectralEditShelves.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpc87c85ae8cdc45d8b78a8467d098d414.cmd"
+         copy /Y  "..\..\..\plug-ins\StudioFadeOut.ny" ..\..\Debug\Plug-ins\StudioFadeOut.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp48434d5dc1df4b18b5234372ae65bf66.cmd"
+         copy /Y  "..\..\..\plug-ins\tremolo.ny" ..\..\Debug\Plug-ins\tremolo.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp650479f3fd0f460eb3a99c37ad41b588.cmd"
+         copy /Y  "..\..\..\plug-ins\vocalrediso.ny" ..\..\Debug\Plug-ins\vocalrediso.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmpaa615bed4dde48df825ab3d071a07040.cmd"
+         copy /Y  "..\..\..\plug-ins\vocalremover.ny" ..\..\Debug\Plug-ins\vocalremover.ny
+         cmd.exe /C "C:\Users\huagao.huagao-WS\AppData\Local\Temp\tmp0e1c39e83455450ca7dafc138f7e61c5.cmd"
+         copy /Y  "..\..\..\plug-ins\vocoder.ny" ..\..\Debug\Plug-ins\vocoder.ny
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I\lib\vc_dll\mswud /I\include /I..\.. /I..\..\..\include /I"..\..\..\lib-src\expat\lib" /I"..\..\..\lib-src\FileDialog" /I"..\..\..\lib-src\FileDialog\win" /I"..\..\..\lib-src\lib-widget-extra" /I"..\..\..\lib-src\libflac\include" /I"..\..\..\lib-src\libid3tag" /I"..\..\..\lib-src\libmad\msvc++" /I"..\..\..\lib-src\libmad" /I"..\..\..\lib-src\libnyquist" /I"..\..\..\lib-src\libogg\include" /I"..\..\..\lib-src\libscorealign" /I..\libsndfile /I"..\..\..\lib-src\libsoxr\src" /I"..\..\..\lib-src\libvamp" /I"..\..\..\lib-src\libvorbis\include" /I"..\..\..\lib-src\portaudio-v19\include" /I"..\..\..\lib-src\portmixer\include" /I"..\..\..\lib-src\portsmf" /I"..\..\..\lib-src\sbsms\include" /I"..\..\..\lib-src\soundtouch\include" /I"..\..\..\lib-src\twolame\libtwolame" /I"..\..\..\lib-src\portmidi\pm_common" /I"..\..\..\lib-src\portmidi\pm_win" /I"..\..\..\lib-src\portmidi\porttime" /I"..\..\..\lib-src\ffmpeg\win32" /I"..\..\..\lib-src\ffmpeg" /I"..\..\..\lib-src\lv2\lilv" /I"..\..\..\lib-src\lv2\lv2" /I"..\..\..\lib-src\lv2\suil" /I"..\..\..\lib-src\lame" /I"&quot" /I"\include\gstreamer-1.0" /I"\include\glib-2.0" /I"\lib\glib-2.0\include" /ZI /nologo /W4 /WX- /Od /Oy- /D BUILDING_AUDACITY /D FLAC__NO_DLL /D XML_STATIC /D __STDC_CONSTANT_MACROS /D WXUSINGDLL /D __WXMSW__ /D __WXDEBUG__ /D _DEBUG /D WIN32 /D STRICT /D _UNICODE /D UNICODE /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"AudacityHeaders.h" /Fp"Debug\Audacity.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /wd4996 /FIAudacityHeaders.h /analyze- /errorReport:prompt ..\..\..\src\AudacityHeaders.cpp
+         AudacityHeaders.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\src\audacityheaders.h(30): fatal error C1083: Cannot open include file: 'wx/wx.h': No such file or directory
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\Audacity\Audacity.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:07.60

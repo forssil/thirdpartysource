@@ -1,0 +1,99 @@
+﻿Build started 4/8/2016 1:44:56 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\lv2\lv2.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\lv2\windows" /I"..\..\..\lib-src\lv2\sord\src" /I"..\..\..\lib-src\lv2\lilv" /I"..\..\..\lib-src\lv2\lv2" /I"..\..\..\lib-src\lv2\serd" /I"..\..\..\lib-src\lv2\sord" /I"..\..\..\lib-src\lv2\sratom" /I"..\..\..\lib-src\lv2\suil" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D snprintf=_snprintf /D HAVE_FMAX /D LILV_INTERNAL /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\lv2\lilv\src\collections.c" "..\..\..\lib-src\lv2\lilv\src\instance.c" "..\..\..\lib-src\lv2\lilv\src\lib.c" "..\..\..\lib-src\lv2\lilv\src\plugin.c" "..\..\..\lib-src\lv2\lilv\src\pluginclass.c" "..\..\..\lib-src\lv2\lilv\src\port.c" "..\..\..\lib-src\lv2\lilv\src\query.c" "..\..\..\lib-src\lv2\lilv\src\scalepoint.c" "..\..\..\lib-src\lv2\lilv\src\state.c" "..\..\..\lib-src\lv2\lilv\src\ui.c" "..\..\..\lib-src\lv2\lilv\src\util.c" "..\..\..\lib-src\lv2\lilv\src\world.c" "..\..\..\lib-src\lv2\serd\src\env.c" "..\..\..\lib-src\lv2\serd\src\reader.c" "..\..\..\lib-src\lv2\serd\src\serdnode.c" "..\..\..\lib-src\lv2\serd\src\string.c" "..\..\..\lib-src\lv2\serd\src\uri.c" "..\..\..\lib-src\lv2\serd\src\writer.c" "..\..\..\lib-src\lv2\sord\src\sord.c" "..\..\..\lib-src\lv2\sord\src\syntax.c" "..\..\..\lib-src\lv2\sord\src\zix\digest.c" "..\..\..\lib-src\lv2\sord\src\zix\hash.c" "..\..\..\lib-src\lv2\sord\src\zix\tree.c" "..\..\..\lib-src\lv2\sratom\src\sratom.c" "..\..\..\lib-src\lv2\suil\src\host.c" "..\..\..\lib-src\lv2\suil\src\suil_instance.c"
+         collections.c
+         instance.c
+         lib.c
+         plugin.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\lilv_internal.h(35): warning C4005: 'INFINITY' : macro redefinition
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(102) : see previous definition of 'INFINITY'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\lilv_internal.h(36): warning C4005: 'NAN' : macro redefinition
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(106) : see previous definition of 'NAN'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(506): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(514): warning C4056: overflow in floating-point constant arithmetic
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(522): warning C4056: overflow in floating-point constant arithmetic
+         pluginclass.c
+         port.c
+         query.c
+         scalepoint.c
+         state.c
+         ui.c
+         util.c
+         world.c
+         env.c
+         reader.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(840): warning C4800: 'unsigned int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(968): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(980): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(984): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1068): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1091): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1104): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1365): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1369): warning C4800: 'Ref' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1396): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1414): warning C4800: 'uint8_t' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\reader.c(1421): warning C4800: 'uint8_t' : forcing value to bool 'true' or 'false' (performance warning)
+         serdnode.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\serdnode.c(255): warning C4244: 'initializing' : conversion from 'double' to 'uint64_t', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\serd\src\serdnode.c(279): warning C4244: 'initializing' : conversion from 'double' to 'const unsigned int', possible loss of data
+         string.c
+         uri.c
+         writer.c
+         sord.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\sord\src\sord.c(535): warning C4800: 'ZixTree *' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\sord\src\sord.c(858): warning C4800: 'const SordNode *' : forcing value to bool 'true' or 'false' (performance warning)
+         syntax.c
+         Generating Code...
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(506): warning C4756: overflow in constant arithmetic
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(514): warning C4756: overflow in constant arithmetic
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(522): warning C4756: overflow in constant arithmetic
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\plugin.c(506): warning C4756: overflow in constant arithmetic
+         Compiling...
+         digest.c
+         hash.c
+         tree.c
+         sratom.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\sratom\src\sratom.c(585): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\sratom\src\sratom.c(658): warning C4244: 'argument' : conversion from 'double' to 'int64_t', possible loss of data
+         host.c
+         suil_instance.c
+         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\lv2\windows" /I"..\..\..\lib-src\lv2\sord\src" /I"..\..\..\lib-src\lv2\lilv" /I"..\..\..\lib-src\lv2\lv2" /I"..\..\..\lib-src\lv2\serd" /I"..\..\..\lib-src\lv2\sord" /I"..\..\..\lib-src\lv2\sratom" /I"..\..\..\lib-src\lv2\suil" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D snprintf=_snprintf /D HAVE_FMAX /D LILV_INTERNAL /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\lilv-node.obj" /Fd"Debug\vc120.pdb" /Gd /TP /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\lv2\lilv\src\node.c"
+         node.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\lv2\lilv\src\node.c(39): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\lv2.lib" /NOLOGO /NODEFAULTLIB Debug\collections.obj
+         Debug\instance.obj
+         Debug\lib.obj
+         Debug\plugin.obj
+         Debug\pluginclass.obj
+         Debug\port.obj
+         Debug\query.obj
+         Debug\scalepoint.obj
+         Debug\state.obj
+         Debug\ui.obj
+         Debug\util.obj
+         Debug\world.obj
+         Debug\env.obj
+         Debug\reader.obj
+         Debug\serdnode.obj
+         Debug\string.obj
+         Debug\uri.obj
+         Debug\writer.obj
+         Debug\sord.obj
+         Debug\syntax.obj
+         Debug\digest.obj
+         Debug\hash.obj
+         Debug\tree.obj
+         Debug\sratom.obj
+         Debug\host.obj
+         Debug\suil_instance.obj
+         "Debug\lilv-node.obj"
+         lv2.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\lv2.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\lv2\lv2.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:16.23

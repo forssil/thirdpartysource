@@ -1,0 +1,760 @@
+﻿Build started 4/8/2016 1:44:15 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libnyquist\libnyquist.vcxproj" on node 3 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\libnyquist" /I"..\..\..\lib-src\libnyquist\nyquist" /I"..\..\..\lib-src\libnyquist\nyquist\cmt" /I"..\..\..\lib-src\libnyquist\nyquist\ffts\src" /I"..\..\..\lib-src\libnyquist\nyquist\nyqsrc" /I"..\..\..\lib-src\libnyquist\nyquist\nyqstk" /I"..\..\..\lib-src\libnyquist\nyquist\nyqstk\include" /I"..\..\..\lib-src\libnyquist\nyquist\snd" /I"..\..\..\lib-src\libnyquist\nyquist\tran" /I"..\..\..\lib-src\libnyquist\nyquist\sys\win\msvc" /I"..\..\..\lib-src\libnyquist\nyquist\xlisp" /I"..\..\..\lib-src\libnyquist\nyquist\win" /I..\libsndfile /I"..\..\..\lib-src\portaudio-v19\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _DEBUG /D WIN32 /D _LIB /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\libnyquist\nyquist\cmt\cext.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\cleanup.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\cmdline.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\cmtcmd.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\mem.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\midifile.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\midifns.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\moxc.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\record.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\seq.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\seqmread.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\seqmwrite.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\seqread.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\seqwrite.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\tempomap.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\timebase.c" "..\..\..\lib-src\libnyquist\nyquist\cmt\userio.c" "..\..\..\lib-src\libnyquist\nyquist\ffts\src\fftext.c" "..\..\..\lib-src\libnyquist\nyquist\ffts\src\fftlib.c" "..\..\..\lib-src\libnyquist\nyquist\ffts\src\matlib.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\add.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\avg.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\compose.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\convolve.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\debug.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\downsample.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\falloc.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\ffilterkit.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\fft.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\handlers.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\inverse.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\local.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\lpanal.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\multiread.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\multiseq.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\phasevocoder.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\pvshell.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\resamp.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\resampv.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\samples.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\seqext.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\seqfnint.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\seqinterf.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sliderdata.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndfnint.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndmax.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndread.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndseq.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndsliders.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sndwritepa.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\sound.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\stats.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\trigger.c" "..\..\..\lib-src\libnyquist\nyquist\nyqsrc\yin.c" "..\..\..\lib-src\libnyquist\nyquist\tran\abs.c" "..\..\..\lib-src\libnyquist\nyquist\tran\allpoles.c" "..\..\..\lib-src\libnyquist\nyquist\tran\alpass.c" "..\..\..\lib-src\libnyquist\nyquist\tran\alpasscv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\alpassvc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\alpassvv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\amosc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\areson.c" "..\..\..\lib-src\libnyquist\nyquist\tran\aresoncv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\aresonvc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\aresonvv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\atone.c" "..\..\..\lib-src\libnyquist\nyquist\tran\atonev.c" "..\..\..\lib-src\libnyquist\nyquist\tran\biquadfilt.c" "..\..\..\lib-src\libnyquist\nyquist\tran\buzz.c" "..\..\..\lib-src\libnyquist\nyquist\tran\chase.c" "..\..\..\lib-src\libnyquist\nyquist\tran\clip.c" "..\..\..\lib-src\libnyquist\nyquist\tran\congen.c" "..\..\..\lib-src\libnyquist\nyquist\tran\const.c" "..\..\..\lib-src\libnyquist\nyquist\tran\coterm.c" "..\..\..\lib-src\libnyquist\nyquist\tran\delaycc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\delaycv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\eqbandvvv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\exp.c" "..\..\..\lib-src\libnyquist\nyquist\tran\fmfb.c" "..\..\..\lib-src\libnyquist\nyquist\tran\fmfbv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\fmosc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\follow.c" "..\..\..\lib-src\libnyquist\nyquist\tran\fromarraystream.c" "..\..\..\lib-src\libnyquist\nyquist\tran\fromobject.c" "..\..\..\lib-src\libnyquist\nyquist\tran\gate.c" "..\..\..\lib-src\libnyquist\nyquist\tran\ifft.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrbanded.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrbow.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrbowedfreq.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrclar.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrclarall.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrclarfreq.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrflute.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrfluteall.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrflutefreq.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrmandolin.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrmodalbar.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrsax.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrsaxall.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrsaxfreq.c" "..\..\..\lib-src\libnyquist\nyquist\tran\instrsitar.c" "..\..\..\lib-src\libnyquist\nyquist\tran\integrate.c" "..\..\..\lib-src\libnyquist\nyquist\tran\log.c" "..\..\..\lib-src\libnyquist\nyquist\tran\lpreson.c" "..\..\..\lib-src\libnyquist\nyquist\tran\maxv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\offset.c" "..\..\..\lib-src\libnyquist\nyquist\tran\oneshot.c" "..\..\..\lib-src\libnyquist\nyquist\tran\osc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\partial.c" "..\..\..\lib-src\libnyquist\nyquist\tran\pluck.c" "..\..\..\lib-src\libnyquist\nyquist\tran\prod.c" "..\..\..\lib-src\libnyquist\nyquist\tran\pwl.c" "..\..\..\lib-src\libnyquist\nyquist\tran\quantize.c" "..\..\..\lib-src\libnyquist\nyquist\tran\recip.c" "..\..\..\lib-src\libnyquist\nyquist\tran\reson.c" "..\..\..\lib-src\libnyquist\nyquist\tran\resoncv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\resonvc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\resonvv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\sampler.c" "..\..\..\lib-src\libnyquist\nyquist\tran\scale.c" "..\..\..\lib-src\libnyquist\nyquist\tran\shape.c" "..\..\..\lib-src\libnyquist\nyquist\tran\sine.c" "..\..\..\lib-src\libnyquist\nyquist\tran\siosc.c" "..\..\..\lib-src\libnyquist\nyquist\tran\slope.c" "..\..\..\lib-src\libnyquist\nyquist\tran\sqrt.c" "..\..\..\lib-src\libnyquist\nyquist\tran\stkchorus.c" "..\..\..\lib-src\libnyquist\nyquist\tran\stkpitshift.c" "..\..\..\lib-src\libnyquist\nyquist\tran\stkrev.c" "..\..\..\lib-src\libnyquist\nyquist\tran\tapf.c" "..\..\..\lib-src\libnyquist\nyquist\tran\tapv.c" "..\..\..\lib-src\libnyquist\nyquist\tran\tone.c" "..\..\..\lib-src\libnyquist\nyquist\tran\tonev.c" "..\..\..\lib-src\libnyquist\nyquist\tran\upsample.c" "..\..\..\lib-src\libnyquist\nyquist\tran\white.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\extern.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\path.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\security.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlbfun.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlcont.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xldbug.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xldmem.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xleval.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlfio.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlftab.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlglob.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlimage.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlinit.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlio.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlisp.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xljump.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xllist.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlmath.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlobj.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlpp.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlprin.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlread.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlstr.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlsubr.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlsym.c" "..\..\..\lib-src\libnyquist\nyquist\xlisp\xlsys.c" "..\..\..\lib-src\libnyquist\nyx.c" "..\..\..\lib-src\libnyquist\xlextstart.c"
+         cext.c
+         cleanup.c
+         cmdline.c
+         cmtcmd.c
+         mem.c
+         midifile.c
+         midifns.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\midifns.c(1757): warning C4013: 'tolower' undefined; assuming extern returning int
+         moxc.c
+         record.c
+         seq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seq.c(967): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(seq_struct *)'
+         seqmread.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(108): warning C4113: 'int (__cdecl *)()' differs in parameter lists from 'int (__cdecl *)(void)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(426): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(char *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(427): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(428): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(429): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(430): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(431): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(432): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(433): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(434): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(435): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(436): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(437): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,char *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(438): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,char *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(439): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(440): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(441): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(442): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,int,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(443): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(444): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(445): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,char *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(446): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,int,char *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmread.c(447): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(int,char *)'
+         seqmwrite.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmwrite.c(532): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(seq_struct *,time_type,int,int)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\cmt\seqmwrite.c(537): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(seq_struct *,int,int,int)'
+         seqread.c
+         seqwrite.c
+         tempomap.c
+         timebase.c
+         userio.c
+         fftext.c
+         fftlib.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(35): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(58): warning C4244: '=' : conversion from 'long' to 'short', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(292): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(531): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(948): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(984): warning C4018: '<=' : signed/unsigned mismatch
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(1355): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(1595): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2015): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2051): warning C4018: '<=' : signed/unsigned mismatch
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2141): warning C4244: 'initializing' : conversion from 'double' to 'const float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2255): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2326): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2327): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2328): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2750): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2819): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2820): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(2821): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\ffts\src\fftlib.c(3116): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+         matlib.c
+         Generating Code...
+         Compiling...
+         add.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\add.c(97): warning C4244: '=' : conversion from 'rate_type' to 'long', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\add.c(108): warning C4244: '=' : conversion from 'rate_type' to 'long', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\add.c(283): warning C4244: '=' : conversion from 'rate_type' to 'long', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\add.c(508): warning C4244: '=' : conversion from 'rate_type' to 'long', possible loss of data
+         avg.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         compose.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         convolve.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(225): warning C4133: 'function' : incompatible types - from 'convolve_susp_type' to 'snd_susp_struct *'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(267): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(277): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(snd_susp_struct *,snd_list_type)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(281): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(284): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\convolve.c(285): warning C4028: formal parameter 1 different from declaration
+         debug.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         downsample.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         falloc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         ffilterkit.c
+         fft.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         handlers.c
+         inverse.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         local.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         lpanal.c
+         multiread.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\multiread.c(150): warning C4244: '=' : conversion from 'sf_count_t' to 'long', possible loss of data
+         multiseq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         phasevocoder.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\phasevocoder.c(67): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         pvshell.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\pvshell.c(123): warning C4244: '=' : conversion from 'long' to 'short', possible loss of data
+         resamp.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         resampv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         samples.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         Generating Code...
+         Compiling...
+         seqext.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\seqext.c(83): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\seqext.c(83): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void *,void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\seqext.c(83): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(FILE *,void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\seqext.c(84): warning C4113: 'unsigned char *(__cdecl *)()' differs in parameter lists from 'unsigned char *(__cdecl *)(FILE *)'
+         seqfnint.c
+         seqinterf.c
+         sliderdata.c
+         sndfnint.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sndmax.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sndread.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndread.c(64): warning C4244: '=' : conversion from 'sf_count_t' to 'long', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndread.c(73): warning C4244: '=' : conversion from 'long' to 'short', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndread.c(287): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(snd_susp_struct *,snd_list_type)'
+         sndseq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sndsliders.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sndwritepa.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndwritepa.c(642): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndwritepa.c(788): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sndwritepa.c(788): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+         sound.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.c(1222): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.c(1222): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void *,void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.c(1223): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(FILE *,void *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.c(1223): warning C4113: 'unsigned char *(__cdecl *)()' differs in parameter lists from 'unsigned char *(__cdecl *)(FILE *)'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.c(1591): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         stats.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         trigger.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         yin.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         abs.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         allpoles.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         alpass.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         alpasscv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\alpasscv.c(264): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         alpassvc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\alpassvc.c(233): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         alpassvv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         Generating Code...
+         Compiling...
+         amosc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         areson.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         aresoncv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         aresonvc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         aresonvv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         atone.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         atonev.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         biquadfilt.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         buzz.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\buzz.c(490): warning C4244: '=' : conversion from 'long' to 'float', possible loss of data
+         chase.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         clip.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         congen.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         const.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         coterm.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\coterm.c(224): warning C4244: 'initializing' : conversion from 'double' to 'sample_type', possible loss of data
+         delaycc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         delaycv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\delaycv.c(267): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\delaycv.c(459): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\delaycv.c(554): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         eqbandvvv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         exp.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         fmfb.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfb.c(78): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         fmfbv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfbv.c(121): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfbv.c(232): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfbv.c(357): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfbv.c(483): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmfbv.c(570): warning C4305: '*=' : truncation from 'double' to 'sample_type'
+         Generating Code...
+         Compiling...
+         fmosc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\fmosc.c(455): warning C4244: '*=' : conversion from 'rate_type' to 'sample_type', possible loss of data
+         follow.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         fromarraystream.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         fromobject.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         gate.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         ifft.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrbanded.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrbow.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrbowedfreq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrclar.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrclarall.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrclarfreq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrflute.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrfluteall.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrflutefreq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrmandolin.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrmodalbar.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrsax.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrsaxall.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         instrsaxfreq.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         Generating Code...
+         Compiling...
+         instrsitar.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         integrate.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         log.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         lpreson.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         maxv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         offset.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         oneshot.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         osc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         partial.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\partial.c(320): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         pluck.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\pluck.c(108): warning C4244: '=' : conversion from 'int' to 'sample_type', possible loss of data
+         prod.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\prod.c(224): warning C4244: '=' : conversion from 'double' to 'sample_type', possible loss of data
+         pwl.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         quantize.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\quantize.c(93): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\tran\quantize.c(95): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+         recip.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         reson.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         resoncv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         resonvc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         resonvv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sampler.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         scale.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         Generating Code...
+         Compiling...
+         shape.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sine.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         siosc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         slope.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         sqrt.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         stkchorus.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         stkpitshift.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         stkrev.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         tapf.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         tapv.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         tone.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         tonev.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         upsample.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         white.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+         extern.c
+         path.c
+         security.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\xlisp\security.c(86): warning C4013: 'getcwd' undefined; assuming extern returning int
+         xlbfun.c
+         xlcont.c
+         xldbug.c
+         Generating Code...
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\xlisp\xlbfun.c(607): warning C4716: 'xcleanup' : must return a value
+         Compiling...
+         xldmem.c
+         xleval.c
+         xlfio.c
+         xlftab.c
+         xlglob.c
+         xlimage.c
+         xlinit.c
+         xlio.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\xlisp\xlio.c(212): warning C4114: same type qualifier used more than once
+         xlisp.c
+         xljump.c
+         xllist.c
+         xlmath.c
+         xlobj.c
+         xlpp.c
+         xlprin.c
+         xlread.c
+         xlstr.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\xlisp\xlstr.c(368): warning C4244: '=' : conversion from 'long' to 'char', possible loss of data
+         xlsubr.c
+         xlsym.c
+         xlsys.c
+         Generating Code...
+         Compiling...
+         nyx.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyquist\nyqsrc\sound.h(461): warning C4273: 'log2' : inconsistent dll linkage
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\math.h(504) : see previous definition of 'log2'
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyx.c(678): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyx.c(680): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyx.c(682): warning C4028: formal parameter 1 different from declaration
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libnyquist\nyx.c(1424): warning C4028: formal parameter 1 different from declaration
+         xlextstart.c
+         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\libnyquist" /I"..\..\..\lib-src\libnyquist\nyquist" /I"..\..\..\lib-src\libnyquist\nyquist\cmt" /I"..\..\..\lib-src\libnyquist\nyquist\ffts\src" /I"..\..\..\lib-src\libnyquist\nyquist\nyqsrc" /I"..\..\..\lib-src\libnyquist\nyquist\nyqstk" /I"..\..\..\lib-src\libnyquist\nyquist\nyqstk\include" /I"..\..\..\lib-src\libnyquist\nyquist\snd" /I"..\..\..\lib-src\libnyquist\nyquist\tran" /I"..\..\..\lib-src\libnyquist\nyquist\sys\win\msvc" /I"..\..\..\lib-src\libnyquist\nyquist\xlisp" /I"..\..\..\lib-src\libnyquist\nyquist\win" /I..\libsndfile /I"..\..\..\lib-src\portaudio-v19\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _DEBUG /D WIN32 /D _LIB /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\libnyquist\nyquist\nyqstk\instr.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\stkinit.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\stkint.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\ADSR.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\BandedWG.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\BiQuad.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Bowed.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\BowTable.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Chorus.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Clarinet.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Delay.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\DelayA.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\DelayL.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Effect.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Envelope.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\FileRead.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\FileWvIn.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Filter.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Flute.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Function.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Generator.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Instrmnt.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\JCRev.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\JetTable.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Mandolin.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Modal.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\ModalBar.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Noise.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\NRev.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\OnePole.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\OneZero.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\PitShift.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\PluckTwo.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\PoleZero.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\PRCRev.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\ReedTable.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Saxofony.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\SineWave.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Sitar.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\Stk.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\WaveLoop.cpp" "..\..\..\lib-src\libnyquist\nyquist\nyqstk\src\WvIn.cpp"
+         instr.cpp
+         stkinit.cpp
+         stkint.cpp
+         ADSR.cpp
+         BandedWG.cpp
+         BiQuad.cpp
+         Bowed.cpp
+         BowTable.cpp
+         Chorus.cpp
+         Clarinet.cpp
+         Delay.cpp
+         DelayA.cpp
+         DelayL.cpp
+         Effect.cpp
+         Envelope.cpp
+         FileRead.cpp
+         FileWvIn.cpp
+         Filter.cpp
+         Flute.cpp
+         Function.cpp
+         Generating Code...
+         Compiling...
+         Generator.cpp
+         Instrmnt.cpp
+         JCRev.cpp
+         JetTable.cpp
+         Mandolin.cpp
+         Modal.cpp
+         ModalBar.cpp
+         Noise.cpp
+         NRev.cpp
+         OnePole.cpp
+         OneZero.cpp
+         PitShift.cpp
+         PluckTwo.cpp
+         PoleZero.cpp
+         PRCRev.cpp
+         ReedTable.cpp
+         Saxofony.cpp
+         SineWave.cpp
+         Sitar.cpp
+         Stk.cpp
+         Generating Code...
+         Compiling...
+         WaveLoop.cpp
+         WvIn.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libnyquist.lib" /NOLOGO Debug\cext.obj
+         Debug\cleanup.obj
+         Debug\cmdline.obj
+         Debug\cmtcmd.obj
+         Debug\mem.obj
+         Debug\midifile.obj
+         Debug\midifns.obj
+         Debug\moxc.obj
+         Debug\record.obj
+         Debug\seq.obj
+         Debug\seqmread.obj
+         Debug\seqmwrite.obj
+         Debug\seqread.obj
+         Debug\seqwrite.obj
+         Debug\tempomap.obj
+         Debug\timebase.obj
+         Debug\userio.obj
+         Debug\fftext.obj
+         Debug\fftlib.obj
+         Debug\matlib.obj
+         Debug\add.obj
+         Debug\avg.obj
+         Debug\compose.obj
+         Debug\convolve.obj
+         Debug\debug.obj
+         Debug\downsample.obj
+         Debug\falloc.obj
+         Debug\ffilterkit.obj
+         Debug\fft.obj
+         Debug\handlers.obj
+         Debug\inverse.obj
+         Debug\local.obj
+         Debug\lpanal.obj
+         Debug\multiread.obj
+         Debug\multiseq.obj
+         Debug\phasevocoder.obj
+         Debug\pvshell.obj
+         Debug\resamp.obj
+         Debug\resampv.obj
+         Debug\samples.obj
+         Debug\seqext.obj
+         Debug\seqfnint.obj
+         Debug\seqinterf.obj
+         Debug\sliderdata.obj
+         Debug\sndfnint.obj
+         Debug\sndmax.obj
+         Debug\sndread.obj
+         Debug\sndseq.obj
+         Debug\sndsliders.obj
+         Debug\sndwritepa.obj
+         Debug\sound.obj
+         Debug\stats.obj
+         Debug\trigger.obj
+         Debug\yin.obj
+         Debug\abs.obj
+         Debug\allpoles.obj
+         Debug\alpass.obj
+         Debug\alpasscv.obj
+         Debug\alpassvc.obj
+         Debug\alpassvv.obj
+         Debug\amosc.obj
+         Debug\areson.obj
+         Debug\aresoncv.obj
+         Debug\aresonvc.obj
+         Debug\aresonvv.obj
+         Debug\atone.obj
+         Debug\atonev.obj
+         Debug\biquadfilt.obj
+         Debug\buzz.obj
+         Debug\chase.obj
+         Debug\clip.obj
+         Debug\congen.obj
+         Debug\const.obj
+         Debug\coterm.obj
+         Debug\delaycc.obj
+         Debug\delaycv.obj
+         Debug\eqbandvvv.obj
+         Debug\exp.obj
+         Debug\fmfb.obj
+         Debug\fmfbv.obj
+         Debug\fmosc.obj
+         Debug\follow.obj
+         Debug\fromarraystream.obj
+         Debug\fromobject.obj
+         Debug\gate.obj
+         Debug\ifft.obj
+         Debug\instrbanded.obj
+         Debug\instrbow.obj
+         Debug\instrbowedfreq.obj
+         Debug\instrclar.obj
+         Debug\instrclarall.obj
+         Debug\instrclarfreq.obj
+         Debug\instrflute.obj
+         Debug\instrfluteall.obj
+         Debug\instrflutefreq.obj
+         Debug\instrmandolin.obj
+         Debug\instrmodalbar.obj
+         Debug\instrsax.obj
+         Debug\instrsaxall.obj
+         Debug\instrsaxfreq.obj
+         Debug\instrsitar.obj
+         Debug\integrate.obj
+         Debug\log.obj
+         Debug\lpreson.obj
+         Debug\maxv.obj
+         Debug\offset.obj
+         Debug\oneshot.obj
+         Debug\osc.obj
+         Debug\partial.obj
+         Debug\pluck.obj
+         Debug\prod.obj
+         Debug\pwl.obj
+         Debug\quantize.obj
+         Debug\recip.obj
+         Debug\reson.obj
+         Debug\resoncv.obj
+         Debug\resonvc.obj
+         Debug\resonvv.obj
+         Debug\sampler.obj
+         Debug\scale.obj
+         Debug\shape.obj
+         Debug\sine.obj
+         Debug\siosc.obj
+         Debug\slope.obj
+         Debug\sqrt.obj
+         Debug\stkchorus.obj
+         Debug\stkpitshift.obj
+         Debug\stkrev.obj
+         Debug\tapf.obj
+         Debug\tapv.obj
+         Debug\tone.obj
+         Debug\tonev.obj
+         Debug\upsample.obj
+         Debug\white.obj
+         Debug\extern.obj
+         Debug\path.obj
+         Debug\security.obj
+         Debug\xlbfun.obj
+         Debug\xlcont.obj
+         Debug\xldbug.obj
+         Debug\xldmem.obj
+         Debug\xleval.obj
+         Debug\xlfio.obj
+         Debug\xlftab.obj
+         Debug\xlglob.obj
+         Debug\xlimage.obj
+         Debug\xlinit.obj
+         Debug\xlio.obj
+         Debug\xlisp.obj
+         Debug\xljump.obj
+         Debug\xllist.obj
+         Debug\xlmath.obj
+         Debug\xlobj.obj
+         Debug\xlpp.obj
+         Debug\xlprin.obj
+         Debug\xlread.obj
+         Debug\xlstr.obj
+         Debug\xlsubr.obj
+         Debug\xlsym.obj
+         Debug\xlsys.obj
+         Debug\instr.obj
+         Debug\stkinit.obj
+         Debug\stkint.obj
+         Debug\ADSR.obj
+         Debug\BandedWG.obj
+         Debug\BiQuad.obj
+         Debug\Bowed.obj
+         Debug\BowTable.obj
+         Debug\Chorus.obj
+         Debug\Clarinet.obj
+         Debug\Delay.obj
+         Debug\DelayA.obj
+         Debug\DelayL.obj
+         Debug\Effect.obj
+         Debug\Envelope.obj
+         Debug\FileRead.obj
+         Debug\FileWvIn.obj
+         Debug\Filter.obj
+         Debug\Flute.obj
+         Debug\Function.obj
+         Debug\Generator.obj
+         Debug\Instrmnt.obj
+         Debug\JCRev.obj
+         Debug\JetTable.obj
+         Debug\Mandolin.obj
+         Debug\Modal.obj
+         Debug\ModalBar.obj
+         Debug\Noise.obj
+         Debug\NRev.obj
+         Debug\OnePole.obj
+         Debug\OneZero.obj
+         Debug\PitShift.obj
+         Debug\PluckTwo.obj
+         Debug\PoleZero.obj
+         Debug\PRCRev.obj
+         Debug\ReedTable.obj
+         Debug\Saxofony.obj
+         Debug\SineWave.obj
+         Debug\Sitar.obj
+         Debug\Stk.obj
+         Debug\WaveLoop.obj
+         Debug\WvIn.obj
+         Debug\nyx.obj
+         Debug\xlextstart.obj
+         libnyquist.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libnyquist.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libnyquist\libnyquist.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:05.74

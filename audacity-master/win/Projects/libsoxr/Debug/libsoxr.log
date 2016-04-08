@@ -1,0 +1,38 @@
+﻿Build started 4/8/2016 1:44:55 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libsoxr\libsoxr.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\libsoxr\msvc" /ZI /nologo /W3 /WX- /Od /Oy- /D _DEBUG /D _USE_MATH_DEFINES /D _CRT_SECURE_NO_WARNINGS /D SOXR_LIB /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt "..\..\..\lib-src\libsoxr\src\data-io.c" "..\..\..\lib-src\libsoxr\src\dbesi0.c" "..\..\..\lib-src\libsoxr\src\fft4g32.c" "..\..\..\lib-src\libsoxr\src\fft4g64.c" "..\..\..\lib-src\libsoxr\src\filter.c" "..\..\..\lib-src\libsoxr\src\lsr.c" "..\..\..\lib-src\libsoxr\src\pffft32s.c" "..\..\..\lib-src\libsoxr\src\rate32.c" "..\..\..\lib-src\libsoxr\src\rate32s.c" "..\..\..\lib-src\libsoxr\src\rate64.c" "..\..\..\lib-src\libsoxr\src\simd.c" "..\..\..\lib-src\libsoxr\src\soxr.c" "..\..\..\lib-src\libsoxr\src\vr32.c"
+         data-io.c
+         dbesi0.c
+         fft4g32.c
+         fft4g64.c
+         filter.c
+         lsr.c
+         pffft32s.c
+         rate32.c
+         rate32s.c
+         rate64.c
+         simd.c
+         soxr.c
+         vr32.c
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libsoxr.lib" /NOLOGO "Debug\data-io.obj"
+         Debug\dbesi0.obj
+         Debug\fft4g32.obj
+         Debug\fft4g64.obj
+         Debug\filter.obj
+         Debug\lsr.obj
+         Debug\pffft32s.obj
+         Debug\rate32.obj
+         Debug\rate32s.obj
+         Debug\rate64.obj
+         Debug\simd.obj
+         Debug\soxr.obj
+         Debug\vr32.obj
+         libsoxr.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libsoxr.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libsoxr\libsoxr.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.11

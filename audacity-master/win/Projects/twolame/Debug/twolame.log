@@ -1,0 +1,63 @@
+﻿Build started 4/8/2016 1:44:36 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\twolame\twolame.vcxproj" on node 3 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D LIBTWOLAME_STATIC /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt "..\..\..\lib-src\twolame\libtwolame\ath.c" "..\..\..\lib-src\twolame\libtwolame\availbits.c" "..\..\..\lib-src\twolame\libtwolame\bitbuffer.c" "..\..\..\lib-src\twolame\libtwolame\crc.c" "..\..\..\lib-src\twolame\libtwolame\dab.c" "..\..\..\lib-src\twolame\libtwolame\encode.c" "..\..\..\lib-src\twolame\libtwolame\energy.c" "..\..\..\lib-src\twolame\libtwolame\fft.c" "..\..\..\lib-src\twolame\libtwolame\get_set.c" "..\..\..\lib-src\twolame\libtwolame\mem.c" "..\..\..\lib-src\twolame\libtwolame\psycho_0.c" "..\..\..\lib-src\twolame\libtwolame\psycho_1.c" "..\..\..\lib-src\twolame\libtwolame\psycho_2.c" "..\..\..\lib-src\twolame\libtwolame\psycho_3.c" "..\..\..\lib-src\twolame\libtwolame\psycho_4.c" "..\..\..\lib-src\twolame\libtwolame\psycho_n1.c" "..\..\..\lib-src\twolame\libtwolame\subband.c" "..\..\..\lib-src\twolame\libtwolame\twolame.c" "..\..\..\lib-src\twolame\libtwolame\util.c"
+         ath.c
+         availbits.c
+         bitbuffer.c
+         crc.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\crc.c(41): warning C4018: '<' : signed/unsigned mismatch
+         dab.c
+         encode.c
+         energy.c
+         fft.c
+         get_set.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(105): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(120): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(135): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(283): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(300): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\get_set.c(311): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+         mem.c
+         psycho_0.c
+         psycho_1.c
+         psycho_2.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\psycho_2.c(321): warning C4018: '<' : signed/unsigned mismatch
+         psycho_3.c
+         psycho_4.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\psycho_4.c(360): warning C4018: '<' : signed/unsigned mismatch
+         psycho_n1.c
+         subband.c
+         twolame.c
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\twolame.c(381): warning C4244: '*=' : conversion from 'double' to 'short', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\twolame.c(383): warning C4244: '*=' : conversion from 'double' to 'short', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\twolame.c(389): warning C4244: '*=' : conversion from 'double' to 'short', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\twolame\libtwolame\twolame.c(395): warning C4244: '*=' : conversion from 'double' to 'short', possible loss of data
+         util.c
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\twolame.lib" /NOLOGO Debug\ath.obj
+         Debug\availbits.obj
+         Debug\bitbuffer.obj
+         Debug\crc.obj
+         Debug\dab.obj
+         Debug\encode.obj
+         Debug\energy.obj
+         Debug\fft.obj
+         Debug\get_set.obj
+         Debug\mem.obj
+         Debug\psycho_0.obj
+         Debug\psycho_1.obj
+         Debug\psycho_2.obj
+         Debug\psycho_3.obj
+         Debug\psycho_4.obj
+         Debug\psycho_n1.obj
+         Debug\subband.obj
+         Debug\twolame.obj
+         Debug\util.obj
+         twolame.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\twolame.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\twolame\twolame.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:05.05

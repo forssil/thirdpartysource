@@ -1,0 +1,64 @@
+﻿Build started 4/8/2016 1:44:35 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libvamp\libvamp.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\libvamp" /ZI /nologo /W3 /WX- /Od /Oy- /D _DEBUG /D WIN32 /D _LIB /D _USE_MATH_DEFINES /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginBufferingAdapter.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginChannelAdapter.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginHostAdapter.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginInputDomainAdapter.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginLoader.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginSummarisingAdapter.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\PluginWrapper.cpp" "..\..\..\lib-src\libvamp\src\vamp-hostsdk\RealTime.cpp"
+         PluginBufferingAdapter.cpp
+         PluginChannelAdapter.cpp
+         PluginHostAdapter.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(210): warning C4800: 'const int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(334): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(341): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(344): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(359): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(423): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginhostadapter.cpp(430): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+         PluginInputDomainAdapter.cpp
+         PluginLoader.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginloader.cpp(640): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+         PluginSummarisingAdapter.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginsummarisingadapter.cpp(364): warning C4244: 'argument' : conversion from 'const double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginsummarisingadapter.cpp(365): warning C4244: 'argument' : conversion from 'const double' to 'float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginsummarisingadapter.cpp(379): warning C4244: 'argument' : conversion from 'double' to 'const float', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\libvamp\src\vamp-hostsdk\pluginsummarisingadapter.cpp(810): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\vector(214): warning C4503: 'std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::_Insert_hint' : decorated name length exceeded, name was truncated
+                 with
+                 [
+                     _Kty=int
+         ,            _Ty=_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap
+         ,            _Pr=std::less<int>
+         ,            _Alloc=std::allocator<std::pair<const int,_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap>>
+                 ]
+     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\vector(214): warning C4503: 'std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::_Insert_at' : decorated name length exceeded, name was truncated
+                 with
+                 [
+                     _Kty=int
+         ,            _Ty=_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap
+         ,            _Pr=std::less<int>
+         ,            _Alloc=std::allocator<std::pair<const int,_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap>>
+                 ]
+     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\vector(214): warning C4503: 'std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::_Insert_nohint' : decorated name length exceeded, name was truncated
+                 with
+                 [
+                     _Kty=int
+         ,            _Ty=_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap
+         ,            _Pr=std::less<int>
+         ,            _Alloc=std::allocator<std::pair<const int,_VampHost::Vamp::HostExt::PluginSummarisingAdapter::Impl::SummarySegmentMap>>
+                 ]
+         PluginWrapper.cpp
+         RealTime.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libvamp.lib" /NOLOGO Debug\PluginBufferingAdapter.obj
+         Debug\PluginChannelAdapter.obj
+         Debug\PluginHostAdapter.obj
+         Debug\PluginInputDomainAdapter.obj
+         Debug\PluginLoader.obj
+         Debug\PluginSummarisingAdapter.obj
+         Debug\PluginWrapper.obj
+         Debug\RealTime.obj
+         libvamp.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\libvamp.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\libvamp\libvamp.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:13.84

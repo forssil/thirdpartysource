@@ -1,0 +1,31 @@
+﻿Build started 4/8/2016 1:44:08 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\soundtouch\soundtouch.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\soundtouch\include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt "..\..\..\lib-src\soundtouch\source\SoundTouch\AAFilter.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\cpu_detect_x86.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\FIFOSampleBuffer.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\FIRFilter.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\mmx_optimized.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\RateTransposer.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\SoundTouch.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\sse_optimized.cpp" "..\..\..\lib-src\soundtouch\source\SoundTouch\TDStretch.cpp"
+         AAFilter.cpp
+         cpu_detect_x86.cpp
+         FIFOSampleBuffer.cpp
+         FIRFilter.cpp
+         mmx_optimized.cpp
+         RateTransposer.cpp
+         SoundTouch.cpp
+         sse_optimized.cpp
+         TDStretch.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\soundtouch.lib" /NOLOGO Debug\AAFilter.obj
+         Debug\cpu_detect_x86.obj
+         Debug\FIFOSampleBuffer.obj
+         Debug\FIRFilter.obj
+         Debug\mmx_optimized.obj
+         Debug\RateTransposer.obj
+         Debug\SoundTouch.obj
+         Debug\sse_optimized.obj
+         Debug\TDStretch.obj
+     1>mmx_optimized.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+         soundtouch.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\soundtouch.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\soundtouch\soundtouch.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:08.89

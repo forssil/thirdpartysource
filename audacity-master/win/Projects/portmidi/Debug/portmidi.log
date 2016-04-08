@@ -1,0 +1,24 @@
+﻿Build started 4/8/2016 1:44:52 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\portmidi\portmidi.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\portmidi\pm_common" /I"..\..\..\lib-src\portmidi\pm_win" /I"..\..\..\lib-src\portmidi\porttime" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _MBCS /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /wd4996 /analyze- /errorReport:prompt "..\..\..\lib-src\portmidi\pm_common\pmutil.c" "..\..\..\lib-src\portmidi\pm_win\pmwin.c" "..\..\..\lib-src\portmidi\pm_win\pmwinmm.c" "..\..\..\lib-src\portmidi\pm_common\portmidi.c" "..\..\..\lib-src\portmidi\porttime\porttime.c" "..\..\..\lib-src\portmidi\porttime\ptwinmm.c"
+         pmutil.c
+         pmwin.c
+         pmwinmm.c
+         portmidi.c
+         porttime.c
+         ptwinmm.c
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\portmidi.lib" /NOLOGO Debug\pmutil.obj
+         Debug\pmwin.obj
+         Debug\pmwinmm.obj
+         Debug\portmidi.obj
+         Debug\porttime.obj
+         Debug\ptwinmm.obj
+         portmidi.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\portmidi.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\portmidi\portmidi.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.39

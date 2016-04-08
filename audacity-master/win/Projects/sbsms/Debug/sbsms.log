@@ -1,0 +1,38 @@
+﻿Build started 4/8/2016 1:44:49 PM.
+     1>Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\sbsms\sbsms.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"..\..\..\lib-src\sbsms\include" /I"..\..\..\lib-src\sbsms\win" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D NDEBUG /D _LIB /D _MBCS /GF /Gm /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt "..\..\..\lib-src\sbsms\src\buffer.cpp" "..\..\..\lib-src\sbsms\src\dBTable.cpp" "..\..\..\lib-src\sbsms\src\fft.cpp" "..\..\..\lib-src\sbsms\src\grain.cpp" "..\..\..\lib-src\sbsms\src\resample.cpp" "..\..\..\lib-src\sbsms\src\sbsms.cpp" "..\..\..\lib-src\sbsms\src\slide.cpp" "..\..\..\lib-src\sbsms\src\sms.cpp" "..\..\..\lib-src\sbsms\src\subband.cpp" "..\..\..\lib-src\sbsms\src\track.cpp" "..\..\..\lib-src\sbsms\src\trackpoint.cpp"
+         trackpoint.cpp
+         track.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\sbsms\src\track.cpp(77): warning C4244: 'argument' : conversion from '_sbsms_::TimeType' to 'unsigned int', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\sbsms\src\track.cpp(215): warning C4244: 'argument' : conversion from '_sbsms_::TimeType' to 'unsigned int', possible loss of data
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\sbsms\src\track.cpp(217): warning C4244: 'argument' : conversion from '_sbsms_::TimeType' to 'unsigned int', possible loss of data
+         subband.cpp
+         sms.cpp
+     1>d:\work\code\opensource\audiotech\audacity-master\lib-src\sbsms\src\sms.cpp(1715): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+         slide.cpp
+         sbsms.cpp
+         resample.cpp
+         grain.cpp
+         fft.cpp
+         dBTable.cpp
+         buffer.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"D:\Work\code\opensource\audiotech\audacity-master\win\Debug\sbsms.lib" /NOLOGO Debug\buffer.obj
+         Debug\dBTable.obj
+         Debug\fft.obj
+         Debug\grain.obj
+         Debug\resample.obj
+         Debug\sbsms.obj
+         Debug\slide.obj
+         Debug\sms.obj
+         Debug\subband.obj
+         Debug\track.obj
+         Debug\trackpoint.obj
+         sbsms.vcxproj -> D:\Work\code\opensource\audiotech\audacity-master\win\Debug\sbsms.lib
+     1>Done Building Project "D:\Work\code\opensource\audiotech\audacity-master\win\Projects\sbsms\sbsms.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:09.24
