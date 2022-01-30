@@ -17,7 +17,7 @@
 
 #define  SUBBANDUSE22k 240
 #define  SUBBANDUSE44k 400
-#define  FILTER_LEN  40  
+#define  FILTER_LEN  10  
 #define  minvalue 1e-26f
 #define  maxvalue 1e26f
 #ifndef PI

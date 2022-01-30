@@ -12,7 +12,7 @@ CSubbandAdap::CSubbandAdap(int Fs, float fft_ms)
 	m_nFs=Fs;
 	m_fFFTlen_ms=fft_ms;
 	m_nFFTsize=int(m_fFFTlen_ms*m_nFs/1000);
-	Subband_init();
+	//Subband_init();
 
 }
 CSubbandAdap::CSubbandAdap(int Fs, int fft_samples)
@@ -20,7 +20,7 @@ CSubbandAdap::CSubbandAdap(int Fs, int fft_samples)
 	m_nFs=Fs;
 	m_nFFTsize=fft_samples;
 	m_fFFTlen_ms=m_nFFTsize*1000.f/m_nFs;
-	Subband_init();
+	//Subband_init();
 }
 CSubbandAdap::~CSubbandAdap(void)
 {
@@ -39,44 +39,44 @@ CSubbandAdap::~CSubbandAdap(void)
 
 	
 }
-void CSubbandAdap::Subband_init()
+void CSubbandAdap::Subband_init(int fiter_len, int fileter_num, float mu, float delat_gain)
 {
 	int i;
 	
 	if (m_nFs == 48000)
 	{
-
-		m_nSubused = SUBBANDUSE44k;
+		fileter_num  = 0 >= fileter_num ? SUBBANDUSE44k : fileter_num;
 
 
 	}
 
 	if (m_nFs==44100)
 	{
+		fileter_num = 0 >= fileter_num ? SUBBANDUSE44k : fileter_num;
 		
-		m_nSubused =SUBBANDUSE44k;          
 	
 		
 	}
 	if (m_nFs==22050)
 	{
-		
-		m_nSubused =SUBBANDUSE22k;     
+		fileter_num = 0 >= fileter_num ? SUBBANDUSE22k : fileter_num; 
 	
 	}
 	
 
+	m_nSubused = fileter_num;
+	fiter_len = 0 >= fiter_len ? FILTER_LEN : fiter_len;
 	m_npFilterLen=new int[m_nSubused];
 	memset(m_npFilterLen,0,sizeof(int)*(m_nSubused));
 	
 	for(i=0;i<m_nSubused;i++)
 	{        
-		m_npFilterLen[i]=FILTER_LEN;
+		m_npFilterLen[i]= fiter_len;
 		
 
 	}
 
-	m_CpAdapG=new CAdapFilterGroup(m_nSubused,m_npFilterLen);
+	m_CpAdapG=new CAdapFilterGroup(m_nSubused,m_npFilterLen,  mu,  delat_gain);
 
 	m_nSubbandGroupk=0;
 	

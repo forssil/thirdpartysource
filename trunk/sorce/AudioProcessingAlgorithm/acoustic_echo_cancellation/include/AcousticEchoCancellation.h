@@ -63,6 +63,8 @@ private:
 #endif
 
 	CSubbandAdap   *m_pSubBandAdap;
+	CSubbandAdap   *m_pSubBandAdap2;
+	int m_nadf2_filterbancunm = 0;
 	CPostFilter    *m_pPostFil;
 	int m_nFs;//samplerate
 	int m_nFFTlen;// fft length in sample
@@ -82,6 +84,7 @@ private:
 	float*    m_pMemAlocat;
 	float**   m_pMemArray;
 	audio_pro_share   m_AECData;
+	audio_pro_share   m_AECData2;
 
 	int m_nTail;
 	bool m_bVad;

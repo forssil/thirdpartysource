@@ -13,7 +13,7 @@
 class IAudioModuleImpleBase
 {
 protected:
-	IAudioModuleImpleBase::IAudioModuleImpleBase(){};
+	IAudioModuleImpleBase(){};
 	virtual ~IAudioModuleImpleBase(){};
 
 public:
@@ -27,7 +27,7 @@ public:
 class IAudioProcessImplBase
 {
 protected:
-	IAudioProcessImplBase::IAudioProcessImplBase(){};
+	IAudioProcessImplBase(){};
 	virtual ~IAudioProcessImplBase(){};
 
 public:

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1340
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioBufferBase", "AudioBufferBase.vcxproj", "{D016309E-EC30-4477-9AB8-FAC8BBD35826}"
 EndProject
@@ -41,6 +41,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "resample", "resample.vcxproj", "{46B86ED2-163C-4CA0-A204-3A206E8C27E1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioDevice", "AudioDevice.vcxproj", "{6DBD62B6-62D3-453D-BD4B-9D65FB114749}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "APF", "APF.vcxproj", "{25DF5122-4C10-4337-84C9-AF228116E892}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -190,8 +192,27 @@ Global
 		{6DBD62B6-62D3-453D-BD4B-9D65FB114749}.Release|Win32.ActiveCfg = Release|Win32
 		{6DBD62B6-62D3-453D-BD4B-9D65FB114749}.Release|Win32.Build.0 = Release|Win32
 		{6DBD62B6-62D3-453D-BD4B-9D65FB114749}.Release|x64.ActiveCfg = Release|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug_MBCS|Win32.ActiveCfg = Debug|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug_MBCS|Win32.Build.0 = Debug|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug_MBCS|x64.ActiveCfg = Debug|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug_MBCS|x64.Build.0 = Debug|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug|Win32.ActiveCfg = Debug|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug|Win32.Build.0 = Debug|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug|x64.ActiveCfg = Debug|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Debug|x64.Build.0 = Debug|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release_MBCS|Win32.ActiveCfg = Release|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release_MBCS|Win32.Build.0 = Release|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release_MBCS|x64.ActiveCfg = Release|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release_MBCS|x64.Build.0 = Release|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release|Win32.ActiveCfg = Release|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release|Win32.Build.0 = Release|Win32
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release|x64.ActiveCfg = Release|x64
+		{25DF5122-4C10-4337-84C9-AF228116E892}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5213B171-8B1E-489A-A5C8-B7FF15F424BB}
 	EndGlobalSection
 EndGlobal

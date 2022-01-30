@@ -17,7 +17,7 @@ public:
 	CSubbandAdap(int Fs, float fft_ms);
 	CSubbandAdap(int Fs, int fft_samples);
 	~CSubbandAdap(void);
-	void Subband_init();
+	void Subband_init(int fiter_len = 0, int fileter_num = 0,  float mu = 0.5f, float delat_gain = 1.f );
 private:
 	void Decay_init();
 	

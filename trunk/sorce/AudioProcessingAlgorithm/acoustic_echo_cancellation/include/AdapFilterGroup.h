@@ -11,7 +11,7 @@ class CAdapFilterGroup
 {
 	
 public:
-	CAdapFilterGroup(int numbank,int *ntaps);
+	CAdapFilterGroup(int numbank,int *ntaps,float mu, float delat_gain);
 	~CAdapFilterGroup(void);
 	void UpdateStep(float fCorr);
 	void AdapfilterIni();
@@ -79,7 +79,7 @@ private:
 	float *m_cpFixEst;//2*m_nNumBank,
 
 	float *m_fpDen;//m_nNumBank
-	float m_fMu;
+	float m_fMu = 0.f;
 	float *m_cpBeta1;//2*m_nNumBank
 	float *m_cpFixBeta;//2*m_nNumBank
 	float *m_cpBeta2;//2*m_nNumBank
@@ -98,6 +98,8 @@ private:
 		float m_fMinFre;*/
 	////add variable delta weights 20160626
 	float* m_pDeltaFreWeight;
+	float m_deltagin = 1.f;
+
 	
 };
 

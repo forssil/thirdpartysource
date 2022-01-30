@@ -15,7 +15,7 @@ CPostFilter::CPostFilter(int fs,int fftlen)
 {
 	int i;
 	//float gmin=0.0316f;//-30dB
-	m_fMinGain=0.05f;
+	m_fMinGain=0.01f;
 	m_nFs=fs;
 	m_nFFTLen=fftlen;
 	m_nHalfFFTLen=fftlen/2;
@@ -93,7 +93,7 @@ void CPostFilter::Reset()
 	float delt;
 	m_fShellgain=1.f;
 	m_fNoisePwr=1e-7f;
-	SetGainMin(m_fNoisePwr);
+	//SetGainMin(m_fNoisePwr);
 	memset(m_pfPwr,0,m_nBufferSize*sizeof(float));
 	memset(m_pnRandW16,0,m_nHalfFFTLen*sizeof(int16_t));
 	ResetGain(1.f);
@@ -213,8 +213,19 @@ void CPostFilter::Process(audio_pro_share *Aec)
 	//////processing 
 	for (int i=0;i<Aec->nLengthFFT_/2;i++)
  	{
-		Aec->pErrorFFT_[2*i]*=Aec->pGain_[i];		
- 	    Aec->pErrorFFT_[2*i+1]*=Aec->pGain_[i];	
+		if (m_nOffset > i) {
+			Aec->pErrorFFT_[2 * i] *= 0.;
+			Aec->pErrorFFT_[2 * i + 1] *= 0.0;
+		}
+		else if (5/*200Hz*/ >= i && Aec->nFarVAD_ >0) {
+			Aec->pErrorFFT_[2 * i] *= 0.;
+			Aec->pErrorFFT_[2 * i + 1] *= 0.0;
+		}
+		else {
+			Aec->pErrorFFT_[2 * i] *= Aec->pGain_[i];
+			Aec->pErrorFFT_[2 * i + 1] *= Aec->pGain_[i];
+		}
+
 		///Why cannot add in frequency domain?
 // 		Aec->pErrorFFT_[2*i]+=m_pfCNGFFT[2*i];	
 // 		Aec->pErrorFFT_[2*i+1]+=m_pfCNGFFT[2*i+1];
@@ -460,8 +471,8 @@ void CPostFilter::Spe_Limiter(audio_pro_share *aeinfo)
 	{
 		tempgain=0.6;
 	}
-	m_pfGaintemp[0]=1.f;
-	m_pfGaintemp[1]=1.f;
+	m_pfGaintemp[0]= m_fMinGain;
+	m_pfGaintemp[1]=m_fMinGain;
 	for (int i=2;i<m_nHalfFFTLen-1;i++)
 	{ 			
 		m_pfGaintemp[i]=m_pfGain[i]*tempgain;

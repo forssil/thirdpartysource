@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "AdapFilterGroup.h"
-CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps)
+CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps, float mu, float delat_gain)
 {
 	m_nNumBank=numbank;
     m_npTaps=ntaps;
+	m_fMu = mu > 0.000001f?mu:0.5f;
+	m_deltagin = delat_gain >= 0.f? delat_gain:0.f;
 	AdapfilterIni();
 
 }
@@ -37,10 +39,12 @@ void CAdapFilterGroup::AdapfilterIni()
 	int i;
 	////add variable delta weights 20160626
 	//#ifdef ADAPTIVE_FILTER_ALGO_AP
-	SetMinMaxDelta(5e-8f, 2e-3f);
+	SetMinMaxDelta(5e-8f, 0.1);
 	//#elif defined ADAPTIVE_FILTER_ALGO_NLMS
 	//SetMinMaxDelta(5e-7f, 0.1f);
 	//#endif
+
+	//
 	m_pDeltaFreWeight=new float[m_nNumBank];
 	m_nSumTapsBank=0;
 	for (i=0;i<m_nNumBank;i++)
@@ -113,7 +117,7 @@ void CAdapFilterGroup::AdapfilterIni()
     m_npDelaylIndx[i]=m_nSumLenDelLine;
 	m_fDeltaTC=0.97f;
 	m_fMaxAdpAll=0;
-	m_fMu=0.5;
+
 
 	m_nFlagcnt=0;
 	m_cpDes=NULL;
@@ -262,20 +266,9 @@ void CAdapFilterGroup::UpdateDelta(float* fp, float fCorr)
 			DeltaGain = 0.2;
 		}
 
-		m_fpDelta[i] = (m_cpBeta2[i]+ m_fpDen[i]) * DeltaGain;
-		//m_fpDelta[i] += err_powr;
-		//m_fpDelta[i] = m_cpBeta2[i] * DeltaGain;
+		m_fpDelta[i] = (1*m_cpBeta2[i]+ 1*m_fpDen[i]) * DeltaGain*m_deltagin;
 
 #endif
-
-		//if( m_fpDelta[i] <= 2 * m_npTaps[i] * m_fMinDelta )
-		//{
-		//	m_fpDelta[i] = 2 * m_npTaps[i] * m_fMinDelta;
-		//}
-		//if( m_fpDelta[i] > 2 * m_fMaxDelta )
-		//{
-		//	m_fpDelta[i] = 2 * m_fMaxDelta;
-		//}
 
 		if( m_fpDelta[i] <=  m_pDeltaFreWeight[i] )
 		{
@@ -323,20 +316,39 @@ void CAdapFilterGroup::UpdateError()
 		m_cpAdErr[indx]  = m_cpAdErrPre[indx] - factor * normalize_error_re;
 		m_cpAdErr[indx+1] = m_cpAdErrPre[indx+1] - factor * normalize_error_im;
 
-		// update normalize error to m_cpAdErrPre
-		m_cpAdErrPre[indx] = normalize_error_re;   
-		m_cpAdErrPre[indx+1] = normalize_error_im;
 
 		// constrain the posteriori error
 		float err_powr = m_cpAdErr[indx] * m_cpAdErr[indx] + m_cpAdErr[indx+1] * m_cpAdErr[indx+1];
 		float des_powr = m_cpDes[indx] * m_cpDes[indx] + m_cpDes[indx+1] * m_cpDes[indx+1];
 		if(err_powr>des_powr)
 		{
-			m_cpAdErr[indx] = m_cpDes[indx];
-			m_cpAdErr[indx+1] = m_cpDes[indx+1];
-			err_powr = des_powr;
+
+			float tmp1= m_cpAdErrPre[indx] - factor/10 * normalize_error_re;
+			float tmp2= m_cpAdErrPre[indx + 1] - factor/10 * normalize_error_im;
+
+
+			// constrain the posteriori error
+			float err_powr2 = tmp1 * tmp1 + tmp2 * tmp2;
+			if (err_powr2 < des_powr) {
+				m_cpAdErr[indx] = tmp1;
+					m_cpAdErr[indx + 1] = tmp2;
+				err_powr = err_powr2;
+			}
+			else {
+				m_cpAdErr[indx] = m_cpDes[indx];
+				m_cpAdErr[indx + 1] = m_cpDes[indx + 1];
+				err_powr = des_powr;
+
+			}
+
+
 		}
 		
+
+		// update normalize error to m_cpAdErrPre
+		m_cpAdErrPre[indx] = normalize_error_re;
+		m_cpAdErrPre[indx + 1] = normalize_error_im;
+
 		// update posteriori filter output to m_cpAdEst
 		m_cpAdEst[indx]  = m_cpDes[indx] - m_cpAdErr[indx];
 		m_cpAdEst[indx+1]= m_cpDes[indx+1] - m_cpAdErr[indx+1];

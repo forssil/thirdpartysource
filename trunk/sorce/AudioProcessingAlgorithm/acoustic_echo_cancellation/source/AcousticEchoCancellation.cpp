@@ -226,8 +226,8 @@ int CAcousticEchoCancellation::ResetAll()
 
 
 	
-	 m_pMemAlocat=new float[m_nFFTlen*10];
-	 memset(m_pMemAlocat,0,m_nFFTlen*10*sizeof(float));
+	 m_pMemAlocat=new float[m_nFFTlen*14];
+	 memset(m_pMemAlocat,0,m_nFFTlen*14*sizeof(float));
 	 m_AECData.pDesire_=m_pMemAlocat;
 	 m_AECData.pReffer_=(m_AECData.pDesire_)   +m_nFFTlen;
 	 m_AECData.pDesireFFT_= (m_AECData.pReffer_)+m_nFFTlen;
@@ -249,10 +249,25 @@ int CAcousticEchoCancellation::ResetAll()
 	 //CNG
 	 m_AECData.bNRCNGOn_=true;
 	 m_AECData.pNRCNGBuffer_=m_pReferFFT;///reuse this buffer
+
+	 ////adf2 
+	 m_AECData2.pDesire_ = m_AECData.pDesire_;
+	 m_AECData2.pReffer_ = m_AECData.pReffer_;
+	 m_AECData2.pDesireFFT_ = m_AECData.pErrorFFT_;
+	
+
+	 m_AECData2.pEstimationFFT_ = m_pRefSp + m_nFFTlen;
+	 m_AECData2.pErrorFFT_ = m_AECData2.pEstimationFFT_ + m_nFFTlen;
+	 m_AECData2.pError_ = m_AECData2.pErrorFFT_ + m_nFFTlen;
+	 m_AECData2.pErrorSpectrumPower_ = m_AECData2.pError_ + m_nFFTlen;
+
+	 m_AECData2.nLengthFFT_ = m_nFFTlen;
+	 m_AECData2.bAECOn_ = true;
+	 m_AECData2.nOffsetBin_ = 2;
 	 //init DTD
 	//fs=22050
 	 //CDTDetector(int Fs = 16000, int Winlen = 15, int StarBin = 4, int EndBin = 60, int MaxDely = 5, float framelen_timeUms = 10.f, float updateCoeff=1.f, bool isExponentialCorrelation = true);
-	 m_CDTD=new CDTDetector(m_nFs,80,4,35,45,m_fFramelen_ms,0.96f,true);
+	 m_CDTD=new CDTDetector(m_nFs,25,8,90,10,m_fFramelen_ms,1,false);
 	
 	 //init delay buffer
 	 m_CDelayBuf=new CDelayBuffer(m_nFFTlen,200);
@@ -272,6 +287,10 @@ int CAcousticEchoCancellation::ResetAll()
 #endif
 
 	 m_pSubBandAdap=new CSubbandAdap(m_nFs,m_nFFTlen);
+	 m_pSubBandAdap->Subband_init();
+	 m_pSubBandAdap2 = new CSubbandAdap(m_nFs, m_nFFTlen);
+	 m_nadf2_filterbancunm = 2050 * m_nFFTlen / m_nFs;
+	 m_pSubBandAdap2->Subband_init(1, m_nadf2_filterbancunm, 0.85f,0.f);
 	 m_pPostFil  =new CPostFilter(m_nFs,m_nFFTlen);
 	 //SPest
 	 m_pSPest=new SPEst();
@@ -282,6 +301,10 @@ int CAcousticEchoCancellation::ResetAll()
 
 	 m_AECData.pGain_=m_pPostFil->GetGain();
 	 m_AECData.pNoiseSPwr=m_pPostFil->GetNoiseEst();
+
+	 m_AECData2.pGain_ = m_pPostFil->GetGain();
+	 m_AECData2.pNoiseSPwr = m_pPostFil->GetNoiseEst();
+
 	 m_AECData.nOffsetBin_=2;
 	 m_bInit=true;
 	 return 0;
@@ -315,6 +338,7 @@ int CAcousticEchoCancellation::ResetAll()
 	  float vadfull=0.f;
 	  m_AECData.bAECOn_ = aShareData.bAECOn_;
 	  m_AECData.bNROn_  = aShareData.bNROn_ ;
+	  m_AECData.bNRCNGOn_ = aShareData.bNRCNGOn_;
 	  if(m_bInit)
 	  {
 		  ////////////time domain to frequency domain
@@ -337,16 +361,29 @@ int CAcousticEchoCancellation::ResetAll()
 				m_CDelayBuf->UpdateData(&audioframe);
 				m_CDelayBuf->getAudioFrame(m_nSystemDelay,&audioframe);
 				float fcorr= m_CDTD->processDelay(audioframe.fp,m_AECData.pDesireFFT_,m_bVad);
-				m_nDelay=(m_CDTD->GetDelay());
+				//m_nDelay=(m_CDTD->GetDelay());
 		  
 				  m_CDelayBuf->getAudioFrame(m_nSystemDelay+m_nDelay,&audioframe);
 				  m_AECData.pRefferFFT_=audioframe.fp;
 				m_AECData.nFarVAD_   =audioframe.VAD;
 				m_AECData.fDTDgain   *=0.8f;
 				m_AECData.fDTDgain   +=0.2f*fcorr;
+
+				m_AECData2.pRefferFFT_ = audioframe.fp;
+				m_AECData2.nFarVAD_ = audioframe.VAD;
+				m_AECData2.fDTDgain = m_AECData.fDTDgain;
+
 			////echo est
 
 				 m_pSubBandAdap->process( m_AECData.pRefferFFT_,m_AECData.pDesireFFT_,m_AECData.pErrorFFT_,m_AECData.pEstimationFFT_, m_AECData.nOffsetBin_,m_AECData);
+				 m_pSubBandAdap2->process(m_AECData.pRefferFFT_, m_AECData2.pDesireFFT_, m_AECData2.pErrorFFT_, m_AECData2.pEstimationFFT_, m_AECData2.nOffsetBin_, m_AECData2);
+				 for (int i = 0; i < m_nadf2_filterbancunm + m_AECData2.nOffsetBin_; i++) {
+					 m_AECData.pErrorFFT_[2 * i] = m_AECData2.pErrorFFT_[2 * i];
+					 m_AECData.pErrorFFT_[2 * i + 1] = m_AECData2.pErrorFFT_[2 * i + 1];
+					 m_AECData.pEstimationFFT_[2 * i] += m_AECData2.pEstimationFFT_[2 * i];
+					 m_AECData.pEstimationFFT_[2 * i + 1 ] += m_AECData2.pEstimationFFT_[2 * i + 1];
+				 }
+
 		  }
 		  else
 		  {
@@ -355,7 +392,8 @@ int CAcousticEchoCancellation::ResetAll()
 
 #ifdef AUDIO_WAVE_DEBUG
 		  // used to save audio data before NR operation
-		  m_CF2TErrBeforeNR->F2T(m_AECData.pErrorFFT_, aShareData.pErrorBeforeNR_);
+		  if(aShareData.pErrorBeforeNR_)
+			  m_CF2TErrBeforeNR->F2T(m_AECData.pErrorFFT_, aShareData.pErrorBeforeNR_);
 #endif
 
 		  if(m_AECData.bNROn_)
@@ -365,14 +403,6 @@ int CAcousticEchoCancellation::ResetAll()
 
 		  m_CF2TErr->F2T(m_AECData.pErrorFFT_, aShareData.pError_);
 
-		  if(m_AECData.bNROn_)
-		  {
-			  for (int i=0;i<m_nFFTlen/2;i++)
-			  {
-				  // allband gain
-				  //aShareData.pError_[i] *= m_pPostFil->GetAllBandGain();
-			  }
-		  }
 
 		  if (m_AECData.bNRCNGOn_)
 		  {
