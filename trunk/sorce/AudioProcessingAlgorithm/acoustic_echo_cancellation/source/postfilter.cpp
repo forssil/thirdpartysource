@@ -244,7 +244,8 @@ void CPostFilter::UpdatePwr(audio_pro_share *Aec,float speed)
 	float speed_4overpi = speed;
 	fp1=Aec->pNRInput_;
 	fp2=Aec->pNRDynamicRefer_;
-	fp3=Aec->pNRInputRefer_;
+	//fp3=Aec->pNRInputRefer_;
+    fp3 = Aec->pDesireFFT_;
 	for (i=0;i<m_nHalfFFTLen;i++)
 	{
 		re=*fp1++;

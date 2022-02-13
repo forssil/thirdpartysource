@@ -602,6 +602,8 @@ int CAcousticEchoCancellation::ResetAll()
 	  m_AECData.bAECOn_ = aShareData.bAECOn_;
 	  m_AECData.bNROn_ = aShareData.bNROn_;
 	  m_AECData.bNRCNGOn_ = aShareData.bNRCNGOn_;
+      m_pReferFFT = aShareData.pRefferFFT_;
+      m_AECData.pErrorFFT_ = aShareData.pErrorFFT_;
 	  if (m_bInit)
 	  {
 		  ////////////time domain to frequency domain
@@ -631,6 +633,7 @@ int CAcousticEchoCancellation::ResetAll()
 		  }
 		  else
 		  {
+              m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;
 			  memcpy(m_AECData.pErrorFFT_, m_AECData.pDesireFFT_, sizeof(float)*m_AECData.nLengthFFT_);
 		  }
 

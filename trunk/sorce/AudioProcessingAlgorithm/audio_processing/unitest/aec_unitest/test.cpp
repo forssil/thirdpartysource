@@ -45,6 +45,7 @@ int main(int argc , char *argv[ ])
 	memset(&sharedata,0,sizeof(audio_pro_share));
 
 		int fremaelen=512;//int(framesize*readwavhead.SampleRate/1000);
+        int mic_numbers = 1;
 	//create AEC
 		CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(1,48000, 2*fremaelen, fremaelen);
 		pAPFInterface->Init();
@@ -52,9 +53,9 @@ int main(int argc , char *argv[ ])
    {
 	    
 	   //infile=argv[1];
-		infile = "D:\\hardware\\huachuang\\audio-48k\\src4_stereo.wav";
-		outfile="D:\\hardware\\huachuang\\audio-48k\\out\\src4_stereo_out_2adf.wav";
-		outfile1 = "D:\\hardware\\huachuang\\audio-48k\\out\\src4_stereo_est2adf.wav";
+		infile = "C:\\ByteVoice\\data\\48k\\test1.wav";
+		outfile="C:/ByteVoice/data/48k/src4_stereo_out_2adf2.wav";
+		outfile1 = "C:/ByteVoice/data/48k/src4_stereo_est2adf2.wav";
 	   i=0;
 
    }
@@ -90,8 +91,6 @@ int main(int argc , char *argv[ ])
 	}
 	filelen=readwavhead.RawDataFileLength/readwavhead.BytesPerSample*readwavhead.NChannels;
 
-
-
 //write file
 	writewavhead=readwavhead;
 	writewavhead.NChannels=2;
@@ -118,9 +117,10 @@ int main(int argc , char *argv[ ])
 	LONGLONG elapseTimeCount = 0;
 	int cycleNum = 1;
 	int insideCycleNum = 0;
-	sharedata.bAECOn_=true;
-	sharedata.bNROn_= true;
+	sharedata.bAECOn_= true;
+	sharedata.bNROn_= false;
 	sharedata.bNRCNGOn_=false;
+    sharedata.nChannelsInCapture_ = 1;
 	for (int i = 0; i < cycleNum; i++)
 	{
 		while (outfileleng < (filelen - fremaelen*readwavhead.NChannels))
@@ -151,7 +151,7 @@ int main(int argc , char *argv[ ])
 
 		//	printf("elapseTimeCount is %d\n", elapseTimeCount);
 			
-			memcpy_s(data_out_f2, fremaelen*sizeof(float), data_in_f, fremaelen*sizeof(float));
+			memcpy_s(data_out_f2, fremaelen*sizeof(float), data_out_f, fremaelen*sizeof(float));
 
 			//DCRemover dcremover(0,0,0);
 			//dcremover.findLevelAndDcRemove(data_in_f, 0);
