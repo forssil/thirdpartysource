@@ -92,5 +92,56 @@ private:
 	float m_fGain;  //full band gain
 };
 
+class CAcousticEchoCancellationInFrequency : CEchoCancellationInterface
+
+{
+public:
+	CAcousticEchoCancellationInFrequency(int Fs, int fftlen_sample, int framlen_sample);
+	~CAcousticEchoCancellationInFrequency();
+public:
+	///AECInterface API
+
+	int Init();
+	virtual int process(audio_pro_share& aShareData);
+	// set start frequency bins; m_nOffset is the bin number of start frequency;
+	void SetOffset(float fre_start) {};
+	void SetAEC_OnOff(bool OnOff) {};
+	void SetNR_OnOff(bool OnOff) {};
+	void Reset();
+	bool SetDelay(int nDelay);
+	int ProcessRefferData(audio_pro_share& aShareData);
+
+private:
+	inline int ResetAll();
+	//move 1/2 length data of buffer
+	inline void UpdateProBuffer(float *fp);
+	//copy new data to processing buffer
+	inline void ProBufferCopy(float *fp, float* fpnew);
+private:
+
+	SPEst* m_pSPest;
+	CSubbandAdap   *m_pSubBandAdap;
+	CPostFilter    *m_pPostFil;
+	int m_nFs;//samplerate
+	int m_nFFTlen;// fft length in sample
+	float m_fFFTlen_ms;// fft length in ms
+	int m_nFramelen;// frame length processed in sample
+	float m_fFramelen_ms;// frame length processed in ms
+	float m_fValu0dB;// value for 0dBov
+	bool m_bResetFlag;
+	bool m_bInit;
+	void* m_ppAuidoInBuf[2];
+	void* m_ppAudioOutBuf[2];
+	AUDIO_DATA_TYPE* m_pRefSp;
+	float*   m_pReferFFT;
+	//////processing buffer
+	float*    m_pMemAlocat;
+	audio_pro_share   m_AECData;
+	int m_nTail;
+	bool m_bVad;
+	float m_fCrossCor;
+	float m_fGain;  //full band gain
+};
+
 
 #endif //_ACOUSTICECHO_

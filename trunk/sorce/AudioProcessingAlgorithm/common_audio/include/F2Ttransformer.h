@@ -1,5 +1,5 @@
 /**************************************************
-*         Copyright 2014 Coddy Inc.
+*         Copyright 2014 GaoH Inc.
 *         Author:  Gu Cheng
 *         History: 10/15/2014
 *         Content: The Fourier Inverse Transform

@@ -617,25 +617,25 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 {
 	/////////////// unprocessed data
 	//time domain
-	AUDIO_DATA_TYPE		**pCapture_;
+	AUDIO_DATA_TYPE		**ppCapture_;
 	CAUDIO_U32_t	    nChannelsInCapture_;
 	CAUDIO_U32_t		nSamplesPerCaptureChannel_; 
-	AUDIO_DATA_TYPE		**pRender_;
+	AUDIO_DATA_TYPE		**ppRender_;
 	CAUDIO_U32_t		nChannelsInRender_;
 	CAUDIO_U32_t		nSamplesPerRenderChannel_;  
-	AUDIO_DATA_TYPE		**pShare_;
+	AUDIO_DATA_TYPE		**ppShare_;
 	CAUDIO_U32_t		nChannelsInShare_;
 	CAUDIO_U32_t		nSamplesPerShareChannel_;  
-	AUDIO_DATA_TYPE     **pProcessOut_;
+	AUDIO_DATA_TYPE     **ppProcessOut_;
 	CAUDIO_U32_t	    nChannelsInProcessOut_;
 	CAUDIO_U32_t		nSamplesPerProcessOutChannel_;
 	//spectrum domain
 	CAUDIO_U32_t		nLengthFFT_;  
-	AUDIO_DATA_TYPE		**pCapureFFT_;
+	AUDIO_DATA_TYPE		**ppCapureFFT_;
 	CAUDIO_U32_t	    nChannelsInCaptureFFT_;
-	AUDIO_DATA_TYPE		**pRenderFFT_;
+	AUDIO_DATA_TYPE		**ppRenderFFT_;
 	CAUDIO_U32_t		nChannelsInRenderFFT_;
-	AUDIO_DATA_TYPE     **pProcessOutFFT_;
+	AUDIO_DATA_TYPE     **ppProcessOutFFT_;
 	CAUDIO_U32_t	    nChannelsInProcessOutFFT_;
 
 	//mix process

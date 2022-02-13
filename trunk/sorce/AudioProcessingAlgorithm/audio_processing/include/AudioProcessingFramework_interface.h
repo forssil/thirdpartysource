@@ -26,6 +26,7 @@ public:
 	virtual void Reset()=0;
 	virtual bool SetDelay(int nDelay)=0;
 	virtual int  ProcessRefferData(audio_pro_share& aShareData)=0;
+	virtual void SetMainMicIndex(int micindx) = 0;
 protected:
 	CAudioProcessingFrameworkInterface(){};
 	
@@ -34,8 +35,7 @@ protected:
 };
 extern "C"
 {
-	CAudioProcessingFrameworkInterface* CreateIAPfInst(int Fs,float fftlen_ms,float framlen_ms);
-	CAudioProcessingFrameworkInterface* CreateIApfInst_int(int Fs,int fftlen,int framlen);
+	CAudioProcessingFrameworkInterface* CreateIApfInst_int(int mic_nums, int Fs,int fftlen,int framlen);
 	int DeleteIAPFInst (CAudioProcessingFrameworkInterface*  IAecInst);	
 };
 

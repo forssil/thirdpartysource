@@ -20,12 +20,12 @@
 #include "postfilter.h"
 #include "SPEst.h"
 #include "VAD.h"
+#include "AcousticEchoCancellation.h"
 class CAudioProcessingFramework : public CAudioProcessingFrameworkInterface
 				  	              
 {
 public:
-	CAudioProcessingFramework(int Fs,float fftlen_ms,float framlen_ms);
-	CAudioProcessingFramework(int Fs,int fftlen_sample,int framlen_sample);
+	CAudioProcessingFramework(int mic_nums, int Fs,int fftlen_sample,int framlen_sample);
 	~CAudioProcessingFramework();
 public:
 	///AECInterface API
@@ -36,6 +36,9 @@ public:
 	void SetOffset(float fre_start){};	
 	void SetAEC_OnOff(bool OnOff){};
 	void SetNR_OnOff(bool OnOff){};
+	void SetMainMicIndex(int micindx) { 
+		m_nMain_mic_index = micindx >= 0 ? micindx : 0;
+	};
 	void Reset();
 	bool SetDelay(int nDelay);
 	int ProcessRefferData(audio_pro_share& aShareData);
@@ -54,18 +57,19 @@ private:
 	CDTDetector*  m_CDTD;
 	CDelayBuffer* m_CDelayBuf;
 
-	T2Ftransformer* m_CT2FMic;
+	T2Ftransformer** m_ppCT2FMics;
 	T2Ftransformer* m_CT2FRef;
 	F2Ttransformer* m_CF2TErr;
 
 #ifdef AUDIO_WAVE_DEBUG
 	F2Ttransformer* m_CF2TErrBeforeNR;
 #endif
-
-	CSubbandAdap   *m_pSubBandAdap;
-	CSubbandAdap   *m_pSubBandAdap2;
+	CAcousticEchoCancellationInFrequency** m_ppCAECMics;
+	audio_pro_share* m_pAECDataArray;
 	int m_nadf2_filterbancunm = 0;
-	CPostFilter    *m_pPostFil;
+
+	int m_nMicsNum;
+	int m_nMain_mic_index;
 	int m_nFs;//samplerate
 	int m_nFFTlen;// fft length in sample
 	float m_fFFTlen_ms;// fft length in ms
@@ -82,9 +86,8 @@ private:
 	float*   m_pReferFFT;
 	//////processing buffer
 	float*    m_pMemAlocat;
-	float**   m_pMemArray;
-	audio_pro_share   m_AECData;
-	audio_pro_share   m_AECData2;
+	audio_pro_share   m_APFData;
+	audio_pro_share   m_APFData2;
 
 	int m_nTail;
 	bool m_bVad;

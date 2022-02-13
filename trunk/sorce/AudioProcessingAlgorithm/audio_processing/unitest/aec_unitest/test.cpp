@@ -46,8 +46,8 @@ int main(int argc , char *argv[ ])
 
 		int fremaelen=512;//int(framesize*readwavhead.SampleRate/1000);
 	//create AEC
-	CEchoCancellationInterface* pAECInterface = CreateIAECInst_int(48000, 2*fremaelen, fremaelen);
-	pAECInterface->Init();
+		CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(1,48000, 2*fremaelen, fremaelen);
+		pAPFInterface->Init();
 
    {
 	    
@@ -144,7 +144,7 @@ int main(int argc , char *argv[ ])
 			sharedata.pError_ = data_out_f;
 			sharedata.pErrorBeforeNR_ = data_out_f3;
 			QueryPerformanceCounter(&startTime);
-			pAECInterface->process(sharedata);
+			pAPFInterface->process(sharedata);
 			QueryPerformanceCounter(&finishTime);
 			
 			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);

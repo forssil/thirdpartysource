@@ -69,6 +69,7 @@ m_fFFTlen_ms(fftlen_ms)
 ,m_fGain(1.f) 
 ,m_pMemArray(NULL)
 ,m_pSubBandAdap(NULL)
+,m_pSubBandAdap2(NULL)
 ,m_nSystemDelay(0)
 ,m_pPostFil(NULL)
 
@@ -104,6 +105,7 @@ CAcousticEchoCancellation::CAcousticEchoCancellation(int Fs,int fftlen_sample,in
 	,m_fGain(1.f) 
 	,m_pMemArray(NULL)
 	,m_pSubBandAdap(NULL)
+	,m_pSubBandAdap2(NULL)
 	,m_nSystemDelay(0)
 	,m_pPostFil(NULL)
 	,m_pSPest(NULL)
@@ -166,6 +168,12 @@ CAcousticEchoCancellation::~CAcousticEchoCancellation()
 	if(	NULL != m_pSubBandAdap)
 	{
 		delete m_pSubBandAdap;
+		m_pSubBandAdap = NULL;
+	}
+	if (NULL != m_pSubBandAdap2)
+	{
+		delete m_pSubBandAdap2;
+		m_pSubBandAdap2 = NULL;
 	}
 	if (NULL != m_pMemAlocat)
 	{
@@ -175,10 +183,12 @@ CAcousticEchoCancellation::~CAcousticEchoCancellation()
 	if(NULL != m_pMemArray)
 	{
 		delete m_pMemArray;
+		m_pMemArray = NULL;
 	}
 	if(NULL!=m_pPostFil)
 	{
 		delete m_pPostFil;
+		m_pPostFil = NULL;
 	}
 	if(NULL != 	m_pSPest)
 	{
@@ -440,6 +450,210 @@ int CAcousticEchoCancellation::ResetAll()
   int CAcousticEchoCancellation::ProcessRefferData(audio_pro_share& aShareData)
   {
 	   
+	  return 0;
+
+  }
+
+
+  ////class CAcousticEchoCancellationInFrequency
+ 
+  CAcousticEchoCancellationInFrequency::CAcousticEchoCancellationInFrequency(int Fs, int fftlen_sample, int framlen_sample) :
+	  m_nFFTlen(fftlen_sample)
+	  , m_nFs(Fs)
+	  , m_nFramelen(framlen_sample)
+	  , m_pReferFFT(NULL)
+	  , m_bResetFlag(false)
+	  , m_bInit(false)
+	  , m_pMemAlocat(NULL)
+	  , m_nTail(0)
+	  , m_bVad(false)
+	  , m_fCrossCor(0)
+	  , m_fGain(1.f)
+	  , m_pSubBandAdap(NULL)
+	  , m_pPostFil(NULL)
+	  , m_pSPest(NULL)
+	  , m_pRefSp(NULL)
+  {
+	  m_fFFTlen_ms = float(m_nFFTlen * 1000) / m_nFs;
+	  m_fFramelen_ms = float(m_nFramelen * 1000) / m_nFs;
+
+
+	  memset(m_ppAuidoInBuf, 0, 2 * sizeof(void*));
+	  memset(m_ppAudioOutBuf, 0, 2 * sizeof(void*));
+  };
+
+  CAcousticEchoCancellationInFrequency::~CAcousticEchoCancellationInFrequency()
+  {
+	  if (NULL != m_pSubBandAdap)
+	  {
+		  delete m_pSubBandAdap;
+		  m_pSubBandAdap = NULL;
+	  }
+	  if (NULL != m_pMemAlocat)
+	  {
+		  delete[] m_pMemAlocat;
+		  m_pMemAlocat = NULL;
+	  }
+
+	  if (NULL != m_pPostFil)
+	  {
+		  delete m_pPostFil;
+		  m_pPostFil = NULL;
+	  }
+	  if (NULL != m_pSPest)
+	  {
+		  delete m_pSPest;
+		  m_pSPest = NULL;
+	  }
+  }
+
+  void CAcousticEchoCancellationInFrequency::Reset()
+  {
+	  m_bResetFlag = true;
+  }
+
+  //thread safe 
+  int CAcousticEchoCancellationInFrequency::ResetAll()
+  {
+	  int ret = 0;
+	  if (m_bResetFlag)
+	  {
+		  ///reset module
+
+		  if (ret == 0)
+		  {
+			  m_bResetFlag = false;
+			  return ret;
+		  }
+	  }
+	  else
+		  return ret;
+
+  }
+
+  int CAcousticEchoCancellationInFrequency::Init()
+  {
+
+	  //
+	  memset(&m_AECData, 0, sizeof(audio_pro_share));
+
+	  //
+	  m_pMemAlocat = new float[m_nFFTlen * 10];
+	  memset(m_pMemAlocat, 0, m_nFFTlen * 10 * sizeof(float));
+	  //m_AECData.pDesire_ = m_pMemAlocat;
+	  //m_AECData.pReffer_ = (m_AECData.pDesire_) + m_nFFTlen;
+	  //m_AECData.pDesireFFT_ = (m_AECData.pReffer_) + m_nFFTlen;
+	  //m_pReferFFT = (m_AECData.pDesireFFT_) + m_nFFTlen;
+
+	  m_AECData.pEstimationFFT_ = m_pMemAlocat + m_nFFTlen;
+	  m_AECData.pErrorFFT_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
+	  m_AECData.pErrorSpectrumPower_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
+	  m_pRefSp = m_AECData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
+	  m_AECData.nLengthFFT_ = m_nFFTlen;
+	  m_AECData.bAECOn_ = true;
+
+	  //////NR
+	  m_AECData.pNRInput_ = m_AECData.pErrorFFT_;
+	  m_AECData.pNRDynamicRefer_ = m_AECData.pEstimationFFT_;
+	  m_AECData.pNRInputRefer_ = m_AECData.pDesireFFT_;
+	  m_AECData.bNROn_ = true;
+	  //CNG
+	  m_AECData.bNRCNGOn_ = true;
+	  m_AECData.pNRCNGBuffer_ = m_pReferFFT;///reuse this buffer
+
+	  m_pSubBandAdap = new CSubbandAdap(m_nFs, m_nFFTlen);
+	  m_pSubBandAdap->Subband_init();
+	  m_pPostFil = new CPostFilter(m_nFs, m_nFFTlen);
+	  //SPest
+	  m_pSPest = new SPEst();
+	  m_pSPest->InitPara(m_nFramelen);
+
+	  m_AECData.pGain_ = m_pPostFil->GetGain();
+	  m_AECData.pNoiseSPwr = m_pPostFil->GetNoiseEst();
+
+	  m_AECData.nOffsetBin_ = 2;
+	  m_bInit = true;
+	  return 0;
+  }
+  void CAcousticEchoCancellationInFrequency::ProBufferCopy(float *fp, float* fpnew)
+  {
+	  int size = m_nFFTlen / 2;
+	  float *tp = fp + size;
+	  memcpy(tp, fpnew, sizeof(float)*size);
+
+  }
+  ///move buffer
+  void CAcousticEchoCancellationInFrequency::UpdateProBuffer(float *fp)
+  {
+	  if (fp)
+	  {
+		  int size = m_nFFTlen / 2;
+		  memmove(fp, fp + size, sizeof(float)*size);
+	  }
+  }
+
+
+  int CAcousticEchoCancellationInFrequency::process(audio_pro_share& aShareData)
+  {
+	  int ret = 0;
+
+	  float vadband[3] = { 0 };
+	  float vadfull = 0.f;
+	  m_AECData.bAECOn_ = aShareData.bAECOn_;
+	  m_AECData.bNROn_ = aShareData.bNROn_;
+	  m_AECData.bNRCNGOn_ = aShareData.bNRCNGOn_;
+	  if (m_bInit)
+	  {
+		  ////////////time domain to frequency domain
+		 
+		  if (m_AECData.bAECOn_)
+		  {
+			  //////far end vad
+			  m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp + m_nFFTlen);
+			  m_bVad = (vadfull == 1);
+
+			  //////delay est
+			  Audioframe_t audioframe;
+			  audioframe.fp = m_pReferFFT;
+			  audioframe.VAD = m_bVad;
+			  audioframe.VADBand = vadband;
+			  audioframe.VADBandBuffSize = 3;
+
+			  m_AECData.nFarVAD_ = audioframe.VAD;
+			  m_AECData.fDTDgain *= 0.8f;
+			  m_AECData.fDTDgain += 0.2f*aShareData.fDTDgain;
+			  m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;
+			  m_AECData.pRefferFFT_ = aShareData.pRefferFFT_;
+
+			  ////echo est
+			  m_pSubBandAdap->process(m_AECData.pRefferFFT_, m_AECData.pDesireFFT_, m_AECData.pErrorFFT_, m_AECData.pEstimationFFT_, m_AECData.nOffsetBin_, m_AECData);
+
+		  }
+		  else
+		  {
+			  memcpy(m_AECData.pErrorFFT_, m_AECData.pDesireFFT_, sizeof(float)*m_AECData.nLengthFFT_);
+		  }
+
+		  if (m_AECData.bNROn_)
+		  {
+			  m_pPostFil->Process(&m_AECData);
+		  }
+
+	  }
+	  else
+		  ret = -1;
+	  return ret;
+  }
+
+
+  bool CAcousticEchoCancellationInFrequency::SetDelay(int nDelay)
+  {
+	  return true;
+  }
+
+  int CAcousticEchoCancellationInFrequency::ProcessRefferData(audio_pro_share& aShareData)
+  {
+
 	  return 0;
 
   }
