@@ -280,7 +280,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 		////////////time domain to frequency domain
 		for (int i = 0; i < m_nMicsNum; i++) {
             //m_ppCT2FMics[i]->T2F((float*)aShareData.pDesire_[i], m_APFData.ppCapureFFT_[i]);
-			m_ppCT2FMics[i]->T2F(aShareData.pDesire_, m_APFData.ppCapureFFT_[i]);
+			m_ppCT2FMics[i]->T2F(aShareData.ppCapture_[i], m_APFData.ppCapureFFT_[i]);
 			m_pAECDataArray[i].bAECOn_ = aShareData.bAECOn_;
 			m_pAECDataArray[i].bNROn_ = aShareData.bNROn_;
 			m_pAECDataArray[i].pDesireFFT_ = m_APFData.ppCapureFFT_[i];
@@ -333,14 +333,18 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 
 		//F2T
 		//m_CF2TErr->F2T(m_APFData.pErrorFFT_, aShareData.pError_);
-        m_CF2TErr->F2T(m_pAECDataArray[0].pErrorFFT_, aShareData.pError_);
-
+		for (int i = 0; i < m_nMicsNum; i++) {
+			//m_CF2TErr->F2T(m_pAECDataArray[i].pDesireFFT_, aShareData.ppProcessOut_[i]);
+			m_CF2TErr->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
+		}
 
 		if (aShareData.bNRCNGOn_)
 		{
-			for (int i = 0; i < m_nFFTlen / 2; i++)
-			{
-				aShareData.pError_[i] += m_APFData.pNRCNGBuffer_[i];
+			for (int j = 0; j < m_nMicsNum; j++) {
+				for (int i = 0; i < m_nFFTlen / 2; i++)
+				{
+					aShareData.ppProcessOut_[j][i] += m_APFData.pNRCNGBuffer_[i];
+				}
 			}
 		}
 	

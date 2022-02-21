@@ -84,7 +84,7 @@ private:
 	int   m_nDelay; ///delay between mic and ref
 	int   m_nSystemDelay;
 	float*   m_pReferFFT;
-    float* m_pErrorFFT;
+    float*   m_pErrorFFT;
 	//////processing buffer
 	float*    m_pMemAlocat;
 	audio_pro_share   m_APFData;
