@@ -185,7 +185,7 @@ void CSpeechEst::UpdateGain()
 		p=m_pfP[i];
 		prisnr=m_pfPrioriSNR[i];
 		g=prisnr/(prisnr+1.f);       		
-		g*=expf(0.5f*expint(m_pfV[i]));
+		g*=expf(0.5f*expint(m_pfV[i]+minvalue));
 		g=min(1.f,g);
 		g=max(m_fGainMin,g);
 		m_pfGain[i]=powf(g,p);

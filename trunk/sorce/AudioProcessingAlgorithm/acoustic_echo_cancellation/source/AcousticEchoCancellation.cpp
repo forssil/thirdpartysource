@@ -547,7 +547,7 @@ int CAcousticEchoCancellation::ResetAll()
 
 	  m_AECData.pEstimationFFT_ = m_pMemAlocat + m_nFFTlen;
 	  m_AECData.pErrorFFT_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
-	  m_AECData.pErrorSpectrumPower_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
+	  m_AECData.pErrorSpectrumPower_ = m_AECData.pErrorFFT_ + m_nFFTlen;
 	  m_pRefSp = m_AECData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
 	  m_AECData.nLengthFFT_ = m_nFFTlen;
 	  m_AECData.bAECOn_ = true;
@@ -639,6 +639,9 @@ int CAcousticEchoCancellation::ResetAll()
 
 		  if (m_AECData.bNROn_)
 		  {
+			  m_AECData.pNRInput_ = m_AECData.pErrorFFT_;
+			  m_AECData.pNRDynamicRefer_ = m_AECData.pEstimationFFT_;
+			  m_AECData.pNRInputRefer_ = m_AECData.pDesireFFT_;
 			  m_pPostFil->Process(&m_AECData);
 		  }
 

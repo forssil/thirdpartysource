@@ -137,7 +137,7 @@ int main(int argc , char *argv[ ])
 	}
 	//memset(&sharedata, 0, sizeof(audio_pro_share));
 	sharedata.bAECOn_=true;
-	sharedata.bNROn_= false;
+	sharedata.bNROn_= true;
 	sharedata.bNRCNGOn_=false;
     sharedata.nChannelsInCapture_ = 1;
 	for (int i = 0; i < cycleNum; i++)
@@ -149,7 +149,7 @@ int main(int argc , char *argv[ ])
 			insideCycleNum++;
 
 			outfileleng += readfile->ReadSample(data_in_s, fremaelen*readwavhead.NChannels);
-			if (outfileleng>=3826* fremaelen*readwavhead.NChannels)
+			if (outfileleng>=6913* fremaelen*readwavhead.NChannels)
 				outfileleng*=1;
 			// link input data pointers
 			for (int j = 0; j < micNum; j++) {
