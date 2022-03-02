@@ -371,7 +371,6 @@ int CAcousticEchoCancellation::ResetAll()
 				m_CDelayBuf->UpdateData(&audioframe);
 				m_CDelayBuf->getAudioFrame(m_nSystemDelay,&audioframe);
 				float fcorr= m_CDTD->processDelay(audioframe.fp,m_AECData.pDesireFFT_,m_bVad);
-				//m_nDelay=(m_CDTD->GetDelay());
 		  
 				  m_CDelayBuf->getAudioFrame(m_nSystemDelay+m_nDelay,&audioframe);
 				  m_AECData.pRefferFFT_=audioframe.fp;
@@ -461,18 +460,15 @@ int CAcousticEchoCancellation::ResetAll()
 	  m_nFFTlen(fftlen_sample)
 	  , m_nFs(Fs)
 	  , m_nFramelen(framlen_sample)
-	  , m_pReferFFT(NULL)
 	  , m_bResetFlag(false)
 	  , m_bInit(false)
 	  , m_pMemAlocat(NULL)
 	  , m_nTail(0)
-	  , m_bVad(false)
 	  , m_fCrossCor(0)
 	  , m_fGain(1.f)
 	  , m_pSubBandAdap(NULL)
 	  , m_pPostFil(NULL)
 	  , m_pSPest(NULL)
-	  , m_pRefSp(NULL)
   {
 	  m_fFFTlen_ms = float(m_nFFTlen * 1000) / m_nFs;
 	  m_fFramelen_ms = float(m_nFramelen * 1000) / m_nFs;
@@ -540,15 +536,11 @@ int CAcousticEchoCancellation::ResetAll()
 	  //
 	  m_pMemAlocat = new float[m_nFFTlen * 10];
 	  memset(m_pMemAlocat, 0, m_nFFTlen * 10 * sizeof(float));
-	  //m_AECData.pDesire_ = m_pMemAlocat;
-	  //m_AECData.pReffer_ = (m_AECData.pDesire_) + m_nFFTlen;
-	  //m_AECData.pDesireFFT_ = (m_AECData.pReffer_) + m_nFFTlen;
-	  //m_pReferFFT = (m_AECData.pDesireFFT_) + m_nFFTlen;
 
 	  m_AECData.pEstimationFFT_ = m_pMemAlocat + m_nFFTlen;
 	  m_AECData.pErrorFFT_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
 	  m_AECData.pErrorSpectrumPower_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
-	  m_pRefSp = m_AECData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
+	 // m_pRefSp = m_AECData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
 	  m_AECData.nLengthFFT_ = m_nFFTlen;
 	  m_AECData.bAECOn_ = true;
 
@@ -559,7 +551,7 @@ int CAcousticEchoCancellation::ResetAll()
 	  m_AECData.bNROn_ = true;
 	  //CNG
 	  m_AECData.bNRCNGOn_ = true;
-	  m_AECData.pNRCNGBuffer_ = m_pReferFFT;///reuse this buffer
+	  m_AECData.pNRCNGBuffer_ = m_AECData.pErrorSpectrumPower_ + m_nFFTlen ;///reuse this buffer
 
 	  m_pSubBandAdap = new CSubbandAdap(m_nFs, m_nFFTlen);
 	  m_pSubBandAdap->Subband_init();
@@ -608,18 +600,7 @@ int CAcousticEchoCancellation::ResetAll()
 		 
 		  if (m_AECData.bAECOn_)
 		  {
-			  //////far end vad
-			  m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp + m_nFFTlen);
-			  m_bVad = (vadfull == 1);
-
-			  //////delay est
-			  Audioframe_t audioframe;
-			  audioframe.fp = m_pReferFFT;
-			  audioframe.VAD = m_bVad;
-			  audioframe.VADBand = vadband;
-			  audioframe.VADBandBuffSize = 3;
-
-			  m_AECData.nFarVAD_ = audioframe.VAD;
+			  m_AECData.nFarVAD_ = aShareData.nFarVAD_;
 			  m_AECData.fDTDgain *= 0.8f;
 			  m_AECData.fDTDgain += 0.2f*aShareData.fDTDgain;
 			  m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;

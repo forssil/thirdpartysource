@@ -185,7 +185,7 @@ int CAudioProcessingFramework::Init()
 	////
 	memset(&m_APFData, 0, sizeof(audio_pro_share));
 
-	int total_size = (m_nMicsNum+6 ) * m_nFFTlen;
+	int total_size = (m_nMicsNum+7 ) * m_nFFTlen;
 	m_pMemAlocat = new float[total_size];
 	memset(m_pMemAlocat, 0, total_size * sizeof(float));
 
@@ -193,7 +193,7 @@ int CAudioProcessingFramework::Init()
 	m_APFData.ppCapureFFT_ = new float*[m_nMicsNum];
 	m_APFData.nChannelsInCaptureFFT_ = m_nMicsNum;
 	m_APFData.nLengthFFT_ = m_nFFTlen;
-	for (int i = 0; i < m_nFFTlen; i++) {
+	for (int i = 0; i < m_nMicsNum; i++) {
 		m_APFData.ppCapureFFT_[i] = m_pMemAlocat + i * m_nFFTlen;
 	}
 	m_pReferFFT = m_APFData.ppCapureFFT_[m_nMicsNum-1] + m_nFFTlen;
@@ -201,7 +201,8 @@ int CAudioProcessingFramework::Init()
 	m_APFData.pErrorFFT_= m_APFData.pEstimationFFT_+m_nFFTlen;
 	m_APFData.pError_= m_APFData.pErrorFFT_+m_nFFTlen;
 	m_APFData.pErrorSpectrumPower_= m_APFData.pError_+m_nFFTlen;
-	m_pRefSp= m_APFData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
+	m_pRefSp= m_APFData.pErrorSpectrumPower_ + m_nFFTlen;  
+	m_pRefSp_nonsmooth = m_pRefSp + m_nFFTlen;
 	m_APFData.nLengthFFT_=m_nFFTlen;
 	m_APFData.bAECOn_= true;
 
@@ -226,6 +227,10 @@ int CAudioProcessingFramework::Init()
 		memset(&m_pAECDataArray[i],0, sizeof(audio_pro_share));
 		m_ppCAECMics[i] =  new CAcousticEchoCancellationInFrequency(m_nFs, m_nFFTlen, m_nFramelen);
 		m_ppCAECMics[i]->Init();
+		//export data in aec
+		m_pAECDataArray[i].pRefferFFT_ = m_pReferFFT;
+		m_pAECDataArray[i].pErrorFFT_ = m_ppCAECMics[i]->m_AECData.pErrorFFT_;
+		m_pAECDataArray[i].pEstimationFFT_ = m_ppCAECMics[i]->m_AECData.pEstimationFFT_;
 	}
 
 	m_CT2FRef = new T2Ftransformer();
@@ -238,7 +243,10 @@ int CAudioProcessingFramework::Init()
 	m_CF2TErrBeforeNR = new F2Ttransformer();
 	m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen);
 #endif
-
+    m_pSPest = new SPEst();
+    m_pSPest->InitPara(m_nFramelen);
+    m_pVADest = new AEC_VAD();
+    m_pVADest->CreateVAD_int(m_nFs, m_nFFTlen, m_nFramelen);
 	m_bInit = true;
 	return 0;
 }
@@ -275,10 +283,12 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 	if (aShareData.nChannelsInCapture_ == m_nMicsNum) {
 		////////////time domain to frequency domain
 		for (int i = 0; i < m_nMicsNum; i++) {
+            //m_ppCT2FMics[i]->T2F((float*)aShareData.pDesire_[i], m_APFData.ppCapureFFT_[i]);
 			m_ppCT2FMics[i]->T2F(aShareData.ppCapture_[i], m_APFData.ppCapureFFT_[i]);
 			m_pAECDataArray[i].bAECOn_ = aShareData.bAECOn_;
 			m_pAECDataArray[i].bNROn_ = aShareData.bNROn_;
 			m_pAECDataArray[i].pDesireFFT_ = m_APFData.ppCapureFFT_[i];
+
 	        ///// NR before aec
 			////
 		}
@@ -288,8 +298,8 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			m_CT2FRef->T2F(fpref, m_pReferFFT);
 
 			//////far end vad
-			m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp + m_nFFTlen);
-			m_pVADest->GetVAD(m_pRefSp, m_pRefSp + m_nFFTlen, vadband, vadfull);
+			m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp_nonsmooth);
+			m_pVADest->GetVAD(m_pRefSp, m_pRefSp_nonsmooth, vadband, vadfull);
 			m_bVad = (vadfull == 1);
 
 			//////delay est
@@ -300,13 +310,12 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			audioframe.VADBandBuffSize = 3;
 			m_CDelayBuf->UpdateData(&audioframe);
 			m_CDelayBuf->getAudioFrame(m_nSystemDelay, &audioframe);
-		    fcorr = m_CDTD->processDelay(audioframe.fp, m_APFData.ppCapture_[m_nMain_mic_index], m_bVad);
+            fcorr = m_CDTD->processDelay(audioframe.fp, m_APFData.ppCapureFFT_[m_nMain_mic_index], m_bVad);
 			m_CDelayBuf->getAudioFrame(m_nSystemDelay + m_nDelay, &audioframe);
 
 			////echo est
 	
 			for (int i = 0; i < m_nMicsNum; i++) {
-				m_pAECDataArray[i].pRefferFFT_ = m_pReferFFT;
 				m_pAECDataArray[i].nFarVAD_ = audioframe.VAD;
 				m_pAECDataArray[i].fDTDgain = fcorr;
 				m_ppCAECMics[i]->process(m_pAECDataArray[i]);
@@ -324,18 +333,19 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 		//
 
 		//F2T
-		m_CF2TErr->F2T(m_APFData.pErrorFFT_, aShareData.pError_);
-
-
-		if (aShareData.bNRCNGOn_)
-		{
-			for (int i = 0; i < m_nFFTlen / 2; i++)
-			{
-				aShareData.pError_[i] += m_APFData.pNRCNGBuffer_[i];
-			}
+		for (int i = 0; i < m_nMicsNum; i++) {
+			m_CF2TErr->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
 		}
-	
 
+		//if (aShareData.bNRCNGOn_)
+		//{
+		//	for (int j = 0; j < m_nMicsNum; j++) {
+		//		for (int i = 0; i < m_nFFTlen / 2; i++)
+		//		{
+		//			aShareData.ppProcessOut_[j][i] += m_APFData.pNRCNGBuffer_[i];
+		//		}
+		//	}
+		//}
 
 	}
 	else
