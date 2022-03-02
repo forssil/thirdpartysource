@@ -41,20 +41,18 @@ int main(int argc , char *argv[ ])
 	long chanle_spos;
 	long outfileleng;
 	long counttime=0;
+	int mics_num = 0;
 
 	memset(&sharedata,0,sizeof(audio_pro_share));
 
-		int fremaelen=512;//int(framesize*readwavhead.SampleRate/1000);
-	//create AEC
-		CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(1,48000, 2*fremaelen, fremaelen);
-		pAPFInterface->Init();
+	int fremaelen=512;//int(framesize*readwavhead.SampleRate/1000);
 
    {
 	    
 	   //infile=argv[1];
-		infile = "D:\\hardware\\huachuang\\audio-48k\\src4_stereo.wav";
-		outfile="D:\\hardware\\huachuang\\audio-48k\\out\\src4_stereo_out_2adf.wav";
-		outfile1 = "D:\\hardware\\huachuang\\audio-48k\\out\\src4_stereo_est2adf.wav";
+		infile = "D:\\hardware\chenan\\3308_mca_dump\\5channel.wav";
+		outfile="D:\\hardware\\chenan\\3308_mca_dumpk\\out\\5channel_out.wav";
+		outfile1 = "D:\\hardware\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";
 	   i=0;
 
    }
@@ -67,6 +65,8 @@ int main(int argc , char *argv[ ])
 		printf("open infile failed!\n");
 		return 0;
 	}
+	mics_num = readwavhead.NChannels - 1;
+
 	writefile1 = new CWavFileOp(outfile1, "wb");
 	if (writefile1->m_FileStatus == -2)
 	{
@@ -97,14 +97,15 @@ int main(int argc , char *argv[ ])
 	writewavhead.NChannels=2;
 	writewavhead1 = readwavhead;
 	writewavhead1.NChannels = 2;
+//buffer
 	data_in_s=new short[fremaelen*(readwavhead.NChannels+writewavhead.NChannels)];
 	data_out_s=data_in_s+fremaelen*readwavhead.NChannels;
 	memset(data_in_s,0,fremaelen*(readwavhead.NChannels+writewavhead.NChannels)*sizeof(short));
 
 	
-	data_in_f=new float[fremaelen*2];
+	data_in_f=new float[fremaelen*(2 + 2*mics_num)];
 	data_out_f=data_in_f+fremaelen;
-	memset(data_in_f,0,(fremaelen*2)*sizeof(float));
+	memset(data_in_f,0,(fremaelen*(2 + 2*mics_num))*sizeof(float));
 	writefile->WriteHeader(writewavhead);
 	writefile1->WriteHeader(writewavhead1);
 
@@ -112,26 +113,51 @@ int main(int argc , char *argv[ ])
 	data_out_f2 = data_in_f2 + fremaelen;
 	data_out_f3 = data_out_f2 + fremaelen;
 	memset(data_in_f2, 0, (fremaelen * 3)*sizeof(float));
+
+	//create AEC
+	CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, readwavhead.SampleRate, 2 * fremaelen, fremaelen);
+	pAPFInterface->Init();
+    //sharedata init
+	sharedata.ppCapture_ = new float*[mics_num];
+	sharedata.nChannelsInCapture_ = mics_num;
+	sharedata.nSamplesPerCaptureChannel_ = fremaelen;
+	sharedata.ppProcessOut_ = new float*[mics_num];
+	sharedata.nChannelsInProcessOut_ = mics_num;
+	sharedata.nSamplesPerProcessOutChannel_ = fremaelen;
+
+	for (int i = 0; i < mics_num; i++) {
+		sharedata.ppCapture_[i] = data_out_f + i * fremaelen;
+		sharedata.ppProcessOut_[i] = data_out_f + i * fremaelen+ mics_num* fremaelen;
+	}
+	sharedata.pReffer_ = data_in_f2;
+	sharedata.nSamplesInReffer_ = fremaelen;
+
+	sharedata.bAECOn_=true;
+	sharedata.bNROn_= true;
+	sharedata.bNRCNGOn_=false;
+
 	//c
-	counttime=clock();
+	counttime = clock();
 	outfileleng = 0;
 	LONGLONG elapseTimeCount = 0;
 	int cycleNum = 1;
 	int insideCycleNum = 0;
-	sharedata.bAECOn_=true;
-	sharedata.bNROn_= true;
-	sharedata.bNRCNGOn_=false;
+
 	for (int i = 0; i < cycleNum; i++)
 	{
 		while (outfileleng < (filelen - fremaelen*readwavhead.NChannels))
 		{
 			outfileleng += readfile->ReadSample(data_in_s, fremaelen*readwavhead.NChannels);
-			if (outfileleng>=3826* fremaelen*readwavhead.NChannels)
-				outfileleng*=1;
+			//if (outfileleng>=3826* fremaelen*readwavhead.NChannels)
+			//	outfileleng*=1;
 			for (i = 0; i < fremaelen; i++)
 			{
-				data_in_f[i] = float(data_in_s[i*readwavhead.NChannels]) *3/ 32768.f;//left channele
-				data_in_f2[i] = float(data_in_s[i*readwavhead.NChannels + 1])*3/ 32768.f;//right channele
+				for (size_t channel = 0; channel < mics_num; channel++)
+				{
+					sharedata.ppCapture_[channel][i] = float(data_in_s[i*readwavhead.NChannels+ channel]);
+				}
+				
+				sharedata.pReffer_[i] = float(data_in_s[i*readwavhead.NChannels + mics_num]);
 			}
 			//////////////////////////////////////////////////////////////////////////
 
@@ -147,14 +173,9 @@ int main(int argc , char *argv[ ])
 			pAPFInterface->process(sharedata);
 			QueryPerformanceCounter(&finishTime);
 			
-			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);
-
-		//	printf("elapseTimeCount is %d\n", elapseTimeCount);
-			
+			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);		
+			 
 			memcpy_s(data_out_f2, fremaelen*sizeof(float), data_in_f, fremaelen*sizeof(float));
-
-			//DCRemover dcremover(0,0,0);
-			//dcremover.findLevelAndDcRemove(data_in_f, 0);
 
 			/////////////
 			for (int i = 0; i<(fremaelen); i++)
@@ -201,17 +222,6 @@ int main(int argc , char *argv[ ])
 				else
 					data_out_s[i*writewavhead1.NChannels] = short(data_out_f3[i]);//*32768.f
 
-				//data_out_f2[i] *= 32767 / 3;
-				//if (data_out_f2[i] > 32767.f)
-				//{
-				//	data_out_s[i*writewavhead1.NChannels + 1] = 32767;
-				//}
-				//else if (data_out_f2[i] < -32768.f)
-				//{
-				//	data_out_s[i*writewavhead1.NChannels + 1] = -32768;
-				//}
-				//else
-				//	data_out_s[i*writewavhead1.NChannels + 1] = short(data_out_f2[i]);//*32768.f
 			}
 			writefile1->WriteSample(data_out_s, (fremaelen*writewavhead1.NChannels));//
 		}
@@ -219,14 +229,14 @@ int main(int argc , char *argv[ ])
 	writefile1->UpdateHeader(writewavhead1.NChannels, outfileleng / writewavhead1.NChannels);
 	writefile->UpdateHeader(writewavhead.NChannels, outfileleng / writewavhead.NChannels);
 	
-	//LARGE_INTEGER fqOfCPU;
-	//QueryPerformanceFrequency(&fqOfCPU);
-	//printf("Frequency: %u\n", fqOfCPU.QuadPart);
-	//counttime-=clock();
-	//double elapseTime2 = (double)elapseTimeCount / fqOfCPU.QuadPart / insideCycleNum*1000;
-	//printf("elapseTime: %fms\n", elapseTime2);
+	LARGE_INTEGER fqOfCPU;
+	QueryPerformanceFrequency(&fqOfCPU);
+	printf("Frequency: %u\n", fqOfCPU.QuadPart);
+	counttime-=clock();
+	double elapseTime2 = (double)elapseTimeCount / fqOfCPU.QuadPart / insideCycleNum*1000;
+	printf("elapseTime: %fms\n", elapseTime2);
 
-	//getchar();
+	getchar();
 
 
 	

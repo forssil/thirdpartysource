@@ -117,7 +117,7 @@ private:
 	inline void UpdateProBuffer(float *fp);
 	//copy new data to processing buffer
 	inline void ProBufferCopy(float *fp, float* fpnew);
-private:
+public:
 
 	SPEst* m_pSPest;
 	CSubbandAdap   *m_pSubBandAdap;
@@ -132,13 +132,13 @@ private:
 	bool m_bInit;
 	void* m_ppAuidoInBuf[2];
 	void* m_ppAudioOutBuf[2];
-	AUDIO_DATA_TYPE* m_pRefSp;
-	float*   m_pReferFFT;
+	//AUDIO_DATA_TYPE* m_pRefSp;
+	//float*   m_pReferFFT;
 	//////processing buffer
 	float*    m_pMemAlocat;
 	audio_pro_share   m_AECData;
 	int m_nTail;
-	bool m_bVad;
+	//bool m_bVad;
 	float m_fCrossCor;
 	float m_fGain;  //full band gain
 };

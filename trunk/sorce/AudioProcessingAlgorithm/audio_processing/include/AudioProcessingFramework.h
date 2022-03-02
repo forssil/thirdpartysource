@@ -80,7 +80,8 @@ private:
 	bool m_bInit;
 	void* m_ppAuidoInBuf[2];
 	void* m_ppAudioOutBuf[2];
-	AUDIO_DATA_TYPE* m_pRefSp;
+	AUDIO_DATA_TYPE* m_pRefSp; 
+	AUDIO_DATA_TYPE* m_pRefSp_nonsmooth;
 	int   m_nDelay; ///delay between mic and ref
 	int   m_nSystemDelay;
 	float*   m_pReferFFT;
