@@ -539,7 +539,7 @@ int CAcousticEchoCancellation::ResetAll()
 
 	  m_AECData.pEstimationFFT_ = m_pMemAlocat + m_nFFTlen;
 	  m_AECData.pErrorFFT_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
-	  m_AECData.pErrorSpectrumPower_ = m_AECData.pEstimationFFT_ + m_nFFTlen;
+	  m_AECData.pErrorSpectrumPower_ = m_AECData.pErrorFFT_ + m_nFFTlen;
 	 // m_pRefSp = m_AECData.pErrorSpectrumPower_ + m_nFFTlen;  //2*fftlen
 	  m_AECData.nLengthFFT_ = m_nFFTlen;
 	  m_AECData.bAECOn_ = true;
@@ -605,6 +605,7 @@ int CAcousticEchoCancellation::ResetAll()
 			  m_AECData.fDTDgain += 0.2f*aShareData.fDTDgain;
 			  m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;
 			  m_AECData.pRefferFFT_ = aShareData.pRefferFFT_;
+			  m_AECData.pNRInputRefer_ = m_AECData.pDesireFFT_;
 
 			  ////echo est
 			  m_pSubBandAdap->process(m_AECData.pRefferFFT_, m_AECData.pDesireFFT_, m_AECData.pErrorFFT_, m_AECData.pEstimationFFT_, m_AECData.nOffsetBin_, m_AECData);
