@@ -50,9 +50,9 @@ int main(int argc , char *argv[ ])
    {
 	    
 	   //infile=argv[1];
-		infile = "D:\\hardware\chenan\\3308_mca_dump\\5channel.wav";
-		outfile="D:\\hardware\\chenan\\3308_mca_dumpk\\out\\5channel_out.wav";
-		outfile1 = "D:\\hardware\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";
+		infile = "D:\\works\\chenan\\3308_mca_dump\\5channel.wav";
+		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out.wav";
+		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";
 	   i=0;
 
    }
@@ -65,14 +65,15 @@ int main(int argc , char *argv[ ])
 		printf("open infile failed!\n");
 		return 0;
 	}
+	readfile->ReadHeader(&readwavhead);
 	mics_num = readwavhead.NChannels - 1;
 
-	writefile1 = new CWavFileOp(outfile1, "wb");
-	if (writefile1->m_FileStatus == -2)
-	{
-		delete writefile1;
-		return 0;
-	}
+	//writefile1 = new CWavFileOp(outfile1, "wb");
+	//if (writefile1->m_FileStatus == -2)
+	//{
+	//	delete writefile1;
+	//	return 0;
+	//}
 	writefile=new CWavFileOp(outfile,"wb");
 	if (writefile->m_FileStatus==-2)
 	{
@@ -80,23 +81,17 @@ int main(int argc , char *argv[ ])
 		return 0;
 	}
 
-
 	
-	readfile->ReadHeader(&readwavhead);
 
-	if (readwavhead.NChannels>2)
-	{
-		return 0;
-	}
 	filelen=readwavhead.RawDataFileLength/readwavhead.BytesPerSample*readwavhead.NChannels;
 
 
 
 //write file
 	writewavhead=readwavhead;
-	writewavhead.NChannels=2;
+	//writewavhead.NChannels=2;
 	writewavhead1 = readwavhead;
-	writewavhead1.NChannels = 2;
+	//writewavhead1.NChannels = 2;
 //buffer
 	data_in_s=new short[fremaelen*(readwavhead.NChannels+writewavhead.NChannels)];
 	data_out_s=data_in_s+fremaelen*readwavhead.NChannels;
@@ -107,7 +102,6 @@ int main(int argc , char *argv[ ])
 	data_out_f=data_in_f+fremaelen;
 	memset(data_in_f,0,(fremaelen*(2 + 2*mics_num))*sizeof(float));
 	writefile->WriteHeader(writewavhead);
-	writefile1->WriteHeader(writewavhead1);
 
 	data_in_f2 = new float[fremaelen * 3];
 	data_out_f2 = data_in_f2 + fremaelen;
@@ -154,10 +148,10 @@ int main(int argc , char *argv[ ])
 			{
 				for (size_t channel = 0; channel < mics_num; channel++)
 				{
-					sharedata.ppCapture_[channel][i] = float(data_in_s[i*readwavhead.NChannels+ channel]);
+					sharedata.ppCapture_[channel][i] = float(data_in_s[i*readwavhead.NChannels+ channel])/32768.f;
 				}
 				
-				sharedata.pReffer_[i] = float(data_in_s[i*readwavhead.NChannels + mics_num]);
+				sharedata.pReffer_[i] = float(data_in_s[i*readwavhead.NChannels + mics_num])/32768.f;
 			}
 			//////////////////////////////////////////////////////////////////////////
 
@@ -180,53 +174,28 @@ int main(int argc , char *argv[ ])
 			/////////////
 			for (int i = 0; i<(fremaelen); i++)
 			{
-				//data_out_s[i*writewavhead.NChannels  ]=data_in_s[i*readwavhead.NChannels];
-				data_out_f[i] *= 32767.f/3;
-				if (data_out_f[i]>32767.f)
+				for (size_t channel = 0; channel < mics_num; channel++)
 				{
-					data_out_s[i*writewavhead.NChannels] = 32767;
+					sharedata.ppProcessOut_[channel][i] *= 32767.f;
+					if (data_out_f[i] > 32767.f)
+					{
+						data_out_s[i*writewavhead.NChannels + channel] = 32767;
+					}
+					else if (data_out_f[i] < -32768.f)
+					{
+						data_out_s[i*writewavhead.NChannels + channel] = -32768;
+					}
+					else
+						data_out_s[i*writewavhead.NChannels + channel] = short(sharedata.ppProcessOut_[channel][i]);//*32768.f
 				}
-				else if (data_out_f[i]<-32768.f)
-				{
-					data_out_s[i*writewavhead.NChannels] = -32768;
-				}
-				else
-					data_out_s[i*writewavhead.NChannels] = short(data_out_f[i]);//*32768.f
 
-				data_out_f2[i] *= 32767.f/3;
-				if (data_out_f2[i]>32767.f)
-				{
-					data_out_s[i*writewavhead.NChannels + 1] = 32767;
-				}
-				else if (data_out_f2[i] < -32768.f)
-				{
-					data_out_s[i*writewavhead.NChannels + 1] = -32768;
-				}
-				else
-					data_out_s[i*writewavhead.NChannels + 1] = short(data_out_f2[i]);//*32768.f
+				data_out_s[i*writewavhead.NChannels + mics_num] = (data_in_s[i*writewavhead.NChannels + mics_num]);
+				
 			}
 			writefile->WriteSample(data_out_s, (fremaelen*writewavhead.NChannels));//
-		    //////////////////
-			for (int i = 0; i < (fremaelen); i++)
-			{
-				//data_out_s[i*writewavhead.NChannels  ]=data_in_s[i*readwavhead.NChannels];
-				data_out_f3[i] *= 32767 / 3;
-				if (data_out_f3[i] > 32767.f)
-				{
-					data_out_s[i*writewavhead1.NChannels] = 32767;
-				}
-				else if (data_out_f3[i] < -32768.f)
-				{
-					data_out_s[i*writewavhead1.NChannels] = -32768;
-				}
-				else
-					data_out_s[i*writewavhead1.NChannels] = short(data_out_f3[i]);//*32768.f
-
-			}
-			writefile1->WriteSample(data_out_s, (fremaelen*writewavhead1.NChannels));//
 		}
 	}
-	writefile1->UpdateHeader(writewavhead1.NChannels, outfileleng / writewavhead1.NChannels);
+	
 	writefile->UpdateHeader(writewavhead.NChannels, outfileleng / writewavhead.NChannels);
 	
 	LARGE_INTEGER fqOfCPU;
@@ -242,9 +211,11 @@ int main(int argc , char *argv[ ])
 	
 	delete readfile;
 	delete writefile;
-	delete writefile1;
+	
 	delete data_in_f;
 	delete data_in_s;
 	delete data_in_f2;
+	delete sharedata.ppCapture_ ;
+	delete sharedata.ppProcessOut_;
 	return 1;
 }

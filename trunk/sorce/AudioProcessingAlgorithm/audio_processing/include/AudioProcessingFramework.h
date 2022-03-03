@@ -63,6 +63,7 @@ private:
 
 #ifdef AUDIO_WAVE_DEBUG
 	F2Ttransformer* m_CF2TErrBeforeNR;
+	F2Ttransformer** m_ppCF2TMics;
 #endif
 	CAcousticEchoCancellationInFrequency** m_ppCAECMics;
 	audio_pro_share* m_pAECDataArray;

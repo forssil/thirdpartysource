@@ -120,6 +120,17 @@ CAudioProcessingFramework::~CAudioProcessingFramework()
 		delete m_CF2TErrBeforeNR;
 		m_CF2TErrBeforeNR = NULL;
 	}
+	if (NULL != m_ppCF2TMics)
+	{
+		for (int i = 0; i < m_nMicsNum; i++) {
+			if (NULL != m_ppCF2TMics[i]) {
+				delete m_ppCF2TMics[i];
+				m_ppCF2TMics[i] = NULL;
+			}
+		}
+		delete[] m_ppCF2TMics;
+		m_ppCF2TMics = NULL;
+	}
 #endif
 
 	if (NULL != m_pMemAlocat)
@@ -242,6 +253,11 @@ int CAudioProcessingFramework::Init()
 #ifdef AUDIO_WAVE_DEBUG
 	m_CF2TErrBeforeNR = new F2Ttransformer();
 	m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen);
+	m_ppCF2TMics = new F2Ttransformer*[m_nMicsNum];
+	for (int i = 0; i < m_nMicsNum; i++) {
+		m_ppCF2TMics[i] = new F2Ttransformer();
+		m_ppCF2TMics[i]->InitFDanaly(m_nFramelen);
+	}
 #endif
     m_pSPest = new SPEst();
     m_pSPest->InitPara(m_nFramelen);
@@ -333,9 +349,13 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 		//
 
 		//F2T
+#ifdef AUDIO_WAVE_DEBUG
 		for (int i = 0; i < m_nMicsNum; i++) {
-			m_CF2TErr->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
+			m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
 		}
+#endif
+		
+		//m_CF2TErr->F2T(m_pAECDataArray[0].pErrorFFT_, aShareData.ppProcessOut_[0]);
 
 		//if (aShareData.bNRCNGOn_)
 		//{
