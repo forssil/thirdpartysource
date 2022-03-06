@@ -9,7 +9,7 @@
 ;*
 ;*
 ;*************************************************************************/
-
+#include <memory.h>
 #include "DCRemover.h"
 
 DCRemover::DCRemover(int Fs, int frameLen, int chn)

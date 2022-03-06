@@ -256,8 +256,8 @@ int CDTDetector::UpdateBuffer(float* far_data,float *near_data)
 	}
 	/* update buffer */
 	j = 2 * m_nBins;
-	memcpy_s(m_pfNearBufInd, (m_pfCorr - m_pfNearBufInd) * sizeof(float), pNearStart, j * sizeof(float));
-	memcpy_s(m_pFarBufInd, (m_pfcNearBuf - m_pFarBufInd) * sizeof(float), pFarStart, j * sizeof(float));
+	memcpy(m_pfNearBufInd,  pNearStart, j * sizeof(float));
+	memcpy(m_pFarBufInd,  pFarStart, j * sizeof(float));
 	m_pfNearBufInd += j;
 	m_pFarBufInd += j;
 #else
