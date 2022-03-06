@@ -13,7 +13,7 @@
 #ifndef DC_REMOVER_
 #define DC_REMOVER_
 
-#include "codyyAudioCommon.h"
+//#include "codyyAudioCommon.h"
 
 #define DCREMOVERATE 0.004f
 
