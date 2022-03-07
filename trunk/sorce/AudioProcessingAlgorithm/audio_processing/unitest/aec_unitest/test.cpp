@@ -6,12 +6,12 @@
 
 #include <time.h>
 //#include "timecounter.h"
+#ifdef WIN32
 #include <windows.h>
+#endif
+
 #include "AudioProcessingFramework_interface.h"
 #include "WaveIO.h"
-#include "fft.h"
-#include "T2Ftransformer.h"
-#include "F2Ttransformer.h"
 #ifndef _CLOCK_T_DEFINED 
 typedef long clock_t;
 #define _CLOCK_T_DEFINED 
@@ -50,10 +50,13 @@ int main(int argc , char *argv[ ])
    {
 	    
 	   //infile=argv[1];
-		infile = "D:\\works\\chenan\\3308_mca_dump\\5channel.wav";
+		/*infile = "D:\\works\\chenan\\3308_mca_dump\\5channel.wav";
 		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out.wav";
-		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";
+		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";*/
 	   i=0;
+	   infile = "./5channel.wav";
+	   outfile = "./5channel_out.wav";
+	   outfile1 = "./5channel_out1.wav";
 
    }
 
@@ -133,7 +136,9 @@ int main(int argc , char *argv[ ])
 	//c
 	counttime = clock();
 	outfileleng = 0;
+#ifdef WIN32
 	LONGLONG elapseTimeCount = 0;
+#endif
 	int cycleNum = 1;
 	int insideCycleNum = 0;
 
@@ -155,21 +160,27 @@ int main(int argc , char *argv[ ])
 			}
 			//////////////////////////////////////////////////////////////////////////
 
-
+#ifdef WIN32
 			LARGE_INTEGER startTime;
 			LARGE_INTEGER finishTime;
+#endif
 			insideCycleNum++;
 			sharedata.pDesire_=data_in_f;
 			sharedata.pReffer_ = data_in_f2;
 			sharedata.pError_ = data_out_f;
+#ifdef AUDIO_WAVE_DEBUG
 			sharedata.pErrorBeforeNR_ = data_out_f3;
+#endif
+#ifdef WIN32
 			QueryPerformanceCounter(&startTime);
+#endif
 			pAPFInterface->process(sharedata);
+#ifdef WIN32
 			QueryPerformanceCounter(&finishTime);
-			
 			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);		
-			 
-			memcpy_s(data_out_f2, fremaelen*sizeof(float), data_in_f, fremaelen*sizeof(float));
+#endif	
+
+			memcpy(data_out_f2, data_in_f, fremaelen*sizeof(float));
 
 			/////////////
 			for (int i = 0; i<(fremaelen); i++)
@@ -197,7 +208,7 @@ int main(int argc , char *argv[ ])
 	}
 	
 	writefile->UpdateHeader(writewavhead.NChannels, outfileleng / writewavhead.NChannels);
-	
+#ifdef WIN32
 	LARGE_INTEGER fqOfCPU;
 	QueryPerformanceFrequency(&fqOfCPU);
 	printf("Frequency: %u\n", fqOfCPU.QuadPart);
@@ -207,7 +218,7 @@ int main(int argc , char *argv[ ])
 
 	getchar();
 
-
+#endif
 	
 	delete readfile;
 	delete writefile;
