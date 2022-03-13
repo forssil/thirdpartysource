@@ -7,7 +7,8 @@ ROOT_PATH    = ./../..
 SRC_PATH     = .
 OBJ_PATH     = $(ROOT_PATH)/objs
 OUTDIR	     = $(ROOT_PATH)/libs
-STATIC_LIB   = $(OUTDIR)/libAPF.a
+#STATIC_LIB   = $(OUTDIR)/libAPF.a
+STATIC_LIB   = $(OUTDIR)/libaec.so
 ####################################################################
 # Compile and link options
 LINK = ld
@@ -39,6 +40,7 @@ CPP_FILES = \
 	$(SRC_PATH)/acoustic_echo_cancellation/source/SpeechEst.cpp \
 	$(SRC_PATH)/acoustic_echo_cancellation/source/SubbandAdap.cpp \
     $(SRC_PATH)/audio_processing/source/AudioProcessingFramework.cpp \
+	$(SRC_PATH)/audio_processing/source/AudioAec.cpp \
 	$(SRC_PATH)/common_audio/source/basemath.cpp \
 	$(SRC_PATH)/common_audio/source/DCRemover.cpp \
 	$(SRC_PATH)/common_audio/source/F2Ttransformer.cpp \
@@ -63,7 +65,8 @@ CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 CXXFLAGS:= $(CFLAGS)
 
 $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
-	$(AR) rcs $(STATIC_LIB) $(OBJ_FILES)
+	#$(AR) rcs $(STATIC_LIB) $(OBJ_FILES)
+	$(CXX) -shared -o $(STATIC_LIB) $(OBJ_FILES)
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
