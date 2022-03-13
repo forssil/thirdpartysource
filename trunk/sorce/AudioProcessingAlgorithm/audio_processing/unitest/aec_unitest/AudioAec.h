@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _INC_AUDIOAEC
+#define _INC_AUDIOAEC
+
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
@@ -13,10 +15,14 @@ void aec_processing_init(void  **p_aec);
 void aec_processing_deinit(void *h_aec);
 unsigned int aec_processing_get_lib_version();
 namespace {
-	float *data_in_f, *data_out_f;
-	float *data_in_f2, *data_out_f2, *data_out_f3;
-	audio_pro_share sharedata;
-	CAudioProcessingFrameworkInterface* pAPFInterface;
-	int mics_num = 4;
-	int fremaelen = 480;
+    float *data_in_f1, *data_out_f1;
+    float *data_in_f21, *data_out_f21, *data_out_f31;
+    audio_pro_share sharedata1;
+    CAudioProcessingFrameworkInterface* pAPFInterface1;
+    int mics_num1 = 4;
+    int fremaelen1 = 480;
 }
+
+
+
+#endif
