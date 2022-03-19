@@ -33,8 +33,15 @@ content: initial parameter
 ***************************************************/
 void F2Ttransformer::InitFDanaly(const int size)
 {
-	m_shift    = size;
 	m_fft_len  = size*2;
+
+    const float inv_size = 1.0f / (float)1024;
+    const float step = 2.0f * AUDIO_COMMON_PI / ((float)1024 - 1.0f);
+    for (int i = 0; i < 1024; ++i) {
+        float weight = (0.5f * (1.0f - cosf((float)i * step)));
+        syn_win1024_new[i] = weight;
+        //syn_win1024_new[i] = weight * inv_size;
+    }
 	const float *fp=NULL;
 	switch(m_fft_len)
 	{
@@ -47,11 +54,27 @@ void F2Ttransformer::InitFDanaly(const int size)
 	case 1024:
 		fp   = syn_hwin1024;
 		break;
+    case 960:
+        //float syn_win1024_new[1024] = { 0.f };
+        m_fft_len = 1024;
+        //const float inv_size = 1.0f / (float)m_fft_len;
+        //const float step = 2.0f * AUDIO_COMMON_PI / ((float)m_fft_len - 1.0f);
+        //for (int i = 0; i < m_fft_len; ++i) {
+        //    float weight = (0.5f * (1.0f - cosf((float)i * step)));
+        //    //hwin1024_new[i] = weight;
+        //    syn_win1024_new[i] = weight * inv_size;
+        //}
+        fp = syn_win1024_new;
+        break;
 	default:
 		fp   = syn_hwin256;
 		m_fft_len=256;
 
 	}
+
+    m_framelen = size;
+    m_shift = m_fft_len - size;
+
 	AnaWin= new float[m_fft_len];
 	for(int i=0; i<m_fft_len; i++)
 	{
@@ -59,13 +82,21 @@ void F2Ttransformer::InitFDanaly(const int size)
 	}
 	
 
-	m_input_spe  = new float[size*2];
-	m_input_tim  = new float[size*2];
-	m_output_spe = new float[size*2];
+	//m_input_spe  = new float[size*2];
+	//m_input_tim  = new float[size*2];
+	//m_output_spe = new float[size*2];
 
-	memset(m_input_spe,  0, sizeof(float)*size*2);
-	memset(m_input_tim,  0, sizeof(float)*size*2);
-	memset(m_output_spe, 0, sizeof(float)*size*2);
+	//memset(m_input_spe,  0, sizeof(float)*size*2);
+	//memset(m_input_tim,  0, sizeof(float)*size*2);
+	//memset(m_output_spe, 0, sizeof(float)*size*2);
+
+    m_input_spe = new float[m_fft_len];
+    m_input_tim = new float[m_fft_len];
+    m_output_spe = new float[m_fft_len];
+
+    memset(m_input_spe, 0, sizeof(float)*m_fft_len);
+    memset(m_input_tim, 0, sizeof(float)*m_fft_len);
+    memset(m_output_spe, 0, sizeof(float)*m_fft_len);
 }
 
 /***************************************************
@@ -94,9 +125,18 @@ void F2Ttransformer::F2T(const float *inbuf, float *outbuf)
 	//update buffer
 	UpdateFDbuffer(m_input_spe);
 	//multiple win
-	memcpy(outbuf,m_input_tim,sizeof(float)*m_shift);
+	memcpy(outbuf,m_input_tim,sizeof(float)*m_framelen);
+    // only add comfact for 480 framelen
+    if (m_framelen == 480) {
+        for (int n = 0; n < m_framelen; n++) {
+            outbuf[n] = outbuf[n] * comfact[n] * 1.f;
+        }
+    }
 	// half shift length 
-	memcpy(m_input_tim,m_input_spe+m_shift,m_shift*sizeof(float));
+	//memcpy(m_input_tim,m_input_spe+m_framelen, m_shift*sizeof(float));
+    memcpy(m_input_tim, m_input_tim + m_framelen, m_shift * sizeof(float));// save histroy win-buffer 480~544
+
+    memset(m_input_tim + m_shift, 0 ,sizeof(float)*m_framelen);
 }
 
 /***************************************************
@@ -111,14 +151,17 @@ void F2Ttransformer::UpdateFDbuffer(float* data)
 	int i=0;
 	for ( i=0; i<m_shift; i++)
 	{
-		*fpFDin+=*fpin * AnaWin[i];
+        (*fpin) *= AnaWin[i];
+		*fpFDin+=*fpin;//* comfact[i]
 		fpin++;
 		fpFDin++;
 	}
 	for(; i<m_fft_len; i++)
 	{
 		(*fpin) *=  AnaWin[i];
+        *fpFDin += *fpin;
 		fpin++;
+        fpFDin++;
 	}
 
 }

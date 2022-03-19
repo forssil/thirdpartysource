@@ -7,7 +7,7 @@
 
 #ifndef AECHALFDUPLEX_T2FTRANSFORMER_H_
 #define AECHALFDUPLEX_T2FTRANSFORMER_H_
-
+#define AUDIO_COMMON_PI (3.14159265358979323846f)  // pi
 //window for smooth
 static const float hwin256[]= {
 
@@ -429,9 +429,12 @@ private:
 	void UpdateFDbuffer(const float* data);
 	
 	int m_shift;        //the length of the offset
+    int m_framelen;
 	int m_fft_len;	    //the length of data
 	float* m_input_tim;	//store the original data
 	float* m_output_spe;//temporary variable
+
+    float hwin1024_new[1024] = { 0.f };
 };
 #endif
 
