@@ -354,6 +354,16 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
 		}
 #endif
+		memcpy(m_APFData.pErrorFFT_, m_pAECDataArray[0].pErrorFFT_, m_nFFTlen * sizeof(float));
+		for (int j = 0; j < m_nFFTlen; j++) {
+			for (int i = 1; i < m_nMicsNum; i++) {
+				m_APFData.pErrorFFT_[j] += m_pAECDataArray[i].pErrorFFT_[j];
+					
+			}
+			m_APFData.pErrorFFT_[j] /= m_nMicsNum;
+		}
+		m_CF2TErr->F2T(m_APFData.pErrorFFT_, aShareData.ppProcessOut_[0]);
+
 		
 		//m_CF2TErr->F2T(m_pAECDataArray[0].pErrorFFT_, aShareData.ppProcessOut_[0]);
 
