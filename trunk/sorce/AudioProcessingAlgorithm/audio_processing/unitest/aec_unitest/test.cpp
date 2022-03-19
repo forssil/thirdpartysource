@@ -11,6 +11,8 @@
 #endif
 
 #include "AudioProcessingFramework_interface.h"
+#include "agc.h"
+#include "agc_new.h"
 #include "WaveIO.h"
 #ifndef _CLOCK_T_DEFINED 
 typedef long clock_t;
@@ -42,6 +44,8 @@ int main(int argc , char *argv[ ])
 	long outfileleng;
 	long counttime=0;
 	int mics_num = 0;
+	struct AGCSTATE* pAgc;
+	//struct AGCSTATE_NEW* pAgc_new;
 
 	memset(&sharedata,0,sizeof(audio_pro_share));
 
@@ -54,9 +58,9 @@ int main(int argc , char *argv[ ])
 		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out.wav";
 		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";*/
 	   i=0;
-	   infile = "./5channel.wav";
-	   outfile = "./5channel_out.wav";
-	   outfile1 = "./5channel_out1.wav";
+	   infile = "C:/Users/carlzhang/Downloads/5channel.wav";
+	   outfile = "C:/Users/carlzhang/Downloads/5channel_out_agc.wav";
+	   outfile1 = "C:/Users/carlzhang/Downloads/5channel_out1.wav";
 
    }
 
@@ -114,6 +118,11 @@ int main(int argc , char *argv[ ])
 	//create AEC
 	CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, readwavhead.SampleRate, 2 * fremaelen, fremaelen);
 	pAPFInterface->Init();
+	//create AGC
+	pAgc = agc_create();
+	agc_reset(pAgc);
+	//pAgc_new = agc_new_create();
+	//agc_new_reset(pAgc_new);
     //sharedata init
 	sharedata.ppCapture_ = new float*[mics_num];
 	sharedata.nChannelsInCapture_ = mics_num;
@@ -182,17 +191,32 @@ int main(int argc , char *argv[ ])
 
 			memcpy(data_out_f2, data_in_f, fremaelen*sizeof(float));
 
+
+			// do agc for every output channel
+			for (size_t channel = 0; channel < mics_num; channel++) {
+				float gain = 1, power = 0;
+				for (int i = 0; i < fremaelen; i++) {
+					power += abs(sharedata.ppProcessOut_[channel][i]);
+				}
+				power /= fremaelen;
+				agc_process(pAgc, 1, &power, &gain, 0);
+				//agc_new_process(pAgc_new, 1, &power, &gain, 0);
+				for (int i = 0; i < fremaelen; i++) {
+					sharedata.ppProcessOut_[channel][i] *= gain;
+				}
+			}
+
 			/////////////
 			for (int i = 0; i<(fremaelen); i++)
 			{
 				for (size_t channel = 0; channel < mics_num; channel++)
 				{
 					sharedata.ppProcessOut_[channel][i] *= 32767.f;
-					if (data_out_f[i] > 32767.f)
+					if (sharedata.ppProcessOut_[channel][i] > 32767.f)
 					{
 						data_out_s[i*writewavhead.NChannels + channel] = 32767;
 					}
-					else if (data_out_f[i] < -32768.f)
+					else if (sharedata.ppProcessOut_[channel][i] < -32768.f)
 					{
 						data_out_s[i*writewavhead.NChannels + channel] = -32768;
 					}
@@ -219,7 +243,8 @@ int main(int argc , char *argv[ ])
 	getchar();
 
 #endif
-	
+	agc_destroy(pAgc);
+	//agc_new_destroy(pAgc_new);
 	delete readfile;
 	delete writefile;
 	
