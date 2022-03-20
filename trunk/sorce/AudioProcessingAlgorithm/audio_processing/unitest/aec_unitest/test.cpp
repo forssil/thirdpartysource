@@ -11,8 +11,8 @@
 #endif
 
 #include "AudioProcessingFramework_interface.h"
-#include "agc.h"
-#include "agc_new.h"
+//#include "agc.h"
+//#include "agc_new.h"
 #include "WaveIO.h"
 #ifndef _CLOCK_T_DEFINED 
 typedef long clock_t;
@@ -46,8 +46,8 @@ int main(int argc , char *argv[ ])
 	long outfileleng;
 	long counttime=0;
 	int mics_num = 0;
-	struct AGCSTATE* pAgc;
-	struct AGCSTATE_NEW* pAgc_new;
+	//struct AGCSTATE* pAgc;
+	//struct AGCSTATE_NEW* pAgc_new;
 
 	//memset(&sharedata,0,sizeof(audio_pro_share));
 
@@ -61,7 +61,7 @@ int main(int argc , char *argv[ ])
 		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";*/
 	   i=0;
 	   infile = "./5channel.wav";
-	   outfile = "./5channel_out_1024_agcon-new.wav";
+	   outfile = "./5channel_out_1024_agcon-new2.wav";
 	   outfile1 = "./5channel_out1.wav";
 
    }
@@ -123,8 +123,8 @@ int main(int argc , char *argv[ ])
 	//create AGC
 	//pAgc = agc_create();
 	//agc_reset(pAgc);
-	pAgc_new = agc_new_create();
-	agc_new_reset(pAgc_new);
+	//pAgc_new = agc_new_create();
+	//agc_new_reset(pAgc_new);
 
     //sharedata init
 	//sharedata.ppCapture_ = new float*[mics_num];
@@ -210,21 +210,21 @@ int main(int argc , char *argv[ ])
 
 			// do agc for every output channel
 			//for (size_t channel = 0; channel < mics_num; channel++) 
-            size_t channel = 0;
-            {
-				float gain = 1, power = 0;
-				for (int i = 0; i < fremaelen; i++) {
-					//power += abs(sharedata.ppProcessOut_[channel][i]);
-                    power += abs((float)errout[i]/32768);
-				}
-				power /= fremaelen;
-				//agc_process(pAgc, 1, &power, &gain, 0);
-				agc_new_process(pAgc_new, 1, &power, &gain, 0);
-				for (int i = 0; i < fremaelen; i++) {
-					//sharedata.ppProcessOut_[channel][i] *= gain;
-                    errout[i] *= gain;
-				}
-			}
+   //         size_t channel = 0;
+   //         {
+			//	float gain = 1, power = 0;
+			//	for (int i = 0; i < fremaelen; i++) {
+			//		//power += abs(sharedata.ppProcessOut_[channel][i]);
+   //                 power += abs((float)errout[i]/32768);
+			//	}
+			//	power /= fremaelen;
+			//	//agc_process(pAgc, 1, &power, &gain, 0);
+			//	agc_new_process(pAgc_new, 1, &power, &gain, 0);
+			//	for (int i = 0; i < fremaelen; i++) {
+			//		//sharedata.ppProcessOut_[channel][i] *= gain;
+   //                 errout[i] *= gain;
+			//	}
+			//}
 
 			/////////////
 			for (int i = 0; i<(fremaelen); i++)
@@ -268,7 +268,7 @@ int main(int argc , char *argv[ ])
 
 #endif
 	//agc_destroy(pAgc);
-	agc_new_destroy(pAgc_new);
+	//agc_new_destroy(pAgc_new);
 	delete readfile;
 	delete writefile;
 	

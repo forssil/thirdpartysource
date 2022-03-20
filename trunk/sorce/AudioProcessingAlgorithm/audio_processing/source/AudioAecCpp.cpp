@@ -84,17 +84,35 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     
     memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
 
+    // do agc for every output channel
+    //for (size_t channel = 0; channel < mics_num; channel++) 
+        size_t channel = 0;
+        {
+            float gain = 1, power = 0;
+            for (int i = 0; i < aec_para.fremaelen; i++) {
+                power += abs(aec_para.sharedata.ppProcessOut_[channel][i]);
+                //power += abs((float)data_out[i] / 32768);
+            }
+            power /= aec_para.fremaelen;
+            //agc_process(pAgc, 1, &power, &gain, 0);
+            agc_new_process(aec_para.pAgc_new, 1, &power, &gain, 0);
+            for (int i = 0; i < aec_para.fremaelen; i++) {
+                aec_para.sharedata.ppProcessOut_[channel][i] *= gain;
+                //data_out[i] *= gain;
+            }
+        }
+
     for (int i = 0; i < (aec_para.fremaelen); i++)
     {
         //for (size_t channel = 0; channel < mics_num; channel++)
         size_t channel = 0;
         {
             aec_para.sharedata.ppProcessOut_[channel][i] *= 32767.f;
-            if (aec_para.data_out_f[i] > 32767.f)
+            if (aec_para.sharedata.ppProcessOut_[channel][i] > 32767.f)
             {
                 data_out[i + channel] = 32767;
             }
-            else if (aec_para.data_out_f[i] < -32768.f)
+            else if (aec_para.sharedata.ppProcessOut_[channel][i] < -32768.f)
             {
                 data_out[i + channel] = -32768;
             }
@@ -158,6 +176,12 @@ void aec_processing_init_cpp(void  **p_aec)
     //    buffer[i] = new short[960];
     //    memset(buffer[i], 0, sizeof(short) * 960);
     //}
+
+    //create AGC
+    //pAgc = agc_create();
+    //agc_reset(pAgc);
+    aec_para.pAgc_new = agc_new_create();
+    agc_new_reset(aec_para.pAgc_new);
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
@@ -172,6 +196,9 @@ void aec_processing_deinit_cpp(void *h_aec)
     //    }
     //    delete [] buffer;
     //}
+    
+    //agc_destroy(pAgc);
+    agc_new_destroy(aec_para.pAgc_new);
 }
 
 //unsigned int aec_processing_get_lib_version()
