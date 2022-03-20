@@ -351,7 +351,11 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 		//F2T
 #ifdef AUDIO_WAVE_DEBUG
 		for (int i = 0; i < m_nMicsNum; i++) {
-			m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
+            if (m_APFData.bAECOn_) {
+                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
+            } else {
+                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pDesireFFT_, aShareData.ppProcessOut_[i]);
+            }
 		}
 #endif
 		memcpy(m_APFData.pErrorFFT_, m_pAECDataArray[0].pErrorFFT_, m_nFFTlen * sizeof(float));

@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <stdio.h>
-#include "AudioAec.h"
+#include "AudioAecCpp.h"
 
 #include <time.h>
 //#include "timecounter.h"
@@ -22,7 +22,9 @@ typedef long clock_t;
 #define framesize 04.f
 #define floatfile
 
-
+//void aec_processing(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out);
+//void aec_processing_init(void  **p_aec);
+//void aec_processing_deinit(void *h_aec);
 
 int main(int argc , char *argv[ ])
 {
@@ -45,7 +47,7 @@ int main(int argc , char *argv[ ])
 	long counttime=0;
 	int mics_num = 0;
 	struct AGCSTATE* pAgc;
-	//struct AGCSTATE_NEW* pAgc_new;
+	struct AGCSTATE_NEW* pAgc_new;
 
 	//memset(&sharedata,0,sizeof(audio_pro_share));
 
@@ -58,9 +60,9 @@ int main(int argc , char *argv[ ])
 		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out.wav";
 		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";*/
 	   i=0;
-	   infile = "C:/Users/carlzhang/Downloads/5channel.wav";
-	   outfile = "C:/Users/carlzhang/Downloads/5channel_out_agc.wav";
-	   outfile1 = "C:/Users/carlzhang/Downloads/5channel_out1.wav";
+	   infile = "./5channel.wav";
+	   outfile = "./5channel_out_1024_agcon-new.wav";
+	   outfile1 = "./5channel_out1.wav";
 
    }
 
@@ -119,10 +121,10 @@ int main(int argc , char *argv[ ])
 	//CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, readwavhead.SampleRate, 2 * fremaelen, fremaelen);
 	//pAPFInterface->Init();
 	//create AGC
-	pAgc = agc_create();
-	agc_reset(pAgc);
-	//pAgc_new = agc_new_create();
-	//agc_new_reset(pAgc_new);
+	//pAgc = agc_create();
+	//agc_reset(pAgc);
+	pAgc_new = agc_new_create();
+	agc_new_reset(pAgc_new);
 
     //sharedata init
 	//sharedata.ppCapture_ = new float*[mics_num];
@@ -143,14 +145,14 @@ int main(int argc , char *argv[ ])
 	//sharedata.bNROn_= true;
 	//sharedata.bNRCNGOn_=false;
 
-    short mic[6][480] = { 0 };
     short **micin = new short*[4];
     for (int i = 0; i < 4; i++) {
-        micin[i] = new short[480];
+        micin[i] = new short[512];
     }
-    short farin[480] = { 0 };
-    short errout[480] = { 0 };
-    aec_processing_init(nullptr);
+    short farin[512] = { 0 };
+    short errout[512] = { 0 };
+    aec_processing_init_cpp(nullptr);
+    //aec_processing_init(nullptr);
 	//c
 	counttime = clock();
 	outfileleng = 0;
@@ -196,7 +198,8 @@ int main(int argc , char *argv[ ])
 #endif
 			//pAPFInterface->process(sharedata);
             
-            aec_processing(nullptr, micin, farin, nullptr, 0, errout);
+            aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout);
+            //aec_processing(nullptr, micin, farin, nullptr, 0, errout);
 #ifdef WIN32
 			QueryPerformanceCounter(&finishTime);
 			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);		
@@ -206,15 +209,17 @@ int main(int argc , char *argv[ ])
 
 
 			// do agc for every output channel
-			for (size_t channel = 0; channel < mics_num; channel++) {
+			//for (size_t channel = 0; channel < mics_num; channel++) 
+            size_t channel = 0;
+            {
 				float gain = 1, power = 0;
 				for (int i = 0; i < fremaelen; i++) {
 					//power += abs(sharedata.ppProcessOut_[channel][i]);
                     power += abs((float)errout[i]/32768);
 				}
 				power /= fremaelen;
-				agc_process(pAgc, 1, &power, &gain, 0);
-				//agc_new_process(pAgc_new, 1, &power, &gain, 0);
+				//agc_process(pAgc, 1, &power, &gain, 0);
+				agc_new_process(pAgc_new, 1, &power, &gain, 0);
 				for (int i = 0; i < fremaelen; i++) {
 					//sharedata.ppProcessOut_[channel][i] *= gain;
                     errout[i] *= gain;
@@ -227,7 +232,7 @@ int main(int argc , char *argv[ ])
 				for (size_t channel = 0; channel < mics_num; channel++)
 				{
 					//sharedata.ppProcessOut_[channel][i] *= 32767.f;
-                    errout[i] *= 32767;
+                    
 					if (errout[i] > 32767.f)
 					{
 						data_out_s[i*writewavhead.NChannels + channel] = 32767;
@@ -262,16 +267,23 @@ int main(int argc , char *argv[ ])
 	//getchar();
 
 #endif
-	agc_destroy(pAgc);
-	//agc_new_destroy(pAgc_new);
+	//agc_destroy(pAgc);
+	agc_new_destroy(pAgc_new);
 	delete readfile;
 	delete writefile;
 	
 	//delete data_in_f;
 	delete data_in_s;
+    if (micin) {
+        for (int i = 0; i < 4; i++) {
+            delete[] micin[i];
+        }
+        delete[] micin;
+    }
 	//delete data_in_f2;
 	//delete sharedata.ppCapture_ ;
 	//delete sharedata.ppProcessOut_;
-    aec_processing_deinit(nullptr);
+    aec_processing_deinit_cpp(nullptr);
+    //aec_processing_deinit(nullptr);
 	return 1;
 }
