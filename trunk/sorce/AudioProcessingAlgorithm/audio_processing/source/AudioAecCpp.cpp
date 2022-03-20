@@ -2,6 +2,7 @@
 #include	<stdlib.h>
 //#include	<string.h>
 #include    <stdbool.h>
+#include    <math.h>
 
 #include    "AudioAecCpp.h"
 #include    "AudioProcessingFramework_interface.h"
@@ -90,7 +91,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         {
             float gain = 1, power = 0;
             for (int i = 0; i < aec_para.fremaelen; i++) {
-                power += abs(aec_para.sharedata.ppProcessOut_[channel][i]);
+                power += fabs(aec_para.sharedata.ppProcessOut_[channel][i]);
                 //power += abs((float)data_out[i] / 32768);
             }
             power /= aec_para.fremaelen;

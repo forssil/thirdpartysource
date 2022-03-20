@@ -6,7 +6,7 @@
 #include	<string.h>
 #include    "audiotypedef.h"
 #include    "AudioProcessingFramework_interface.h"
-#include    "agc.h"
+//#include    "agc.h"
 #include    "agc_new.h"
 #ifdef __cplusplus
 extern "C" {
@@ -31,7 +31,7 @@ struct AEC_parameter {
     int mics_num;
     int fremaelen;
     //short **buffer = new short*[5];
-    struct AGCSTATE* pAgc;
+    //struct AGCSTATE* pAgc;
     struct AGCSTATE_NEW* pAgc_new;
 };
 

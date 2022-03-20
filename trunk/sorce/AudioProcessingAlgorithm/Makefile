@@ -20,11 +20,14 @@ INCLUDES =\
 	-I./acoustic_echo_cancellation/include/interface\
 	-I./audio_processing/include\
 	-I./common_audio/include\
+	-I./agc/include\
 	-I./vad/include
 
 C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
 	$(SRC_PATH)/common_audio/source/randomization_functions.c\
+	$(SRC_PATH)/audio_processing/source/AudioAec.c \
+	$(SRC_PATH)/agc/source/agc_new.c \
 	$(SRC_PATH)/common_audio/source/Amp_compute.c
 	
 
@@ -40,7 +43,7 @@ CPP_FILES = \
 	$(SRC_PATH)/acoustic_echo_cancellation/source/SpeechEst.cpp \
 	$(SRC_PATH)/acoustic_echo_cancellation/source/SubbandAdap.cpp \
     $(SRC_PATH)/audio_processing/source/AudioProcessingFramework.cpp \
-	$(SRC_PATH)/audio_processing/source/AudioAec.cpp \
+	$(SRC_PATH)/audio_processing/source/AudioAecCpp.cpp \
 	$(SRC_PATH)/common_audio/source/basemath.cpp \
 	$(SRC_PATH)/common_audio/source/DCRemover.cpp \
 	$(SRC_PATH)/common_audio/source/F2Ttransformer.cpp \
@@ -58,7 +61,7 @@ CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
 LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
-DEFINES := -fPIC -Wl,-rpath=.
+DEFINES := -fPIC -fpermissive -Wl,-rpath=.
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
@@ -69,6 +72,12 @@ $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 	$(CXX) -shared -o $(STATIC_LIB) $(OBJ_FILES)
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	
+$(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.c
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	
+$(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
