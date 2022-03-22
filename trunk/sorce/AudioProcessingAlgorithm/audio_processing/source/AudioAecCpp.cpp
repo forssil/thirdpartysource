@@ -6,6 +6,9 @@
 
 #include    "AudioAecCpp.h"
 #include    "AudioProcessingFramework_interface.h"
+#include    "agc_new.h"
+
+static AEC_parameter aec_para;
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,78 +74,84 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     //    }
     //    sharedata.pReffer_[i] = float(ref_spk[i]) / 32768.f;
     //}
-
-    for (int i = 0; i < aec_para.fremaelen; i++)
-    {
-        for (size_t channel = 0; channel < aec_para.mics_num; channel++)
+    audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
+    AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
+    for(int cycle = 0; cycle<2 ; cycle++){
+        for (int i = 0; i < aec_para.fremaelen; i++)
         {
-            aec_para.sharedata.ppCapture_[channel][i] = float(date_in[0 + channel][i]) / 32768.f;
+            for (size_t channel = 0; channel < aec_para.mics_num; channel++)
+            {
+                sharedata->ppCapture_[channel][i] = float(date_in[3 + channel][i+480*cycle]) / 32768.f;
+            }
+            sharedata->pReffer_[i] = float(ref_spk[i+480*cycle]) / 32768.f;
         }
-        aec_para.sharedata.pReffer_[i] = float(ref_spk[i]) / 32768.f;
-    }
 
-    aec_para.pAPFInterface->process(aec_para.sharedata);
+        ((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->process(*sharedata);
+        
+        memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
+
+        // do agc for every output channel
+        //for (size_t channel = 0; channel < mics_num; channel++) 
+            size_t channel = 0;
+            {
+                float gain = 1, power = 0;
+                for (int i = 0; i < aec_para.fremaelen; i++) {
+                    power += fabs(sharedata->ppProcessOut_[channel][i]);
+                    //power += abs((float)data_out[i] / 32768);
+                }
+                power /= aec_para.fremaelen;
+                //agc_process(pAgc, 1, &power, &gain, 0);
+                agc_new_process(agc_new, 1, &power, &gain, 0);
+                for (int i = 0; i < aec_para.fremaelen; i++) {
+                    sharedata->ppProcessOut_[channel][i] *= gain;
+                    //data_out[i] *= gain;
+                }
+            }
+
+        for (int i = 0; i < (aec_para.fremaelen); i++)
+        {
+            //for (size_t channel = 0; channel < mics_num; channel++)
+            size_t channel = 0;
+            {
+                sharedata->ppProcessOut_[channel][i] *= 32767.f;
+                if (sharedata->ppProcessOut_[channel][i] > 32767.f)
+                {
+                    data_out[i + channel+480*cycle] = 32767;
+                }
+                else if (sharedata->ppProcessOut_[channel][i] < -32768.f)
+                {
+                    data_out[i + channel +480*cycle] = -32768;
+                }
+                else {
+                    data_out[i + channel +480*cycle] = short(sharedata->ppProcessOut_[channel][i]);//*32768.f
+                }
+            }
+            //data_out[i*writewavhead.NChannels + mics_num] = (data_in_s[i*writewavhead.NChannels + mics_num]);
+        }
+    }
     
-    memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
-
-    // do agc for every output channel
-    //for (size_t channel = 0; channel < mics_num; channel++) 
-        size_t channel = 0;
-        {
-            float gain = 1, power = 0;
-            for (int i = 0; i < aec_para.fremaelen; i++) {
-                power += fabs(aec_para.sharedata.ppProcessOut_[channel][i]);
-                //power += abs((float)data_out[i] / 32768);
-            }
-            power /= aec_para.fremaelen;
-            //agc_process(pAgc, 1, &power, &gain, 0);
-            agc_new_process(aec_para.pAgc_new, 1, &power, &gain, 0);
-            for (int i = 0; i < aec_para.fremaelen; i++) {
-                aec_para.sharedata.ppProcessOut_[channel][i] *= gain;
-                //data_out[i] *= gain;
-            }
-        }
-
-    for (int i = 0; i < (aec_para.fremaelen); i++)
-    {
-        //for (size_t channel = 0; channel < mics_num; channel++)
-        size_t channel = 0;
-        {
-            aec_para.sharedata.ppProcessOut_[channel][i] *= 32767.f;
-            if (aec_para.sharedata.ppProcessOut_[channel][i] > 32767.f)
-            {
-                data_out[i + channel] = 32767;
-            }
-            else if (aec_para.sharedata.ppProcessOut_[channel][i] < -32768.f)
-            {
-                data_out[i + channel] = -32768;
-            }
-            else {
-                data_out[i + channel] = short(aec_para.sharedata.ppProcessOut_[channel][i]);//*32768.f
-            }
-        }
-        //data_out[i*writewavhead.NChannels + mics_num] = (data_in_s[i*writewavhead.NChannels + mics_num]);
-    }
 }
 
 void aec_processing_init_cpp(void  **p_aec)
 {
     aec_para.mics_num = 4;
     aec_para.fremaelen = 480;
-    //audio_pro_share sharedata;
-    memset(&aec_para.sharedata, 0, sizeof(audio_pro_share));
+    audio_pro_share *sharedata = new audio_pro_share;
+    memset(sharedata, 0, sizeof(audio_pro_share));
+    
+    aec_para.sharedata = (void*)sharedata;
 
     //create AEC
     //CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, 48000, 2 * fremaelen, fremaelen);
-    aec_para.pAPFInterface = CreateIApfInst_int(aec_para.mics_num, 48000, 2 * aec_para.fremaelen, aec_para.fremaelen);
-    aec_para.pAPFInterface->Init();
+    aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 2 * aec_para.fremaelen, aec_para.fremaelen);
+    ((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->Init();
     //sharedata init
-    aec_para.sharedata.ppCapture_ = new float*[aec_para.mics_num];
-    aec_para.sharedata.nChannelsInCapture_ = aec_para.mics_num;
-    aec_para.sharedata.nSamplesPerCaptureChannel_ = aec_para.fremaelen;
-    aec_para.sharedata.ppProcessOut_ = new float*[aec_para.mics_num];
-    aec_para.sharedata.nChannelsInProcessOut_ = aec_para.mics_num;
-    aec_para.sharedata.nSamplesPerProcessOutChannel_ = aec_para.fremaelen;
+    sharedata->ppCapture_ = new float*[aec_para.mics_num];
+    sharedata->nChannelsInCapture_ = aec_para.mics_num;
+    sharedata->nSamplesPerCaptureChannel_ = aec_para.fremaelen;
+    sharedata->ppProcessOut_ = new float*[aec_para.mics_num];
+    sharedata->nChannelsInProcessOut_ = aec_para.mics_num;
+    sharedata->nSamplesPerProcessOutChannel_ = aec_para.fremaelen;
 
     //float *data_in_f, *data_out_f;
     //float *data_in_f2, *data_out_f2, *data_out_f3;
@@ -157,19 +166,19 @@ void aec_processing_init_cpp(void  **p_aec)
     memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 3) * sizeof(float));
 
     for (int i = 0; i < aec_para.mics_num; i++) {
-        aec_para.sharedata.ppCapture_[i] = aec_para.data_out_f + i * aec_para.fremaelen;
-        aec_para.sharedata.ppProcessOut_[i] = aec_para.data_out_f + i * aec_para.fremaelen + aec_para.mics_num * aec_para.fremaelen;
+        sharedata->ppCapture_[i] = aec_para.data_out_f + i * aec_para.fremaelen;
+        sharedata->ppProcessOut_[i] = aec_para.data_out_f + i * aec_para.fremaelen + aec_para.mics_num * aec_para.fremaelen;
     }
-    aec_para.sharedata.pReffer_ = aec_para.data_in_f2;
-    aec_para.sharedata.nSamplesInReffer_ = aec_para.fremaelen;
+    sharedata->pReffer_ = aec_para.data_in_f2;
+    sharedata->nSamplesInReffer_ = aec_para.fremaelen;
 
-    aec_para.sharedata.bAECOn_ = true;
-    aec_para.sharedata.bNROn_ = true;
-    aec_para.sharedata.bNRCNGOn_ = false;
+    sharedata->bAECOn_ = true;
+    sharedata->bNROn_ = true;
+    sharedata->bNRCNGOn_ = false;
 
-    aec_para.sharedata.pDesire_ = aec_para.data_in_f;
-    aec_para.sharedata.pReffer_ = aec_para.data_in_f2;
-    aec_para.sharedata.pError_ = aec_para.data_out_f;
+    sharedata->pDesire_ = aec_para.data_in_f;
+    sharedata->pReffer_ = aec_para.data_in_f2;
+    sharedata->pError_ = aec_para.data_out_f;
 
     // buffer
     
@@ -181,16 +190,23 @@ void aec_processing_init_cpp(void  **p_aec)
     //create AGC
     //pAgc = agc_create();
     //agc_reset(pAgc);
-    aec_para.pAgc_new = agc_new_create();
-    agc_new_reset(aec_para.pAgc_new);
+
+    AGCSTATE_NEW *agc_new = agc_new_create();
+    aec_para.pAgc_new = (void*)agc_new;
+    agc_new_reset(agc_new);
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
 {
+    audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
+    AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
     delete aec_para.data_in_f;
     delete aec_para.data_in_f2;
-    delete aec_para.sharedata.ppCapture_;
-    delete aec_para.sharedata.ppProcessOut_;
+    delete sharedata->ppCapture_;
+    delete sharedata->ppProcessOut_;
+    delete sharedata;
+    
+
     //if (buffer) {
     //    for (int i = 0; i < 5; i++) {
     //        delete [] buffer[i];
@@ -199,7 +215,9 @@ void aec_processing_deinit_cpp(void *h_aec)
     //}
     
     //agc_destroy(pAgc);
-    agc_new_destroy(aec_para.pAgc_new);
+    agc_new_destroy(agc_new);
+    memset(&aec_para,0,sizeof(AEC_parameter));
+
 }
 
 //unsigned int aec_processing_get_lib_version()

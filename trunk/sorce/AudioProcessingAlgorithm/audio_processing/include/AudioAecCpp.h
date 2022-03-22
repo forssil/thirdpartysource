@@ -1,13 +1,12 @@
 #ifndef _INC_AUDIOAECCPP
 #define _INC_AUDIOAECCPP
 
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<string.h>
-#include    "audiotypedef.h"
-#include    "AudioProcessingFramework_interface.h"
+// #include	<stdio.h>
+// #include	<stdlib.h>
+// #include	<string.h>
+
 //#include    "agc.h"
-#include    "agc_new.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,17 +24,17 @@ extern void aec_processing_deinit_cpp(void *h_aec);
 struct AEC_parameter {
     float *data_in_f, *data_out_f;
     float *data_in_f2, *data_out_f2, *data_out_f3;
-    audio_pro_share sharedata;
-    CAudioProcessingFrameworkInterface* pAPFInterface;
+    void* sharedata;
+    void* pAPFInterface;
     //CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(4, 48000, 2 * 512, 512);
     int mics_num;
     int fremaelen;
     //short **buffer = new short*[5];
     //struct AGCSTATE* pAgc;
-    struct AGCSTATE_NEW* pAgc_new;
+    //struct AGCSTATE_NEW* pAgc_new;
+    void * pAgc_new;
 };
 
-static AEC_parameter aec_para;
 
 #ifdef __cplusplus
 };
