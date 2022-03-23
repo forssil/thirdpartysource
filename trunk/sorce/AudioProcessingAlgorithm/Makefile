@@ -22,6 +22,7 @@ INCLUDES =\
 	-I./common_audio/include\
 	-I./agc/include\
 	-I./vad/include
+	#-I$(ROOT_PATH)/thirdparty/ne10/inc
 
 C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
@@ -60,7 +61,7 @@ CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
 LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
-DEFINES := -fPIC -fpermissive -Wl,-rpath=.
+DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
@@ -71,22 +72,23 @@ $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 	#$(CXX) -shared -o $(STATIC_LIB) $(OBJ_FILES)
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
+	
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/acoustic_echo_cancellation/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)-c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/vad/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
 	
 objs: $(OBJ_FILES)
 

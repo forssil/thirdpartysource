@@ -20,7 +20,8 @@ INCLUDES =\
 	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/audio_processing/include\
 	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/common_audio/include\
 	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/vad/include\
-	-I$(ROOT_PATH)/tools/WaveFunction
+	-I$(ROOT_PATH)/tools/WaveFunction\
+	-I$(ROOT_PATH)/thirdparty/ne10/inc
 
 
 CPP_FILES = \
@@ -36,12 +37,12 @@ CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
 LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
-DEFINES := -fPIC -Wl,-rpath=.
+DEFINES := -fPIC -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
-LFLAGS = -L$(ROOT_PATH)/libs
-LIBS = -lAPF
+LFLAGS = -L$(ROOT_PATH)/libs -L$(ROOT_PATH)/thirdparty/ne10/lib_mca
+LIBS = -lAPF -lNE10
 CXXFLAGS:= $(CFLAGS)
 
 $(TARGET): checkbindir checkdir $(OBJ_FILES)
