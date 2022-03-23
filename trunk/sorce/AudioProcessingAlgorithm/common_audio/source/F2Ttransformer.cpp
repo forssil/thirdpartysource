@@ -97,6 +97,18 @@ void F2Ttransformer::InitFDanaly(const int size)
     memset(m_input_spe, 0, sizeof(float)*m_fft_len);
     memset(m_input_tim, 0, sizeof(float)*m_fft_len);
     memset(m_output_spe, 0, sizeof(float)*m_fft_len);
+
+#ifdef ARM_NEON
+	if (ne10_init() != NE10_OK)
+	{
+		return 1;
+	}
+
+	m_cfg = ne10_fft_alloc_r2c_float32(m_fft_len);
+	m_pdst = new ne10_fft_cpx_float32_t[m_fft_len / 2 + 1];
+	memset(m_pdst, 0, sizeof(ne10_fft_cpx_float32_t)*£¨m_fft_len / 2 + 1£©);
+
+#endif
 }
 
 /***************************************************
@@ -109,6 +121,11 @@ void F2Ttransformer::FreeFDanaly()
 	if(m_input_tim)	    delete []m_input_tim;
 	if(m_output_spe)	delete []m_output_spe;
 	if(AnaWin) delete AnaWin;
+#ifdef ARM_NEON
+	ne10_fft_destroy_r2c_float32(m_cfg);
+	if (m_pdst) delete[] m_pdst;
+
+#endif
 }
 
 /***************************************************
@@ -120,8 +137,19 @@ content: the fourier inverse transform
 void F2Ttransformer::F2T(const float *inbuf, float *outbuf)
 {
 	//ifft
+#ifndef ARM_NEON
 	memcpy(m_input_spe,inbuf,m_fft_len*sizeof(float));
-	InvFFT(m_input_spe,m_output_spe,m_fft_len);
+
+	InvFFT(m_input_spe, m_output_spe, m_fft_len);
+#else
+	for (int i = 0; i < m_fft_len; i += 2) {
+		m_pdst[i / 2].r = inbuf[i];
+		m_pdst[i / 2].i = inbuf[i+1];
+	}
+	ne10_fft_c2r_1d_float32(m_input_spe,m_pdst, m_cfg);
+	
+#endif
+
 	//update buffer
 	UpdateFDbuffer(m_input_spe);
 	//multiple win

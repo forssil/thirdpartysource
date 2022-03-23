@@ -91,6 +91,18 @@ void T2Ftransformer::InitFDanaly(const int size) {
 
     memset(m_input_tim, 0, sizeof(float)*m_fft_len);
     memset(m_output_spe, 0, sizeof(float)*m_fft_len);
+
+#ifdef ARM_NEON
+	if (ne10_init() != NE10_OK)
+	{
+		return 1;
+	}
+
+	m_cfg = ne10_fft_alloc_r2c_float32(m_fft_len);
+	m_pdst = new ne10_fft_cpx_float32_t[m_fft_len/2 +1];
+	memset(m_pdst, 0, sizeof(ne10_fft_cpx_float32_t)*£¨m_fft_len / 2 + 1£©);
+
+#endif
 }
 
 /***************************************************
@@ -101,6 +113,11 @@ inline void T2Ftransformer::FreeFDanaly() {
 	if(m_input_tim)	 delete []m_input_tim;
 	if(m_output_spe) delete []m_output_spe;
 	if( m_ana_win) delete m_ana_win;
+#ifdef ARM_NEON
+	ne10_fft_destroy_r2c_float32(m_cfg);
+	if (m_pdst) delete[] m_pdst;
+
+#endif
 }
 
 /***************************************************
@@ -116,7 +133,15 @@ void T2Ftransformer::T2F(const float* inbuf, float* outbuf) {
 	for(int i = 0; i < m_fft_len; ++i)
 		outbuf[i] = m_input_tim[i]*m_ana_win[i];
 	//the fourier transform
+#ifndef ARM_NEON
 	FFT(outbuf, m_output_spe, m_fft_len);
+#else
+	ne10_fft_r2c_1d_float32(m_pdst, outbuf, m_cfg);
+	for (int i = 0; i < m_fft_len; i += 2) {
+		outbuf[i] = m_pdst[i / 2].r;
+		outbuf[i+1] = m_pdst[i / 2].i;
+	}
+#endif
 	//update buffer
 	memcpy(m_input_tim, m_input_tim + m_framelen, sizeof(float)*m_shift);
 }

@@ -8,6 +8,9 @@
 #ifndef AECHALFDUPLEX_F2TTRANSFORMER_H_
 #define AECHALFDUPLEX_F2TTRANSFORMER_H_
 #define AUDIO_COMMON_PI (3.14159265358979323846f)  // pi
+#ifdef ARM_NEON
+#include "NE10_dsp.h"
+#endif
 //window for smooth
 static const float syn_hwin256[] = {
 	0.000149421078453171f,
@@ -489,6 +492,10 @@ private:
 	float* m_output_spe; //temporary variable
 
     float syn_win1024_new[1024] = { 0.f };
+#ifdef ARM_NEON
+	ne10_fft_r2c_cfg_float32_t m_cfg;
+	ne10_fft_cpx_float32_t *m_pdst£»
+#endif
 };
 #endif
 

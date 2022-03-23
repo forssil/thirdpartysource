@@ -8,6 +8,10 @@
 #ifndef AECHALFDUPLEX_T2FTRANSFORMER_H_
 #define AECHALFDUPLEX_T2FTRANSFORMER_H_
 #define AUDIO_COMMON_PI (3.14159265358979323846f)  // pi
+
+#ifdef ARM_NEON
+#include "NE10_dsp.h"
+#endif
 //window for smooth
 static const float hwin256[]= {
 
@@ -413,6 +417,10 @@ public:
 	void T2F(const float* inbuf, float* outbuf);
 	
 private:	
+#ifdef ARM_NEON
+	ne10_fft_r2c_cfg_float32_t m_cfg;
+	ne10_fft_cpx_float32_t *m_pdst£»
+#endif
 	float* m_ana_win; //store window
 
 	/***************************************************
