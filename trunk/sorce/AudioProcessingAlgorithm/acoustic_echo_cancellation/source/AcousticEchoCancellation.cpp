@@ -613,7 +613,7 @@ int CAcousticEchoCancellation::ResetAll()
 		  }
 		  else
 		  {
-			  memcpy(m_AECData.pErrorFFT_, m_AECData.pDesireFFT_, sizeof(float)*m_AECData.nLengthFFT_);
+			  memcpy(m_AECData.pErrorFFT_, aShareData.pDesireFFT_, sizeof(float)*m_AECData.nLengthFFT_);
 		  }
 
 		  if (m_AECData.bNROn_)

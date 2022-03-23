@@ -78,12 +78,12 @@ extern "C" {
         }
         valid = (fp != NULL) && (fp1 != NULL) && (fp2 != NULL) && (fp3 != NULL) && (fp_ref != NULL) && (fp_out != NULL);
         if (valid && (index < MAX_RECORD_TIMES)) {
-            fwrite((char *)(&date_in[3][0]), 960 * 2, 1, fp);
-            fwrite((char *)(&date_in[4][0]), 960 * 2, 1, fp1);
-            fwrite((char *)(&date_in[5][0]), 960 * 2, 1, fp2);
-            fwrite((char *)(&date_in[6][0]), 960 * 2, 1, fp3);
-            fwrite((char *)(&ref_spk[0]), 960 * 2, 1, fp_ref);
-            fwrite((char *)(&data_out[0]), 960 * 2, 1, fp_out);
+            // fwrite((char *)(&date_in[3][0]), 960 * 2, 1, fp);
+            // fwrite((char *)(&date_in[4][0]), 960 * 2, 1, fp1);
+            // fwrite((char *)(&date_in[5][0]), 960 * 2, 1, fp2);
+            // fwrite((char *)(&date_in[6][0]), 960 * 2, 1, fp3);
+            // fwrite((char *)(&ref_spk[0]), 960 * 2, 1, fp_ref);
+            // fwrite((char *)(&data_out[0]), 960 * 2, 1, fp_out);
             index++;
             size = ftell(fp);
             if (index >= MAX_RECORD_TIMES) {
