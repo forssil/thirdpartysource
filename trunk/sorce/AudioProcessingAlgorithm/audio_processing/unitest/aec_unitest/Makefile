@@ -21,11 +21,13 @@ INCLUDES =\
 	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/common_audio/include\
 	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/vad/include\
 	-I$(ROOT_PATH)/tools/WaveFunction\
+	-I$(ROOT_PATH)/sorce/AudioProcessingAlgorithm/agc/include\
 	-I$(ROOT_PATH)/thirdparty/ne10/inc
 
 
 CPP_FILES = \
 	./test.cpp \
+	./AudioAecCpp.cpp \
 	$(ROOT_PATH)/tools/WaveFunction/WaveIO.cpp 
 
 CPPOBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(CPP_FILES:.cpp=.o)))
@@ -41,7 +43,7 @@ DEFINES := -fPIC -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
-LFLAGS = -L$(ROOT_PATH)/libs -L$(ROOT_PATH)/thirdparty/ne10/lib_mca
+LFLAGS = -L$(ROOT_PATH)/libs -L$(ROOT_PATH)/thirdparty/ne10/libs_mca
 LIBS = -lAPF -lNE10
 CXXFLAGS:= $(CFLAGS)
 

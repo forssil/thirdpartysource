@@ -106,7 +106,7 @@ void F2Ttransformer::InitFDanaly(const int size)
 
 	m_cfg = ne10_fft_alloc_r2c_float32(m_fft_len);
 	m_pdst = new ne10_fft_cpx_float32_t[m_fft_len / 2 + 1];
-	memset(m_pdst, 0, sizeof(ne10_fft_cpx_float32_t)*£¨m_fft_len / 2 + 1£©);
+	memset(m_pdst, 0, sizeof(ne10_fft_cpx_float32_t)*(m_fft_len / 2 + 1));
 
 #endif
 }

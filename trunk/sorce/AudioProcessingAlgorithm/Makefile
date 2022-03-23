@@ -21,8 +21,8 @@ INCLUDES =\
 	-I./audio_processing/include\
 	-I./common_audio/include\
 	-I./agc/include\
-	-I./vad/include
-	#-I$(ROOT_PATH)/thirdparty/ne10/inc
+	-I./vad/include \
+	-I$(ROOT_PATH)/thirdparty/ne10/inc
 
 C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
@@ -72,23 +72,24 @@ $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 	#$(CXX) -shared -o $(STATIC_LIB) $(OBJ_FILES)
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
-	$(CXX) $(CXXFLAGS)  -c $< -o $@
 	
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
-	$(CXX) $(CXXFLAGS)  -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
-	$(CXX) $(CXXFLAGS)  -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/acoustic_echo_cancellation/source/%.cpp
-	$(CXX) $(CXXFLAGS)  -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
-	$(CXX) $(CXXFLAGS)-c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/vad/source/%.cpp
-	$(CXX) $(CXXFLAGS)  -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 objs: $(OBJ_FILES)
 

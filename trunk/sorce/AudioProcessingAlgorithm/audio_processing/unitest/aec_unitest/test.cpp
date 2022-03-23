@@ -56,13 +56,10 @@ int main(int argc , char *argv[ ])
    {
 	    
 	   //infile=argv[1];
-		/*infile = "D:\\works\\chenan\\3308_mca_dump\\5channel.wav";
-		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out.wav";
-		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1.wav";*/
-	   i=0;
-	   infile = "./5channel.wav";
-	   outfile = "./5channel_out_1024_agcon-new2.wav";
-	   outfile1 = "./5channel_out1.wav";
+	   infile = "D:\\works\\chenan\\3308_mca_dump\\5channel_half.wav";
+		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out_expint3.wav";
+		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1_expint2.wav";
+	   
 
    }
 
