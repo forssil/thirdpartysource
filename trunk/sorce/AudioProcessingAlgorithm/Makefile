@@ -61,9 +61,9 @@ CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
 LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
-DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON -DNE10_UNROLL_LEVEL=1
+DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
-CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
+CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
 CXXFLAGS:= $(CFLAGS)
 

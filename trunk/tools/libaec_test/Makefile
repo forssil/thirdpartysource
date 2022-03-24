@@ -18,9 +18,9 @@ LD      := ../rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabi
 LIBS    := -ldl -lpthread -lasound -lssl -lcrypto -lcurl -lm -lc -lAPF -lNE10
 #LDFLAGS := -L$(AEC_PATH)/ -L$(ROOT_PATH)/libs/
 LDFLAGS := -L$(ROOT_PATH)/libs/  -L$(ROOT_PATH)/thirdparty/ne10/libs_mca
-DEFINES := -fPIC -Wl,-rpath=. -DNE10_UNROLL_LEVEL=1
+DEFINES := -fPIC -Wl,-rpath=.
 INCLUDE := -Iinclude -I./extlib  -I./../../sorce/AudioProcessingAlgorithm/audio_processing/include -I$(ROOT_PATH)/thirdparty/ne10/inc
-CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE)
+CFLAGS  :=  -Wall -O3 $(DEFINES) $(INCLUDE)
 
 CXXFLAGS:= $(CFLAGS)
 

@@ -41,7 +41,7 @@ LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
 DEFINES := -fPIC -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
-CFLAGS  := -g -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
+CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
 LFLAGS = -L$(ROOT_PATH)/libs -L$(ROOT_PATH)/thirdparty/ne10/libs_mca
 LIBS = -lAPF -lNE10
