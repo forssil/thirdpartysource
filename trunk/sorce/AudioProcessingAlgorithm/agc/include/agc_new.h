@@ -25,7 +25,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                      const uint32_t channels,
                      const float * const absLevel,
                      float * gain,
-                     uint32_t trace);
+                     bool is_res_echo);
 void agc_new_set_on_off(struct AGCSTATE_NEW * agc, bool val);
 void agc_new_set_NFE_on_off(struct AGCSTATE_NEW * agc, bool val);
 void agc_new_set_param(struct AGCSTATE_NEW * agc,

@@ -317,6 +317,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp_nonsmooth);
 			m_pVADest->GetVAD(m_pRefSp, m_pRefSp_nonsmooth, vadband, vadfull);
 			m_bVad = (vadfull == 1);
+			aShareData.IsResEcho_ = m_bVad;
 
 			//////delay est
 			Audioframe_t audioframe;

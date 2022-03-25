@@ -148,7 +148,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                      const uint32_t channels,
                      const float * const absLevel,
                      float * gain,
-                     uint32_t trace)
+                     bool is_res_echo)
 {
     /*Initializing variables*/
     struct AGC_PREV * prev = &agc->prev;
@@ -265,7 +265,10 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
 
     /*Convert to Db*/
     smooth_db = 20 * log10f(smooth_new);
-
+    bool needcompress = false;
+    if (smooth_db < -50 && is_res_echo) {
+        needcompress = true;
+    }
     if (smooth_db >= param->th_comp) /*Compress*/
         smooth_db_comp = param->ratio_comp * (smooth_db - param->th_comp)
                                                         + param->th_comp;
@@ -273,11 +276,16 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
         smooth_db_comp = smooth_db; /*Gain = 1*/
     else if (smooth_db < param->th_exp) /*Expand*/
     {
-        smooth_db_comp = param->ratio_exp * (smooth_db - param->th_exp)
-                                                        + param->th_exp;
-        if (smooth_db_comp < smooth_db - param->makeup){
-            /*Expander gain below 1 is set to 1*/
-            smooth_db_comp = smooth_db - param->makeup;
+        if (!needcompress) {
+            smooth_db_comp = param->ratio_exp * (smooth_db - param->th_exp)
+                + param->th_exp;
+            if (smooth_db_comp < smooth_db - param->makeup) {
+                /*Expander gain below 1 is set to 1*/
+                smooth_db_comp = smooth_db - param->makeup;
+            }
+        }
+        else {
+            smooth_db_comp = smooth_db;
         }
     }
 
@@ -287,9 +295,8 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     else
     {
         gain_db = smooth_db_comp - smooth_db; /*Compute the gain, output/input*/
-        gain_db += param->makeup;             /*Add makeup gain*/
-        if (gain_db > 2) {
-            gain_db *= 1;
+        if (!needcompress) {
+            gain_db += param->makeup;             /*Add makeup gain*/
         }
     }
 

@@ -688,6 +688,8 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	AUDIO_DATA_TYPE		fDTDgain;
 	//VAD
 
+	//AGC
+	bool                IsResEcho_;
 } audio_pro_share;
 
 typedef struct AUDIO_TYPE_NUM
