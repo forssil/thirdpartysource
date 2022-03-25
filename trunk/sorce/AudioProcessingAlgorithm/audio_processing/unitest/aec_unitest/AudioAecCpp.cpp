@@ -185,6 +185,7 @@ void aec_processing_init_cpp(void  **p_aec)
     //agc_reset(pAgc);
     aec_para.pAgc_new = agc_new_create();
     agc_new_reset(aec_para.pAgc_new);
+    agc_new_set_NFE_on_off(aec_para.pAgc_new, true);
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
