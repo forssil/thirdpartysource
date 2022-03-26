@@ -101,7 +101,8 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
                 }
                 power /= aec_para.fremaelen;
                 //agc_process(pAgc, 1, &power, &gain, 0);
-                agc_new_process(agc_new, 1, &power, &gain, 0);
+                //agc_new_process(agc_new, 1, &power, &gain, 0);
+                agc_new_process(agc_new, 1, &power, &gain, sharedata->IsResEcho_);
                 for (int i = 0; i < aec_para.fremaelen; i++) {
                     sharedata->ppProcessOut_[channel][i] *= gain;
                     //data_out[i] *= gain;
@@ -195,6 +196,8 @@ void aec_processing_init_cpp(void  **p_aec)
     AGCSTATE_NEW *agc_new = agc_new_create();
     aec_para.pAgc_new = (void*)agc_new;
     agc_new_reset(agc_new);
+    agc_new_set_NFE_on_off(agc_new, true);
+    
 }
 
 void aec_processing_deinit_cpp(void *h_aec)

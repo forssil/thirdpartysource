@@ -96,7 +96,8 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             }
             power /= aec_para.fremaelen;
             //agc_process(pAgc, 1, &power, &gain, 0);
-            agc_new_process(aec_para.pAgc_new, 1, &power, &gain, 0);
+            //agc_new_process(aec_para.pAgc_new, 1, &power, &gain, 0);
+            agc_new_process(aec_para.pAgc_new, 1, &power, &gain, aec_para.sharedata.IsResEcho_);
             for (int i = 0; i < aec_para.fremaelen; i++) {
                 aec_para.sharedata.ppProcessOut_[channel][i] *= gain;
                 //data_out[i] *= gain;
