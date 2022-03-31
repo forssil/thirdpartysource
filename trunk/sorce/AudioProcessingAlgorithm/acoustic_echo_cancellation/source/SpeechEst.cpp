@@ -184,12 +184,18 @@ void CSpeechEst::UpdateGain()
 	{
 		p=m_pfP[i];
 		prisnr=m_pfPrioriSNR[i];
-		g=prisnr/(prisnr+1.f);       		
+		/*g=prisnr/(prisnr+1.f);       		
 		g*=expf(0.5f*expint(m_pfV[i]));
 		g=min(1.f,g);
 		g=max(m_fGainMin,g);
 		m_pfGain[i]=powf(g,p);
-		m_pfGain[i]*=powf(m_fGainMin,1.f-p);
+		m_pfGain[i]*=powf(m_fGainMin,1.f-p);*/
+		g = logf(prisnr / (prisnr + 1.f));
+		g *= (0.5f*expint(m_pfV[i]));
+		g = min(0.f, g);
+		g = max(lngmin, g);
+		prisnr = p * (g - lngmin) + lngmin;
+		m_pfGain[i] = expf(prisnr);
 	}
 }
 void CSpeechEst::Porcess(float *InPwer,float*Noise,float* Trans)
