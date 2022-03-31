@@ -192,7 +192,7 @@ float expint(float x) {
 		i = input -1;
 		return res_expint[i];
 	}
-	return  (-egamma - logf(x));
+	return  (res_expint[0]);
 	
 	
 }
