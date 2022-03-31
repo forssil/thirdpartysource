@@ -179,7 +179,8 @@ void CSpeechEst::UpdateProb()
 void CSpeechEst::UpdateGain()
 {
 	int i;
-	float prisnr,g,p;
+	float prisnr, g, p, lngmin;
+	lngmin = logf(m_fGainMin);
 	for (i=m_nStartBin;i<m_nEndBin;i++)
 	{
 		p=m_pfP[i];
