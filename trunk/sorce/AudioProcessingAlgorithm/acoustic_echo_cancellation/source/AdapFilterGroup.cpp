@@ -387,10 +387,10 @@ void CAdapFilterGroup::filter(void)
 			temp1  +=w_re*x_re   -w_im*x_im;
 			temp2  +=w_re*x_im   +w_im*x_re;
 			//fix filter
-			w_re =m_cpFixW[indx_dely];
+		/*	w_re =m_cpFixW[indx_dely];
 			w_im =m_cpFixW[indx_dely+1];
 			temp3  +=w_re*x_re   -w_im*x_im;
-			temp4  +=w_re*x_im   +w_im*x_re;
+			temp4  +=w_re*x_im   +w_im*x_re;*/
 		}
 		indx_dely+=2;
 #ifdef ADAPTIVE_FILTER_ALGO_AP
@@ -407,10 +407,10 @@ void CAdapFilterGroup::filter(void)
 		m_cpAdErrPre[indx] =m_cpDes[indx]-temp1;
 		m_cpAdErrPre[indx+1] =m_cpDes[indx+1]-temp2;
 #endif
-		m_cpFixEst[indx]=temp3;
+/*		m_cpFixEst[indx]=temp3;
 		m_cpFixEst[indx+1]=temp4;
 		m_cpFixErr[indx]=m_cpDes[indx]-m_cpFixEst[indx];
-		m_cpFixErr[indx+1]=m_cpDes[indx+1]-m_cpFixEst[indx+1];		
+		m_cpFixErr[indx+1]=m_cpDes[indx+1]-m_cpFixEst[indx+1];	*/	
 	}
 }
 
@@ -424,7 +424,7 @@ void CAdapFilterGroup::UpdateFilterWeight(void)
 	float *AttackTaps;
 
 	indy=0;
-	AttackTaps=m_fpAttackTaps;
+	//AttackTaps=m_fpAttackTaps;
 	
 	{	
 		for (i=0;i<m_nNumBank;i++)	
@@ -448,14 +448,15 @@ void CAdapFilterGroup::UpdateFilterWeight(void)
 			beta12_im = m_cpAdErrPre[indx+1];
 #endif
 
-			m_cpFixBeta[indx]   = m_fpR22sum[i] * m_cpFixErr[indx] * den;
+		/*	m_cpFixBeta[indx]   = m_fpR22sum[i] * m_cpFixErr[indx] * den;
 			m_cpFixBeta[indx+1] = m_fpR22sum[i] * m_cpFixErr[indx+1] * den;
-		
+		*/
 		////////update adaptive weights		
 	
 			for (j=0;j<=m_npTaps[i];j++,indy+=2)
 			{			
-				est_err2_re=m_fMu*(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
+				//est_err2_re=m_fMu*(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
+				est_err2_re = m_fMu;
 #ifdef ADAPTIVE_FILTER_ALGO_AP
 				x_re=m_cpReferDelayLine[indy+2];
 				x_im=m_cpReferDelayLine[indy+3];
@@ -489,7 +490,7 @@ void CAdapFilterGroup::Adap2Fix(int startbin,int endbin)
 	float tmep,beta_re,beta_im,x_re,x_im;
 	indx=m_npDelaylIndx[startbin];
 
-    AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
+   // AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
 	for (i=startbin;i<endbin;i++)
 	{
 		indy=2*i;
@@ -498,7 +499,8 @@ void CAdapFilterGroup::Adap2Fix(int startbin,int endbin)
 		beta_im=m_cpBeta1[indy+1];
 		for (j=0;j<=maxtaps;j++,indx+=2)
 		{
-			tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
+			//tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
+			tmep = m_fMu;
 			x_re=m_cpReferDelayLine[indx+2];
 			x_im=m_cpReferDelayLine[indx+3];
 			m_cpFixW[indx  ] = m_cpAdW[indx  ] + tmep*(beta_re*x_re + beta_im*x_im);
@@ -516,7 +518,7 @@ void CAdapFilterGroup::Fix2Adap(int startbin,int endbin)
 	float *AttackTaps;
 	float tmep,beta_re,beta_im,x_re,x_im;
 	indx=m_npDelaylIndx[startbin];
-	AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
+	//AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
 	for (i=startbin;i<endbin;i++)
 	{
 		indy=2*i;
@@ -525,11 +527,11 @@ void CAdapFilterGroup::Fix2Adap(int startbin,int endbin)
 		beta_im=m_cpBeta1[indy+1];
 		for (j=0;j<=maxtaps;j++,indx+=2)
 		{
-			tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
+			//tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
 			x_re=m_cpReferDelayLine[indx+2];
 			x_im=m_cpReferDelayLine[indx+3];
-			m_cpAdW[indx  ] = m_cpFixW[indx  ] + tmep*(beta_re*x_re + beta_im*x_im);
-			m_cpAdW[indx+1] = m_cpFixW[indx+1] + tmep*(beta_im*x_re - beta_re*x_im);
+			m_cpAdW[indx  ] = m_cpFixW[indx  ] + m_fMu *(beta_re*x_re + beta_im*x_im);
+			m_cpAdW[indx+1] = m_cpFixW[indx+1] + m_fMu *(beta_im*x_re - beta_re*x_im);
 		}
 	}
 	maxtaps=endbin-startbin;
@@ -714,16 +716,20 @@ void CAdapFilterGroup::SumR11_R12()
 		fpr11=m_fpR11+m_npR11Indx[i];
 		fpr22=fpr11+1;
 		fpr12=m_cpR12+m_npR12Indx[i];
-		AttackTaps=m_fpAttackTaps+m_npR11Indx[i];
+		//AttackTaps=m_fpAttackTaps+m_npR11Indx[i];
 
 		for (j=0;j<m_npTaps[i];j++)
 		{
-			temp=*AttackTaps;
-			r11		+= temp * (*(fpr11++));
-			r12_re	+= temp * (*(fpr12++));
-			r12_im	+= temp * (*(fpr12++));
-			r22		+= temp * (*(fpr22++));
-			AttackTaps++;
+			//temp=*AttackTaps;
+			//r11		+= temp * (*(fpr11++));
+			//r12_re	+= temp * (*(fpr12++));
+			//r12_im	+= temp * (*(fpr12++));
+			//r22		+= temp * (*(fpr22++));
+			//AttackTaps++;
+			r11		+= (*(fpr11++));
+			r12_re	+=  (*(fpr12++));
+			r12_im	+=  (*(fpr12++));
+			r22		+=  (*(fpr22++));
 		}
 
 #ifdef ADAPTIVE_FILTER_ALGO_AP
@@ -748,7 +754,7 @@ void CAdapFilterGroup::UpdateFilterWeight_band(int startbin,int endbin)
 	float *AttackTaps;
 	//memset(m_fpExpDecay,1,sizeof(float)*m_nNumBank);
 	indy=m_npDelaylIndx[startbin];
-	AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
+	//AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
 
 	{	
 		for (i=startbin;i<endbin;i++)	
@@ -774,12 +780,12 @@ void CAdapFilterGroup::UpdateFilterWeight_band(int startbin,int endbin)
 
 			for (j=0;j<=m_npTaps[i];j++,indy+=2)
 			{			
-				est_err2_re=(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
+				//est_err2_re=(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
 				x_re=m_cpReferDelayLine[indy+2];
 				x_im=m_cpReferDelayLine[indy+3];
 
-				m_cpAdW[indy  ] +=   est_err2_re* (beta12_re * x_re   + beta12_im * x_im);
-				m_cpAdW[indy+1] +=   est_err2_re* (beta12_im * x_re   - beta12_re * x_im);
+				m_cpAdW[indy  ] +=  (beta12_re * x_re   + beta12_im * x_im);
+				m_cpAdW[indy+1] +=  (beta12_im * x_re   - beta12_re * x_im);
 			}
 		}
 	}
