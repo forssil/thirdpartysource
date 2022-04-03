@@ -21,6 +21,7 @@ INCLUDES =\
 	-I./audio_processing/include\
 	-I./common_audio/include\
 	-I./agc/include\
+	-I./rnnoise/include\
 	-I./vad/include \
 	-I$(ROOT_PATH)/thirdparty/ne10/inc
 
@@ -28,6 +29,7 @@ C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
 	$(SRC_PATH)/common_audio/source/randomization_functions.c\
 	$(SRC_PATH)/agc/source/agc_new.c \
+	$(SRC_PATH)/rnnoise/source/agc_new.c \
 	$(SRC_PATH)/common_audio/source/Amp_compute.c
 	
 
@@ -75,6 +77,8 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
 	
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
+$(OBJ_PATH)/%.o: $(SRC_PATH)/rnnoise/source/%.c
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@

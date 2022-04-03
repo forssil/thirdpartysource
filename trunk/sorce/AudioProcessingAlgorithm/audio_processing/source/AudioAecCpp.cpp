@@ -7,7 +7,7 @@
 #include    "AudioAecCpp.h"
 #include    "AudioProcessingFramework_interface.h"
 #include    "agc_new.h"
-
+#include    "rnnoise.h"
 static AEC_parameter aec_para;
 
 #ifdef __cplusplus
@@ -76,6 +76,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     //}
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
     AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
+    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
     for(int cycle = 0; cycle<2 ; cycle++){
         for (int i = 0; i < aec_para.fremaelen; i++)
         {
@@ -90,9 +91,13 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         
         memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
 
+        size_t channel = 0;
+        // do rnnoise
+        rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+
         // do agc for every output channel
         //for (size_t channel = 0; channel < mics_num; channel++) 
-            size_t channel = 0;
+            
             {
                 float gain = 1, power = 0;
                 for (int i = 0; i < aec_para.fremaelen; i++) {
@@ -198,6 +203,8 @@ void aec_processing_init_cpp(void  **p_aec)
     agc_new_reset(agc_new);
     agc_new_set_NFE_on_off(agc_new, true);
     
+    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
+    rnnoise = rnnoise_create(NULL);
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
@@ -220,6 +227,8 @@ void aec_processing_deinit_cpp(void *h_aec)
     
     //agc_destroy(pAgc);
     agc_new_destroy(agc_new);
+    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
+    rnnoise_destroy(rnnoise);
     memset(&aec_para,0,sizeof(AEC_parameter));
 
 }

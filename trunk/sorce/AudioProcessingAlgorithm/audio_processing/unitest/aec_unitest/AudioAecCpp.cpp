@@ -84,10 +84,13 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     aec_para.pAPFInterface->process(aec_para.sharedata);
     
     memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
+    
+    size_t channel = 0;
 
+    // do rnnoise
+    rnnoise_process_frame(aec_para.pRnnoise, aec_para.sharedata.ppProcessOut_[channel], aec_para.sharedata.ppProcessOut_[channel]);
     // do agc for every output channel
     //for (size_t channel = 0; channel < mics_num; channel++) 
-        size_t channel = 0;
         {
             float gain = 1, power = 0;
             for (int i = 0; i < aec_para.fremaelen; i++) {
@@ -187,6 +190,8 @@ void aec_processing_init_cpp(void  **p_aec)
     aec_para.pAgc_new = agc_new_create();
     agc_new_reset(aec_para.pAgc_new);
     agc_new_set_NFE_on_off(aec_para.pAgc_new, true);
+
+    aec_para.pRnnoise = rnnoise_create(NULL);
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
@@ -204,6 +209,7 @@ void aec_processing_deinit_cpp(void *h_aec)
     
     //agc_destroy(pAgc);
     agc_new_destroy(aec_para.pAgc_new);
+    rnnoise_destroy(aec_para.pRnnoise);
 }
 
 //unsigned int aec_processing_get_lib_version()

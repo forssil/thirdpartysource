@@ -33,6 +33,7 @@ struct AEC_parameter {
     //struct AGCSTATE* pAgc;
     //struct AGCSTATE_NEW* pAgc_new;
     void * pAgc_new;
+    void* pRnnoise;
 };
 
 
