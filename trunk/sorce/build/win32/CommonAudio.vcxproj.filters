@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\F2Ttransformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\randomization_functions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -43,6 +40,12 @@
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\T2Ftransformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft1536.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\audiodatatypecast.h">
@@ -64,9 +67,6 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\fastest_coeffs.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft.h">
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\float_cast.h">
@@ -94,6 +94,9 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\T2Ftransformer.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft1536.h">
       <Filter>Include Files</Filter>
     </ClInclude>
   </ItemGroup>

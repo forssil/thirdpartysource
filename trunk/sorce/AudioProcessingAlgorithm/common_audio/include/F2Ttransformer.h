@@ -458,7 +458,7 @@ public:
 	para:    size  (IN)
 	content: initial parameter
 	***************************************************/
-	void InitFDanaly(const int size);
+	void InitFDanaly(const int size, const int fft_size);
 	
 	/***************************************************
 	name:    F2T

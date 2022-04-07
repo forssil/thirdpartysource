@@ -234,7 +234,7 @@ int CAudioProcessingFramework::Init()
 	m_ppCAECMics = new CAcousticEchoCancellationInFrequency*[m_nMicsNum];
 	for (int i = 0; i < m_nMicsNum; i++) {
 		m_ppCT2FMics[i] = new T2Ftransformer();
-		m_ppCT2FMics[i]->InitFDanaly(m_nFramelen);
+		m_ppCT2FMics[i]->InitFDanaly(m_nFramelen, m_nFFTlen);
 		memset(&m_pAECDataArray[i],0, sizeof(audio_pro_share));
 		m_ppCAECMics[i] =  new CAcousticEchoCancellationInFrequency(m_nFs, m_nFFTlen, m_nFramelen);
 		m_ppCAECMics[i]->Init();
@@ -245,18 +245,18 @@ int CAudioProcessingFramework::Init()
 	}
 
 	m_CT2FRef = new T2Ftransformer();
-	m_CT2FRef->InitFDanaly(m_nFramelen);
+	m_CT2FRef->InitFDanaly(m_nFramelen, m_nFFTlen);
 	//init F2T
 	m_CF2TErr = new F2Ttransformer();
-	m_CF2TErr->InitFDanaly(m_nFramelen);
+	m_CF2TErr->InitFDanaly(m_nFramelen, m_nFFTlen);
 
 #ifdef AUDIO_WAVE_DEBUG
 	m_CF2TErrBeforeNR = new F2Ttransformer();
-	m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen);
+	m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen, m_nFFTlen);
 	m_ppCF2TMics = new F2Ttransformer*[m_nMicsNum];
 	for (int i = 0; i < m_nMicsNum; i++) {
 		m_ppCF2TMics[i] = new F2Ttransformer();
-		m_ppCF2TMics[i]->InitFDanaly(m_nFramelen);
+		m_ppCF2TMics[i]->InitFDanaly(m_nFramelen, m_nFFTlen);
 	}
 #endif
     m_pSPest = new SPEst();

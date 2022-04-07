@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "processingconfig.h"
 #include "randomization_functions.h"
-#include "fft.h"
+#include "fft1536.h"
 #define n50dB  -50 //1e-5f
 #define n75dB  -80 //3.1623e-8f
 #define gainspeed 0.7f
@@ -206,7 +206,7 @@ void CPostFilter::Process(audio_pro_share *Aec)
 	{
 		AddCNG(Aec);
 		//memcpy(Aec->pNRCNGBuffer_,m_pfCNGFFT,m_nFFTLen*sizeof(float));
-		InvFFT(m_pfCNGFFT,m_pfCNGFFTtemp,m_nFFTLen);
+		wbxInvFFT(m_pfCNGFFT,m_pfCNGFFTtemp,m_nFFTLen);
 		memcpy(Aec->pNRCNGBuffer_,m_pfCNGFFT,m_nFFTLen*sizeof(float));
 	}
 	

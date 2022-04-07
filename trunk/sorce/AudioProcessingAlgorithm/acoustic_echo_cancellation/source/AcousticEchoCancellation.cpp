@@ -284,16 +284,16 @@ int CAcousticEchoCancellation::ResetAll()
 	 m_CDelayBuf->Init();
 	 ////init T2F
 	 m_CT2FMic=new T2Ftransformer();
-	 m_CT2FMic->InitFDanaly(m_nFramelen);
+	 m_CT2FMic->InitFDanaly(m_nFramelen, m_nFFTlen);
 	 m_CT2FRef=new T2Ftransformer();
-	 m_CT2FRef->InitFDanaly(m_nFramelen);
+	 m_CT2FRef->InitFDanaly(m_nFramelen, m_nFFTlen);
 	 //init F2T
 	 m_CF2TErr=new F2Ttransformer();
-	 m_CF2TErr->InitFDanaly(m_nFramelen); 
+	 m_CF2TErr->InitFDanaly(m_nFramelen, m_nFFTlen);
 
 #ifdef AUDIO_WAVE_DEBUG
 	 m_CF2TErrBeforeNR=new F2Ttransformer();
-	 m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen); 
+	 m_CF2TErrBeforeNR->InitFDanaly(m_nFramelen, m_nFFTlen);
 #endif
 
 	 m_pSubBandAdap=new CSubbandAdap(m_nFs,m_nFFTlen);
