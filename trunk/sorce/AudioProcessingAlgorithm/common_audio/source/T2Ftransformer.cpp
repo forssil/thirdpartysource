@@ -224,8 +224,8 @@ void T2Ftransformer::T2F(const float* inbuf, float* outbuf) {
 #else
 	ne10_fft_r2c_1d_float32(m_pdst, outbuf, m_cfg);
 	for (int i = 0; i < m_fft_len; i += 2) {
-		outbuf[i] = m_pdst[i / 2].r;
-		outbuf[i+1] = m_pdst[i / 2].i;
+		outbuf[i] = m_pdst[i / 2].r/ m_fft_len;
+		outbuf[i+1] = m_pdst[i / 2].i/ m_fft_len;
 	}
 #endif
 	//update buffer

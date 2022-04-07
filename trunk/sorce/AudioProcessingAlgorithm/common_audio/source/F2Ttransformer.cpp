@@ -203,8 +203,8 @@ void F2Ttransformer::F2T(const float *inbuf, float *outbuf)
 	//gh::InvFFT(m_input_spe, m_output_spe, m_fft_len);
 #else
 	for (int i = 0; i < m_fft_len; i += 2) {
-		m_pdst[i / 2].r = inbuf[i];
-		m_pdst[i / 2].i = inbuf[i+1];
+		m_pdst[i / 2].r = inbuf[i]* m_fft_len;
+		m_pdst[i / 2].i = inbuf[i+1]* m_fft_len;
 	}
 	ne10_fft_c2r_1d_float32(m_input_spe,m_pdst, m_cfg);
 	
