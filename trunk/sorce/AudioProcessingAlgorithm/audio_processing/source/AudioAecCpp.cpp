@@ -102,11 +102,14 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 
         size_t channel = 0;
         // do rnnoise
-        rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+        if (sharedata->bRNNOISEOn_) {
+            rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+        }
 
         // do agc for every output channel
-        //for (size_t channel = 0; channel < mics_num; channel++) 
-            
+        if (sharedata->bAGCOn_) {
+            //for (size_t channel = 0; channel < mics_num; channel++) 
+
             {
                 float gain = 1, power = 0;
                 for (int i = 0; i < aec_para.fremaelen; i++) {
@@ -122,6 +125,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
                     //data_out[i] *= gain;
                 }
             }
+        }
 
         for (int i = 0; i < (aec_para.fremaelen); i++)
         {
@@ -192,6 +196,8 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bAECOn_ = true;
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
+    sharedata->bAGCOn_ = true;
+    sharedata->bRNNOISEOn_ = true;
 
     sharedata->pDesire_ = aec_para.data_in_f;
     sharedata->pReffer_ = aec_para.data_in_f2;

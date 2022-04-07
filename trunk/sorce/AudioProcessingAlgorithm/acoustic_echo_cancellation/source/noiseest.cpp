@@ -53,7 +53,7 @@ void CNoiseEst::InitNosieEst()
 	m_nBeginFrames=0x0000000f;//for 96ms analysis filter
 	if(m_nMode==MS)
 	{
-		SetWin(10,25);
+		SetWin(10,27);
 		m_fAlpha_v=2.f;
 		i=m_nLen*(9+m_nSubWinNum);
 		m_pfPwr=new float[i];

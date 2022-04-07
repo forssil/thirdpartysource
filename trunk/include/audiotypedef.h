@@ -688,8 +688,15 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	AUDIO_DATA_TYPE		fDTDgain;
 	//VAD
 
-	//AGC
+	//RES
 	bool                IsResEcho_;
+
+    //AGC
+    bool                bAGCOn_;
+
+    //RNNOISE
+    bool                bRNNOISEOn_;
+
 } audio_pro_share;
 
 typedef struct AUDIO_TYPE_NUM
