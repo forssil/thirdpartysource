@@ -27,7 +27,6 @@ INCLUDES =\
 
 CPP_FILES = \
 	./test.cpp \
-	./AudioAecCpp.cpp \
 	$(ROOT_PATH)/tools/WaveFunction/WaveIO.cpp 
 
 CPPOBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(CPP_FILES:.cpp=.o)))

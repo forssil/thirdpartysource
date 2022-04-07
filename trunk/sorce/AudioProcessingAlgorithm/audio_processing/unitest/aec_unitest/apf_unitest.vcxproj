@@ -86,13 +86,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\tools\WaveFunction\WaveIO.cpp" />
-    <ClCompile Include="AudioAec.c" />
-    <ClCompile Include="AudioAecCpp.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\tools\WaveFunction\WaveIO.h" />
-    <ClInclude Include="AudioAecCpp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

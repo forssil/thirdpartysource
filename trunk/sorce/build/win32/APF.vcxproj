@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioAecCpp.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioProcessingFramework.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioProcessingFramework_interface.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Compandor.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioAecCpp.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioProcessingFramework.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Compandor.cpp" />
   </ItemGroup>
@@ -109,7 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\audio_processing\include;..\..\AudioProcessingAlgorithm\mixer\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\AudioProcessingAlgorithm\rnnoise\include;..\..\AudioProcessingAlgorithm\agc\include;..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\audio_processing\include;..\..\AudioProcessingAlgorithm\mixer\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>

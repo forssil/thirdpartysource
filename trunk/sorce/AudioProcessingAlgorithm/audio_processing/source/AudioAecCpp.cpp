@@ -8,6 +8,7 @@
 #include    "AudioProcessingFramework_interface.h"
 #include    "agc_new.h"
 #include    "rnnoise.h"
+
 static AEC_parameter aec_para;
 
 #ifdef __cplusplus
@@ -77,12 +78,20 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
     AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
     DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
-    for(int cycle = 0; cycle<2 ; cycle++){
+#ifdef AUDIO_WAVE_DEBUG
+    int cycle_num = 1;
+    int index_tmp = 0;
+#else
+    int cycle_num = 2;
+    int index_tmp = 3;
+#endif
+
+    for(int cycle = 0; cycle < cycle_num ; cycle++){
         for (int i = 0; i < aec_para.fremaelen; i++)
         {
             for (size_t channel = 0; channel < aec_para.mics_num; channel++)
             {
-                sharedata->ppCapture_[channel][i] = float(date_in[3 + channel][i+480*cycle]) / 32768.f;
+                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i+480*cycle]) / 32768.f;
             }
             sharedata->pReffer_[i] = float(ref_spk[i+480*cycle]) / 32768.f;
         }
@@ -151,6 +160,7 @@ void aec_processing_init_cpp(void  **p_aec)
     //CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, 48000, 2 * fremaelen, fremaelen);
     //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 2 * aec_para.fremaelen, aec_para.fremaelen);
     aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1024, aec_para.fremaelen);
+    //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1536, aec_para.fremaelen);
     ((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->Init();
     //sharedata init
     sharedata->ppCapture_ = new float*[aec_para.mics_num];
@@ -203,8 +213,8 @@ void aec_processing_init_cpp(void  **p_aec)
     agc_new_reset(agc_new);
     agc_new_set_NFE_on_off(agc_new, true);
     
-    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
-    rnnoise = rnnoise_create(NULL);
+    DenoiseState* rnnoise = rnnoise_create(NULL); 
+    aec_para.pRnnoise = (void*)rnnoise;
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
