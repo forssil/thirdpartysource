@@ -103,7 +103,13 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         size_t channel = 0;
         // do rnnoise
         if (sharedata->bRNNOISEOn_) {
+            for (int i = 0; i < aec_para.fremaelen; i++) {
+                sharedata->ppProcessOut_[channel][i] *= 32767;
+            }
             rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+            for (int i = 0; i < aec_para.fremaelen; i++) {
+                sharedata->ppProcessOut_[channel][i] /= 32767;
+            }
         }
 
         // do agc for every output channel
@@ -197,7 +203,7 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
     sharedata->bAGCOn_ = true;
-    sharedata->bRNNOISEOn_ = true;
+    sharedata->bRNNOISEOn_ = false;
 
     sharedata->pDesire_ = aec_para.data_in_f;
     sharedata->pReffer_ = aec_para.data_in_f2;
