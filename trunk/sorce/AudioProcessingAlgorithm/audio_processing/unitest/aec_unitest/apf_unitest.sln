@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1778
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AEC", "..\..\..\..\build\win32\AEC.vcxproj", "{4D1B3771-F541-4244-94F4-CBEEFD15331C}"
 EndProject
@@ -27,6 +27,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AGC", "..\..\..\..\build\win32\AGC.vcxproj", "{5C613443-E256-424E-80EC-DEC7B39940E3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rnnoise", "..\..\..\..\build\win32\Rnnoise.vcxproj", "{AC4B5EBB-2D92-4019-B10C-4FFCDA661CAD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BF", "..\..\..\..\build\win32\BF.vcxproj", "{745CB631-3BCA-4342-B84D-455E125306CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +82,12 @@ Global
 		{AC4B5EBB-2D92-4019-B10C-4FFCDA661CAD}.Release|Win32.ActiveCfg = Release|Win32
 		{AC4B5EBB-2D92-4019-B10C-4FFCDA661CAD}.Release|Win32.Build.0 = Release|Win32
 		{AC4B5EBB-2D92-4019-B10C-4FFCDA661CAD}.Release|x64.ActiveCfg = Release|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Debug|Win32.Build.0 = Debug|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Debug|x64.ActiveCfg = Debug|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Release|Win32.ActiveCfg = Release|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Release|Win32.Build.0 = Release|Win32
+		{745CB631-3BCA-4342-B84D-455E125306CF}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

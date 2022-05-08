@@ -21,6 +21,7 @@
 #include "SPEst.h"
 #include "VAD.h"
 #include "AcousticEchoCancellation.h"
+#include "MVDR.h"
 class CAudioProcessingFramework : public CAudioProcessingFrameworkInterface
 				  	              
 {
@@ -95,6 +96,7 @@ private:
 	bool m_bVad;
 	float m_fCrossCor;
 	float m_fGain;  //full band gain
+	CMVDR* m_CBF;
 };
 
 
