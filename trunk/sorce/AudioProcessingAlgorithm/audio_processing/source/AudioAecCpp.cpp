@@ -77,7 +77,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     //}
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
     AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
-    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
+    // DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
 #ifdef AUDIO_WAVE_DEBUG
     int cycle_num = 1;
     int index_tmp = 0;
@@ -106,7 +106,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             for (int i = 0; i < aec_para.fremaelen; i++) {
                 sharedata->ppProcessOut_[channel][i] *= 32767;
             }
-            rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+            // rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
             for (int i = 0; i < aec_para.fremaelen; i++) {
                 sharedata->ppProcessOut_[channel][i] /= 32767;
             }
@@ -225,8 +225,8 @@ void aec_processing_init_cpp(void  **p_aec)
     agc_new_reset(agc_new);
     agc_new_set_NFE_on_off(agc_new, true);
     
-    DenoiseState* rnnoise = rnnoise_create(NULL); 
-    aec_para.pRnnoise = (void*)rnnoise;
+    // DenoiseState* rnnoise = rnnoise_create(NULL); 
+    // aec_para.pRnnoise = (void*)rnnoise;
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
@@ -249,8 +249,8 @@ void aec_processing_deinit_cpp(void *h_aec)
     
     //agc_destroy(pAgc);
     agc_new_destroy(agc_new);
-    DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
-    rnnoise_destroy(rnnoise);
+    // DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
+    // rnnoise_destroy(rnnoise);
     memset(&aec_para,0,sizeof(AEC_parameter));
 
 }

@@ -32,9 +32,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "kiss_fft.h"
 #include "common.h"
-#include <math.h>
 #include "rnnoise.h"
 #include "pitch.h"
 #include "arch.h"
@@ -65,6 +65,9 @@
 #define TRAINING 0
 #endif
 
+#ifndef M_PI
+#define M_PI       3.14159265358979323846   // pi
+#endif
 
 /* The built-in model, used if no file is given as input */
 extern const struct RNNModel rnnoise_model_orig;

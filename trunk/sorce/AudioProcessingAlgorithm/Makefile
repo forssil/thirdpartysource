@@ -30,7 +30,13 @@ C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
 	$(SRC_PATH)/common_audio/source/randomization_functions.c\
 	$(SRC_PATH)/agc/source/agc_new.c \
-	$(SRC_PATH)/rnnoise/source/agc_new.c \
+	$(SRC_PATH)/rnnoise/source/celt_lpc.c \
+	$(SRC_PATH)/rnnoise/source/denoise.c \
+	$(SRC_PATH)/rnnoise/source/kiss_fft.c \
+	$(SRC_PATH)/rnnoise/source/pitch.c \
+	$(SRC_PATH)/rnnoise/source/rnn.c \
+	$(SRC_PATH)/rnnoise/source/rnn_data.c \
+	$(SRC_PATH)/rnnoise/source/rnn_reader.c \
 	$(SRC_PATH)/common_audio/source/Amp_compute.c
 	
 
