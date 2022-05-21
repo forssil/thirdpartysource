@@ -23,6 +23,7 @@ INCLUDES =\
 	-I./agc/include\
 	-I./rnnoise/include\
 	-I./vad/include \
+	-I./beam_forming/include \
 	-I$(ROOT_PATH)/thirdparty/ne10/inc
 
 C_FILES = \
@@ -51,6 +52,7 @@ CPP_FILES = \
 	$(SRC_PATH)/common_audio/source/F2Ttransformer.cpp \
 	$(SRC_PATH)/common_audio/source/SPEst.cpp \
 	$(SRC_PATH)/common_audio/source/T2Ftransformer.cpp \
+	$(SRC_PATH)/beam_forming/source/MVDR.cpp \
 	$(SRC_PATH)/vad/source/VAD.cpp 
 
 COBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(C_FILES:.c=.o)))
@@ -93,6 +95,9 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/vad/source/%.cpp
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+
+$(OBJ_PATH)/%.o: $(SRC_PATH)/beam_forming/source/%.cpp
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 objs: $(OBJ_FILES)

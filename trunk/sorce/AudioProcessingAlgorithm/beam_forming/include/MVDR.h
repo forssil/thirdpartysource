@@ -1,9 +1,10 @@
 #ifndef MVDR_H_
 #define MVDR_H_
 #endif
+
+#include <complex>
 #include "audiotypedef.h"
 #include "processingconfig.h"
-#include <complex>
 
 class CMVDR {
 public:
