@@ -71,6 +71,7 @@ CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
 LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
 AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
+
 DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
@@ -86,7 +87,7 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/rnnoise/source/%.c
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CC) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
