@@ -57,7 +57,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\AudioProcessingAlgorithm\beam_forming\include;..\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\AudioProcessingAlgorithm\beam_forming\include;..\..\..\include;..\..\AudioProcessingAlgorithm\common_audio\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -70,7 +70,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\agc\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\agc\include;..\..\AudioProcessingAlgorithm\beam_forming\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>

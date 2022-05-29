@@ -77,12 +77,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\audiodatatypecast.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\basemath.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\DCRemover.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\F2Ttransformer.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft1536.h" />
-    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\signal_processing_library.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\PitchTrack.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SilenceDetector.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SPEst.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\T2Ftransformer.h" />
@@ -107,6 +106,7 @@
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\F2Ttransformer.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft1536.c" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\PitchTrack.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\randomization_functions.c" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SilenceDetector.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\SPEst.cpp" />

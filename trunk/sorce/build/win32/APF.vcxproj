@@ -148,7 +148,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\audio_processing\include;..\..\AudioProcessingAlgorithm\mixer\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include;..\..\AudioProcessingAlgorithm\audio_processing\include;..\..\AudioProcessingAlgorithm\mixer\include;..\..\AudioProcessingAlgorithm\beam_forming\include;..\..\AudioProcessingAlgorithm\agc\include;..\..\AudioProcessingAlgorithm\rnnoise\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>

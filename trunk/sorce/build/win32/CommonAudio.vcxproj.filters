@@ -46,11 +46,11 @@
     <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\fft.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\common_audio\source\PitchTrack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\audiodatatypecast.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\basemath.h">
       <Filter>Include Files</Filter>
     </ClInclude>
@@ -84,9 +84,6 @@
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\SampleRateConvert\include\SampleRateConvert.h">
       <Filter>Include Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\signal_processing_library.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\SilenceDetector.h">
       <Filter>Include Files</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\fft1536.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\common_audio\include\PitchTrack.h">
       <Filter>Include Files</Filter>
     </ClInclude>
   </ItemGroup>

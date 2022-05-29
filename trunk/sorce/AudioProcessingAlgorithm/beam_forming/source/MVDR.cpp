@@ -1,4 +1,5 @@
 #include "MVDR.h"
+#include "basemath.h"
 
 CMVDR::CMVDR(int fft_len, int fs, int bins, int channels, float interval, float DOA) :
 	m_nbins(bins),
@@ -147,4 +148,114 @@ void CMVDR::matrix_multiply(float* A, float* B, float* C, int length) {
 }
 float* CMVDR::get_weight() {
 	return m_pfH;
+}
+
+
+CAdaptiveBeamForming::CAdaptiveBeamForming(int fft_len, int fs, int bins, int channels):
+	m_nbins(bins),
+	m_nFs(fs),
+	m_nFftLen(fft_len),
+	m_nChannels(channels){
+
+
+}
+CAdaptiveBeamForming::~CAdaptiveBeamForming() {
+	if (m_fppAutoCorr[0]) {
+		delete[] m_fppAutoCorr[0];
+	}
+	if (m_fppAutoCorr) {
+		delete[] m_fppAutoCorr;
+	}
+
+}
+
+void CAdaptiveBeamForming::init() {
+
+	int  inter_channels = m_nChannels - 1;
+	///mem allocate
+	m_fppAutoCorr = new float*[3 * inter_channels];
+	m_fppCrossCorr = m_fppAutoCorr + inter_channels;
+	m_fppTransFilter = m_fppCrossCorr + inter_channels;
+	int mem_size = inter_channels * (m_nFftLen * 5 / 2)+ m_nFftLen;
+	m_fppAutoCorr[0] = new float[mem_size];	 
+	memset(m_fppAutoCorr[0], 0, mem_size * sizeof(float));
+	m_fppCrossCorr[0] = m_fppAutoCorr[0] + inter_channels* m_nFftLen/2;
+	m_fppTransFilter[0] = m_fppCrossCorr[0] + inter_channels * m_nFftLen ;
+	for (int i = 1; i < inter_channels; i++) {
+		m_fppAutoCorr[i] = m_fppAutoCorr[0] + i * m_nFftLen / 2;
+		m_fppCrossCorr[i] = m_fppCrossCorr[0] + i * m_nFftLen ;
+		m_fppTransFilter[i] = m_fppTransFilter[0] + i * m_nFftLen;
+	}
+	m_fpOutPut = m_fppTransFilter[inter_channels - 1] + m_nFftLen;
+}
+void  CAdaptiveBeamForming::process(audio_pro_share* input, int input_len, audio_pro_share& output, int main_channel)
+{
+	//update corr
+	m_nMainChannel = (main_channel<0 || main_channel>m_nChannels) ? 0 : main_channel;
+	size_t loopmax = input_len == (m_nChannels) ? (m_nChannels) : input_len;
+	float alpha = 1.f - m_fLamda;
+	float * fp_input = nullptr;
+	float* fp_output_auto = *m_fppAutoCorr;
+	float* fp_output_corss = *m_fppCrossCorr;
+	float* fp_main_channel = input[m_nMainChannel].pErrorFFT_;
+	float *fp_tf = NULL;
+	int channels = 0;
+	float tem_pwr = 0.f;
+	memset(m_fpOutPut,0, m_nFftLen * sizeof(float));
+	for (size_t channelind = 0; channelind < loopmax; channelind++) {
+		if (channelind == m_nMainChannel) {
+			continue;
+		}
+		fp_input = input[channelind].pErrorFFT_;
+		fp_output_auto = m_fppAutoCorr[channels];
+		fp_tf = m_fppTransFilter[channels];
+		fp_output_corss = m_fppCrossCorr[channels++];
+		for (int bin = 0; bin < m_nbins; bin++) {
+			int bin_in_complex = 2 * bin;
+			tem_pwr = fp_input[bin_in_complex] * fp_input[bin_in_complex] + fp_input[bin_in_complex + 1] * fp_input[bin_in_complex + 1];
+			//if (tem_pwr <= m_fActiveThreashold) {
+			//	continue;
+			//}
+			///auto
+			fp_output_auto[bin] *= alpha;
+			fp_output_auto[bin] += m_fLamda *(tem_pwr);
+			//cross
+			fp_output_corss[bin_in_complex] *= alpha;
+			fp_output_corss[bin_in_complex] += m_fLamda * (fp_main_channel[bin_in_complex] * fp_input[bin_in_complex] + fp_main_channel[bin_in_complex + 1] * fp_input[bin_in_complex + 1]);
+			fp_output_corss[bin_in_complex +1] *= alpha;
+			fp_output_corss[bin_in_complex + 1] += m_fLamda * (fp_main_channel[bin_in_complex + 1] * fp_input[bin_in_complex] - fp_main_channel[bin_in_complex] * fp_input[bin_in_complex + 1]);
+	
+			//output
+			float H_re = fp_output_corss[bin_in_complex] / (fp_output_auto[bin] + m_fActiveThreashold);
+			float H_im = fp_output_corss[bin_in_complex +1] / (fp_output_auto[bin] + m_fActiveThreashold);
+
+			if (fp_output_auto[bin] > m_fActiveThreashold &&
+				H_re<2.f &&
+				H_im< 2.f) {
+				fp_tf[bin_in_complex] *= alpha;
+				fp_tf[bin_in_complex] += m_fLamda * H_re;
+				fp_tf[bin_in_complex+1] *= alpha;
+				fp_tf[bin_in_complex+1] += m_fLamda * H_im;
+			}
+			float tem_re = fp_tf[bin_in_complex] * fp_input[bin_in_complex] - fp_tf[bin_in_complex + 1] * fp_input[bin_in_complex + 1];
+			float tem_im = fp_tf[bin_in_complex] * fp_input[bin_in_complex + 1] + fp_tf[bin_in_complex + 1] * fp_input[bin_in_complex];
+			if ((tem_re *tem_re + tem_im * tem_im) >( fp_main_channel[bin_in_complex] * fp_main_channel[bin_in_complex ] + fp_main_channel[bin_in_complex + 1]*fp_main_channel[bin_in_complex + 1]) * 2.5f) {
+				tem_re = fp_main_channel[bin_in_complex];
+				tem_im = fp_main_channel[bin_in_complex + 1];
+			}
+			m_fpOutPut[bin_in_complex] += tem_re;
+			m_fpOutPut[bin_in_complex + 1] += tem_im;
+		}
+	}
+	int bin = 0;
+	for ( bin = 0; bin < m_nbins; bin++) {
+		int bin_in_complex = 2 * bin;
+		output.pErrorFFT_[bin_in_complex] = (fp_main_channel[bin_in_complex] + m_fpOutPut[bin_in_complex])/m_nChannels;
+		output.pErrorFFT_[bin_in_complex + 1] = (fp_main_channel[bin_in_complex + 1] + m_fpOutPut[bin_in_complex + 1])/m_nChannels;
+	}
+	for (; bin < m_nFftLen / 2; bin++) {
+		int bin_in_complex = 2 * bin;
+		output.pErrorFFT_[bin_in_complex] = (fp_main_channel[bin_in_complex] ) ;
+		output.pErrorFFT_[bin_in_complex + 1] = (fp_main_channel[bin_in_complex + 1] ) ;
+	}
 }
