@@ -656,6 +656,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	AUDIO_DATA_TYPE		*pErrorFFT_;
 	AUDIO_DATA_TYPE		*pErrorSpectrumPower_;
 	AUDIO_DATA_TYPE		*pRefferFFT_;
+    AUDIO_DATA_TYPE		*pRNNERRORFFT_;
 	AUDIO_DATA_TYPE		*pMaxSubfilterTaps_;
 	AUDIO_DATA_TYPE		*pError_;
 	CAUDIO_U32_t 		nOffsetBin_; //AEC start bin in fft
@@ -696,6 +697,14 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 
     //RNNOISE
     bool                bRNNOISEOn_;
+    AUDIO_DATA_TYPE     *pRNNERROR_;
+    AUDIO_DATA_TYPE     *pRNNPOWER_;
+    AUDIO_DATA_TYPE     *pRNNBuffer_;
+    bool                bRNNOISEVad_;
+    bool                bRNNOISEVad_enhance_;
+    int                 RNNCounter_;
+    int                 RNNCounter_enhance_;
+    int                 ChannelIndex_;
 
 } audio_pro_share;
 

@@ -60,6 +60,7 @@ private:
 
 	T2Ftransformer** m_ppCT2FMics;
 	T2Ftransformer* m_CT2FRef;
+    T2Ftransformer* m_CT2FRNNERROR;
 	F2Ttransformer* m_CF2TErr;
 
 #ifdef AUDIO_WAVE_DEBUG
@@ -87,6 +88,7 @@ private:
 	int   m_nDelay; ///delay between mic and ref
 	int   m_nSystemDelay;
 	float*   m_pReferFFT;
+    float*   m_pRNNERRORFFT;
 	//////processing buffer
 	float*    m_pMemAlocat;
 	audio_pro_share   m_APFData;

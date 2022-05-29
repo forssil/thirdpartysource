@@ -141,6 +141,8 @@ public:
 	//bool m_bVad;
 	float m_fCrossCor;
 	float m_fGain;  //full band gain
+
+    int counter_ = 0;
 };
 
 

@@ -56,9 +56,10 @@ int main(int argc , char *argv[ ])
    {
 	    
 	   //infile=argv[1];
-	   infile = "D:\\works\\chenan\\3308_mca_dump\\5channel_half.wav";
-		outfile=   "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out_expint3.wav";
-		outfile1 = "D:\\works\\chenan\\3308_mca_dump\\out\\5channel_out1_expint2.wav";
+	   infile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_chenan5.wav";
+		outfile=   "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcon-aecon-nron-bfoff-rnnoff-transient0.03-0.01-vad2-chn0-0.03-50-0.5-5-4-20-1.wav";
+        //outfile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcoff-aecon-nron-bfoff-rnnon-out.wav";
+        outfile1 = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out1_expint2.wav";
 	   
 
    }

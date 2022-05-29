@@ -588,7 +588,7 @@ int CAcousticEchoCancellation::ResetAll()
   int CAcousticEchoCancellationInFrequency::process(audio_pro_share& aShareData)
   {
 	  int ret = 0;
-
+      counter_++;
 	  float vadband[3] = { 0 };
 	  float vadfull = 0.f;
 	  m_AECData.bAECOn_ = aShareData.bAECOn_;
@@ -618,7 +618,25 @@ int CAcousticEchoCancellation::ResetAll()
 
 		  if (m_AECData.bNROn_)
 		  {
+              if (counter_ >=2012) {
+                  counter_ *= 1;
+              }
+              for (int i = 0; i < m_AECData.nLengthFFT_; i++) {
+                  if (aShareData.bRNNOISEVad_ || aShareData.ChannelIndex_ != 0) {
+                      m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0 * aShareData.pRNNERRORFFT_[i];
+                  }
+                  else {
+                      m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0.01 * aShareData.pRNNERRORFFT_[i];
+                  }
+                  
+              }
+
+              m_AECData.ChannelIndex_ = aShareData.ChannelIndex_;
 			  m_pPostFil->Process(&m_AECData);
+
+              if (!aShareData.bRNNOISEVad_enhance_ && aShareData.ChannelIndex_ == 0) {
+                  memset(m_AECData.pErrorFFT_, 0, sizeof(float)*m_AECData.nLengthFFT_);
+              }
 		  }
 
 	  }

@@ -78,6 +78,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
     AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
     DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
+
 #ifdef AUDIO_WAVE_DEBUG
     int cycle_num = 1;
     int index_tmp = 0;
@@ -86,30 +87,101 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
     int index_tmp = 3;
 #endif
 
-    for(int cycle = 0; cycle < cycle_num ; cycle++){
+    for (int cycle = 0; cycle < cycle_num; cycle++) {
         for (int i = 0; i < aec_para.fremaelen; i++)
         {
             for (size_t channel = 0; channel < aec_para.mics_num; channel++)
             {
-                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i+480*cycle]) / 32768.f;
+                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + 480 * cycle]) / 32768.f;
             }
-            sharedata->pReffer_[i] = float(ref_spk[i+480*cycle]) / 32768.f;
+            sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
         }
-
+        size_t channel = 0;
+        //for (size_t channel = 0; channel < aec_para.mics_num; channel++){
+        //    if (sharedata->bRNNOISEOn_) {
+        //        float tmp[480] = { 0 };
+        //        for (int j = 0; j < aec_para.fremaelen; j++) {
+        //            sharedata->ppCapture_[channel][j] *= 32767;
+        //            tmp[j] = sharedata->ppCapture_[channel][j];
+        //        }
+        //        rnnoise_process_frame(rnnoise, sharedata->ppCapture_[channel], sharedata->ppCapture_[channel]);
+        //        for (int j = 0; j < aec_para.fremaelen; j++) {
+        //            sharedata->pRNNERROR_[j] = tmp[j] - sharedata->ppProcessOut_[channel][j];
+        //            //sharedata->ppCapture_[channel][j] /= 32767;
+        //            sharedata->ppCapture_[channel][j] = tmp[j]/32767;
+        //        }
+        //    }
+        //}
         ((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->process(*sharedata);
         
         memcpy(aec_para.data_out_f2, aec_para.data_in_f, aec_para.fremaelen * sizeof(float));
 
-        size_t channel = 0;
+        
         // do rnnoise
+        // to do: move rnn before aec
         if (sharedata->bRNNOISEOn_) {
+            float tmp[480] = { 0 };
+            float tmp_in = 0.f;
+            float tmp_out = 0.f;
+            float tmp_diff = 0.f;
+            int channel1 = 1;
+            float alpha = 0;
             for (int i = 0; i < aec_para.fremaelen; i++) {
-                sharedata->ppProcessOut_[channel][i] *= 32767;
+                sharedata->ppProcessOut_[channel1][i] *= 32767;
+                sharedata->pRNNBuffer_[i+ aec_para.fremaelen] = sharedata->ppProcessOut_[channel1][i];
+                tmp[i] = sharedata->pRNNBuffer_[i];
+                tmp_in += tmp[i] * tmp[i];
             }
-             rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel], sharedata->ppProcessOut_[channel]);
+             rnnoise_process_frame(rnnoise, sharedata->ppProcessOut_[channel1], sharedata->ppProcessOut_[channel1]);
+
             for (int i = 0; i < aec_para.fremaelen; i++) {
-                sharedata->ppProcessOut_[channel][i] /= 32767;
+                sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1- alpha) * sharedata->ppProcessOut_[channel1][i] * sharedata->ppProcessOut_[channel1][i];
+                tmp_out += sharedata->pRNNPOWER_[i];
+
+                sharedata->pRNNERROR_[i] = sharedata->pRNNBuffer_[i] - sharedata->ppProcessOut_[channel1][i];
+                tmp_diff += sharedata->pRNNERROR_[i] * sharedata->pRNNERROR_[i];
+                sharedata->pRNNBuffer_[i] = sharedata->pRNNBuffer_[i + aec_para.fremaelen]; // update one frame
+
+                //sharedata->ppProcessOut_[channel1 - channel1][i] = sharedata->ppProcessOut_[channel1][i] / 32767;
+                //sharedata->ppProcessOut_[channel1 - channel1][i] = sharedata->pRNNBuffer_[i] / 32767;
+                //sharedata->ppProcessOut_[channel1][i] = tmp[i] / 32767;
+                //sharedata->ppProcessOut_[channel1 - channel1][i] = sharedata->pRNNERROR_[i] / 32767;
             }
+
+            //if (tmp_in > 1e4 && tmp_out < 1e3 && tmp_diff > 1e3) {  // -50dB -60dB
+            //    sharedata->bRNNOISEVad_ = false;
+            //}
+            //else {
+            //    sharedata->bRNNOISEVad_ = true;
+            //}
+            // to do freq vad and handover vad to protect voice
+            //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
+            if (tmp_out > 1 * 1e4)
+            {  // -50dB -53dB -57
+                sharedata->bRNNOISEVad_ = true;
+                sharedata->RNNCounter_ = 5;
+            }
+            else {
+                sharedata->RNNCounter_--;
+                sharedata->RNNCounter_ = sharedata->RNNCounter_ < 0 ? 0 : sharedata->RNNCounter_;
+                if (sharedata->RNNCounter_ == 0) {
+                    sharedata->bRNNOISEVad_ = false;
+                }                
+            }
+
+            if (tmp_out < 1 * 1e5) {
+                sharedata->RNNCounter_enhance_--;
+                sharedata->RNNCounter_enhance_ = sharedata->RNNCounter_enhance_ < 0 ? 0 : sharedata->RNNCounter_enhance_;
+                if (sharedata->RNNCounter_enhance_ == 0) {
+                    sharedata->bRNNOISEVad_enhance_ = false;
+                }                
+            }
+            else {
+                sharedata->bRNNOISEVad_enhance_ = true;
+                sharedata->RNNCounter_enhance_ = 20;
+            }
+
+
         }
 
         // do agc for every output channel
@@ -187,10 +259,12 @@ void aec_processing_init_cpp(void  **p_aec)
     aec_para.data_out_f = aec_para.data_in_f + aec_para.fremaelen;
     memset(aec_para.data_in_f, 0, (aec_para.fremaelen*(2 + 2 * aec_para.mics_num)) * sizeof(float));
 
-    aec_para.data_in_f2 = new float[aec_para.fremaelen * 3];
+    aec_para.data_in_f2 = new float[aec_para.fremaelen * 6];
     aec_para.data_out_f2 = aec_para.data_in_f2 + aec_para.fremaelen;
     aec_para.data_out_f3 = aec_para.data_out_f2 + aec_para.fremaelen;
-    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 3) * sizeof(float));
+    aec_para.data_out_f4 = aec_para.data_out_f3 + aec_para.fremaelen;
+    aec_para.data_out_f5 = aec_para.data_out_f4 + aec_para.fremaelen;
+    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 6) * sizeof(float));
 
     for (int i = 0; i < aec_para.mics_num; i++) {
         sharedata->ppCapture_[i] = aec_para.data_out_f + i * aec_para.fremaelen;
@@ -203,12 +277,16 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
     sharedata->bAGCOn_ = true;
-    sharedata->bRNNOISEOn_ = false;
+    sharedata->bRNNOISEOn_ = true;
+
+    sharedata->RNNCounter_ = 0;
 
     sharedata->pDesire_ = aec_para.data_in_f;
     sharedata->pReffer_ = aec_para.data_in_f2;
     sharedata->pError_ = aec_para.data_out_f;
-
+    sharedata->pRNNERROR_ = aec_para.data_out_f4;
+    sharedata->pRNNPOWER_ = aec_para.data_out_f3;
+    sharedata->pRNNBuffer_ = aec_para.data_out_f5;
     // buffer
     
     //for (int i = 0; i < 5; i++) {

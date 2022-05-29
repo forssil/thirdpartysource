@@ -91,6 +91,10 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
 	m_CSpeechStatic->Porcess(m_pfPwr, m_pfNoise, m_pfTrans);
 	memcpy(m_pfGaintemp, m_CSpeechStatic->GetGain(), m_nQNum*sizeof(float));
 #else
+    if (aecdata.ChannelIndex_ == 1) {
+        m_CSpeechStatic->SetGmin(1);
+    }
+    
 	m_CSpeechStatic->Porcess(m_pfPwr, m_pfNoise);
 	// set m_pfTrans[0] = 0 , so m_fAllbandProb = 1
 	m_pfTrans[0] = 0;
@@ -102,6 +106,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
 	for (CAUDIO_U32_t i = 0; i < m_nQNum; ++i)
 	{
 		m_pfGaintemp[i] = min(gain_static[i], gain_transient[i]);
+        //m_pfGaintemp[i] = gain_transient[i];
 	}
 
 #endif

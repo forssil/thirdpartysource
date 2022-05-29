@@ -25,6 +25,7 @@ void CSpeechEst::InitSpeechEst()
 	m_fAlpha_prio=0.7f;
 	m_fBeta_prio=0.7f;
 	SetGmin(0.0316f); //-30dB
+    //SetGmin(0.1f); //-20dB
 	SetBinUsed(2,m_nLen);
 	/*for high bands */
 	for (i=0;i<2;i++)
@@ -211,6 +212,9 @@ void CSpeechEst::Porcess(float *InPwer, float* Noise)
 {
 	UpdateSNR(InPwer, Noise);
 	UpdateProb();
+    if (Noise[0] != 0) {
+       // m_fGainMin = 0.9;
+    }
 	UpdateGain();
 }
 
