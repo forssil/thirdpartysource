@@ -697,6 +697,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 
     //RNNOISE
     bool                bRNNOISEOn_;
+    bool                bPreRnnOn_;
     AUDIO_DATA_TYPE     *pRNNERROR_;
     AUDIO_DATA_TYPE     *pRNNPOWER_;
     AUDIO_DATA_TYPE     *pRNNBuffer_;
@@ -705,6 +706,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
     int                 RNNCounter_;
     int                 RNNCounter_enhance_;
     int                 ChannelIndex_;
+    CAUDIO_U32_t        FrameCounter_;
 
 } audio_pro_share;
 
