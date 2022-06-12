@@ -1,9 +1,6 @@
 #ifndef _H_AdapFilterGroup_
 #define _H_AdapFilterGroup_
 
-#define ADAPTIVE_FILTER_ALGO_NLMS
-//#define ADAPTIVE_FILTER_ALGO_AP
-
 /*
 CAdapFilterGroup is a class of a bank of adaptive filters, is instead of CAdapFilter array in CSubbandAdap.
 */
@@ -13,7 +10,7 @@ class CAdapFilterGroup
 public:
 	CAdapFilterGroup(int numbank,int *ntaps,float mu, float delat_gain);
 	~CAdapFilterGroup(void);
-	void UpdateStep(float fCorr);
+	//void UpdateStep(float fCorr);
 	void AdapfilterIni();
 	void UpdateR11_R12(const float *newRefer);//*newRefer size 2*m_nNumBank
 	void UpdateReferEnergy();
@@ -26,21 +23,21 @@ public:
 	void UpdateFilterWeight(void);
 	void UpdateDecay(int indxbin,int attack_length, float *attackTaps,float subbandDecay,float attackGain);
 	void Resetfilter(int startbin,int endbin);
-	void Adap2Fix(int startbin,int endbin);
-	void Fix2Adap(int startbin,int endbin);
-	float GetMaxAdW(void);
+	//void Adap2Fix(int startbin,int endbin);
+	//void Fix2Adap(int startbin,int endbin);
+	//float GetMaxAdW(void);
 	float* GetMaxAdWVec(){return m_fpMaxAdp;};
 	//void process(const float *Refer,const float *Des);
-	void reset_process(int startbin ,int endbin ,short flag);
+	//void reset_process(int startbin ,int endbin ,short flag);
 	void ResetDelay_Taps(int indx);
-	void MoveTapsForward(int indx,int abs_delay);
-	void MoveTapsBackward(int indx,int abs_delay);
-	void UpdateDelaylineInvers(const float *newRefer);
-	void UpdateR11_R12Invers(const float *newRefer);
+	//void MoveTapsForward(int indx,int abs_delay);
+	//void MoveTapsBackward(int indx,int abs_delay);
+	//void UpdateDelaylineInvers(const float *newRefer);
+	//void UpdateR11_R12Invers(const float *newRefer);
 	void SumR11_R12();
 	void process(const float *Refer,const float *Des,float *est,float* err,int update_flag);
 	float* GetFixTaps(int i){return m_cpFixW+m_npDelaylIndx[i];};
-	void UpdateFilterWeight_band(int startbin,int endbin);
+	//void UpdateFilterWeight_band(int startbin,int endbin);
 	void SetDeltaGain(float gain){m_fDeltaTC=gain;};
 private:
 	int   m_nNumBank;// the number of filters in bank
@@ -64,7 +61,7 @@ private:
 	float *m_fpMaxAdp;//m_nNumBank
 	float *m_cpFixW;//sum(2*filtertaps[m]+2) as same as length of m_fpReferDelayLine
 	float *m_fpAttackTaps;//sum(filtertaps[m]+1) as same as half length of m_fpReferDelayLine
-	float *m_fpExpDecay;//m_nNumBank
+	float *m_fpAdEstPwr;//m_nNumBank
 
 	float *m_fpDelta;//m_nNumBank
 	float m_fDeltaTC;//constant 

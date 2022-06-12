@@ -554,7 +554,7 @@ int CAcousticEchoCancellation::ResetAll()
 	  m_AECData.pNRCNGBuffer_ = m_AECData.pErrorSpectrumPower_ + m_nFFTlen ;///reuse this buffer
 
 	  m_pSubBandAdap = new CSubbandAdap(m_nFs, m_nFFTlen);
-	  m_pSubBandAdap->Subband_init();
+	  m_pSubBandAdap->Subband_init(25, 0, 0.6f, 1.f);
 	  m_pPostFil = new CPostFilter(m_nFs, m_nFFTlen);
 	  //SPest
 	  m_pSPest = new SPEst();

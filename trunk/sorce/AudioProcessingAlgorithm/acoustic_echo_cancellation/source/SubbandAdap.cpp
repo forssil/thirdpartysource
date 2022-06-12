@@ -131,13 +131,9 @@ void CSubbandAdap::process(float * Refer ,float *Des,float *OutErr,float *OutEst
 	float *outest=OutEst+offset*2;
 	bool copied = false;
 
-
 	m_nFarVAD=aecdata.nFarVAD_;
-
 	//do filter
-	//m_CpAdapG->UpdateStep(aecdata.fDTDgain);
 	m_CpAdapG->UpdateDelta(aecdata.pNoiseSPwr+offset, aecdata.fDTDgain);
-	//m_CpAdapG->UpdateDelta(NULL);
 	m_CpAdapG->process(re,de,outest,outerr,m_nFarVAD);
 
 	
