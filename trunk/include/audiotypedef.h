@@ -708,6 +708,8 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
     int                 RNNCounter_enhance_;
     int                 ChannelIndex_;
     CAUDIO_U32_t        FrameCounter_;
+    float               RnnVad_;
+    AUDIO_DATA_TYPE     *RnnGain_;
 
 } audio_pro_share;
 

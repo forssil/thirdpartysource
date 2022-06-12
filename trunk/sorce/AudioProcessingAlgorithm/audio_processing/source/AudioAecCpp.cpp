@@ -111,10 +111,10 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
                 tmp[i] = sharedata->pRNNBuffer_[i];
                 tmp_in += tmp[i] * tmp[i];
             }
-            rnnoise_process_frame(rnnoise, sharedata->pRNNBufferDiff_, sharedata->pRNNBufferDiff_);
-            if (sharedata->FrameCounter_ == 3659) {
-                sharedata->FrameCounter_ *= 1;
-            }
+            float rnn_vad = rnnoise_process_frame(rnnoise, sharedata->pRNNBufferDiff_, sharedata->pRNNBufferDiff_);
+            sharedata->RnnVad_ += 0.1*(rnn_vad - sharedata->RnnVad_);
+            get_rnn_gain(rnnoise, 1024, sharedata->RnnGain_);
+
             for (int i = 0; i < aec_para.fremaelen; i++) {
                 sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1 - alpha) * sharedata->pRNNBufferDiff_[i] * sharedata->pRNNBufferDiff_[i];
                 tmp_out += sharedata->pRNNPOWER_[i];
@@ -312,13 +312,15 @@ void aec_processing_init_cpp(void  **p_aec)
     aec_para.data_out_f = aec_para.data_in_f + aec_para.fremaelen;
     memset(aec_para.data_in_f, 0, (aec_para.fremaelen*(2 + 2 * aec_para.mics_num)) * sizeof(float));
 
-    aec_para.data_in_f2 = new float[aec_para.fremaelen * 7 + 64];
+    aec_para.data_in_f2 = new float[aec_para.fremaelen * 7 + 64 + 512];
     aec_para.data_out_f2 = aec_para.data_in_f2 + aec_para.fremaelen;
     aec_para.data_out_f3 = aec_para.data_out_f2 + aec_para.fremaelen;
     aec_para.data_out_f4 = aec_para.data_out_f3 + aec_para.fremaelen;
     aec_para.data_out_f5 = aec_para.data_out_f4 + aec_para.fremaelen;
     aec_para.data_out_f6 = aec_para.data_out_f5 + 2 * aec_para.fremaelen;
-    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 7 + 64) * sizeof(float));
+    aec_para.data_out_f7 = aec_para.data_out_f6 + aec_para.fremaelen + 64;
+
+    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 7 + 64 + 512) * sizeof(float));
 
     for (int i = 0; i < aec_para.mics_num; i++) {
         sharedata->ppCapture_[i] = aec_para.data_out_f + i * aec_para.fremaelen;
@@ -336,14 +338,16 @@ void aec_processing_init_cpp(void  **p_aec)
 
     sharedata->RNNCounter_ = 0;
     sharedata->FrameCounter_ = 0;
+    sharedata->RnnVad_ = 0.f;
 
     sharedata->pDesire_ = aec_para.data_in_f;
     sharedata->pReffer_ = aec_para.data_in_f2;
     sharedata->pError_ = aec_para.data_out_f;
     sharedata->pRNNERROR_ = aec_para.data_out_f4;
     sharedata->pRNNPOWER_ = aec_para.data_out_f3;
-    sharedata->pRNNBuffer_ = aec_para.data_out_f5;
-    sharedata->pRNNBufferDiff_ = aec_para.data_out_f6;
+    sharedata->pRNNBuffer_ = aec_para.data_out_f5; // 480 * 2
+    sharedata->pRNNBufferDiff_ = aec_para.data_out_f6; // 480 + 64
+    sharedata->RnnGain_ = aec_para.data_out_f7; // 512
 
     // buffer
     

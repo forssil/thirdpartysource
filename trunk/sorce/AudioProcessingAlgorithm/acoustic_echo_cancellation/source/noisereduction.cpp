@@ -28,14 +28,16 @@ CNoiseRedu::CNoiseRedu(int fs, int fftlen)
 	m_pfPwrFd=m_CPsd->GetCQPsdFd();
 	m_fMinGain=0.2f;
 	maxloop=fftlen/2;
-	m_pfGainout=new float[3*maxloop];
+	m_pfGainout=new float[4*maxloop];
 	m_pfNoiseLine=m_pfGainout+maxloop;
 	m_pfWinWeight=m_pfNoiseLine+maxloop;
+    m_pfnrin_smooth = m_pfWinWeight + maxloop;
 	delt= 1.f/float(maxloop);
 	for (i=0;i<maxloop;i++)
 	{
 		m_pfWinWeight[i]=Window(i,delt);
 		m_pfNoiseLine[i]=minvalue;
+        m_pfnrin_smooth[i] = 0.f;
 
 	}
 	//init
@@ -112,6 +114,48 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
 #endif
 
 	m_CPsd->CQSpread(m_pfGaintemp,m_pfGainout);	
+    // to do: add rnn gain, min
+    int valid_bin[512] = { 0 };
+    float tmp_gain_low = 0.f;
+    float tmp_gain_sum = 0.f;
+    float tmp_psd_low = 0.f;
+    float tmp_psd_sum = 0.f;
+
+    for (CAUDIO_U32_t i = 0; i < m_nFFTLen / 2; i++)
+    {
+        //m_pfnrin_smooth[i] += 0.05 * (input[i] - m_pfnrin_smooth[i]);
+    }
+    for (CAUDIO_U32_t i = 0; i < m_nFFTLen/2; i++)
+    {
+        m_pfnrin_smooth[i] += 0.05 * (input[i] - m_pfnrin_smooth[i]);
+        tmp_gain_sum += aecdata.RnnGain_[i];
+        if (i < 86) { // 4kHz
+            tmp_gain_low += aecdata.RnnGain_[i];
+            tmp_psd_low += m_pfnrin_smooth[i];
+        }
+        tmp_psd_sum += m_pfnrin_smooth[i];        
+    }
+
+    tmp_gain_low /= 86;
+    tmp_gain_sum /= (m_nFFTLen / 2);
+    tmp_psd_low /= 86;
+    tmp_psd_sum /= (m_nFFTLen / 2);
+
+    for (CAUDIO_U32_t i = 0; i < m_nFFTLen / 2; i++)
+    {
+        if (tmp_gain_low < 0.2 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.000001 && tmp_psd_sum < 0.000001) { // -60dB
+            m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
+        }
+
+        if (tmp_gain_low < 0.1 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.00001 && tmp_psd_sum < 0.000001) { // -60dB
+            //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
+        }
+
+        if (tmp_gain_low < 0.7 && tmp_gain_sum < 0.5 && tmp_psd_low < 100) {
+            //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
+        }
+    }
+
 	m_CPsd->CQSpread(m_pfNoise,m_pfNoiseLine);	
  
 }

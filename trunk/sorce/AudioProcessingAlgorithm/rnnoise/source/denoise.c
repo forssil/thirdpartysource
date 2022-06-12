@@ -97,6 +97,7 @@ struct DenoiseState {
   int last_period;
   float mem_hp_x[2];
   float lastg[NB_BANDS];
+  float rnngain[1024];
   RNNState rnn;
 };
 
@@ -488,12 +489,36 @@ float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
     for (i=0;i<FREQ_SIZE;i++) {
       X[i].r *= gf[i];
       X[i].i *= gf[i];
+      st->rnngain[i] = gf[i];
     }
 #endif
   }
 
   frame_synthesis(st, out, X);
   return vad_prob;
+}
+
+void get_rnn_gain(DenoiseState *st, int fftlen, float *rnn_gain) {
+    int i;
+    float delta1 = 24000.f / 480;
+    float delta2 = 24000.f / 512;
+
+    for (i = 0; i < FREQ_SIZE; i++) {
+        for (int j = 0; j < fftlen / 2; j++) {
+            if (j == 0) {
+                rnn_gain[j] = st->rnngain[0];
+            }
+            if (j > 0 && i < fftlen / 2 -1) {
+                int tmp = j * delta2 / delta1;
+                rnn_gain[j] = ((tmp + 1)*delta1 - j * delta2)*st->rnngain[tmp] / delta1 + \
+                    (j * delta2 - tmp * delta1)*st->rnngain[tmp + 1] / delta1;
+            }
+
+            if (j == fftlen / 2 - 1) {
+                rnn_gain[j] = st->rnngain[480];
+            }
+        }
+    }
 }
 
 #if TRAINING

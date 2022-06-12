@@ -44,6 +44,7 @@ public:
 	float *m_pfGainout;
 	float *m_pfNoiseLine;/*attention: m_pfNoiseLine[0] is all band noise!!!!!!*/
 	float *m_pfWinWeight;
+    float *m_pfnrin_smooth;
 	audio_pro_share m_sAecdata;
 
 

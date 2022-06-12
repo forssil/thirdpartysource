@@ -554,7 +554,7 @@ int CAcousticEchoCancellation::ResetAll()
 	  m_AECData.pNRCNGBuffer_ = m_AECData.pErrorSpectrumPower_ + m_nFFTlen ;///reuse this buffer
 
 	  m_pSubBandAdap = new CSubbandAdap(m_nFs, m_nFFTlen);
-	  m_pSubBandAdap->Subband_init();
+	  m_pSubBandAdap->Subband_init(25, 0,  0.6, 1.f );
 	  m_pPostFil = new CPostFilter(m_nFs, m_nFFTlen);
 	  //SPest
 	  m_pSPest = new SPEst();
@@ -632,11 +632,48 @@ int CAcousticEchoCancellation::ResetAll()
               }
 
               m_AECData.ChannelIndex_ = aShareData.ChannelIndex_;
+              m_AECData.RnnGain_ = aShareData.RnnGain_;
 			  m_pPostFil->Process(&m_AECData);
 
               if (!aShareData.bRNNOISEVad_enhance_ && aShareData.ChannelIndex_ == 0) {
                   memset(m_AECData.pErrorFFT_, 0, sizeof(float)*m_AECData.nLengthFFT_);
               }
+
+              // residual echo suppression start
+
+              float Y[512] = { 0.f };
+              float X[512] = { 0.f };
+              float x_psd = 0.f;
+              float E = 0.f;
+              float erle = 0.f;
+              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
+              {
+                  if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
+                      Y[i] = m_AECData.pDesireFFT_[2 * i] * m_AECData.pDesireFFT_[2 * i] + m_AECData.pDesireFFT_[2 * i + 1] * m_AECData.pDesireFFT_[2 * i + 1];
+                      X[i] = m_AECData.pRefferFFT_[2 * i] * m_AECData.pRefferFFT_[2 * i] + m_AECData.pRefferFFT_[2 * i + 1] * m_AECData.pRefferFFT_[2 * i + 1];
+                      
+                      E += m_AECData.pErrorFFT_[2*i]* m_AECData.pErrorFFT_[2*i] + m_AECData.pErrorFFT_[2 * i + 1] * m_AECData.pErrorFFT_[2 * i + 1];
+                  }  
+              }
+              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
+              {
+                  if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
+                      erle += Y[i];
+                      x_psd += X[i];
+                  }
+              }
+              erle /= (E + 0.000000001);
+              erle = 10 * log10(erle);
+              //x_psd = 10 * log10(x_psd * 4 / m_AECData.nLengthFFT_);
+
+              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
+              {
+                  if (erle > 15 && x_psd > 0.00001 && E < 0.000002) { // E > -52dB
+                      m_AECData.pErrorFFT_[i] *= 0.01;
+                  }
+              }
+              // end
+
 		  }
 
 	  }

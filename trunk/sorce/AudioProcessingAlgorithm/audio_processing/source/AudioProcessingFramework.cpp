@@ -329,6 +329,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
             m_pAECDataArray[i].bRNNOISEVad_ = aShareData.bRNNOISEVad_;
             m_pAECDataArray[i].bRNNOISEVad_enhance_ = aShareData.bRNNOISEVad_enhance_;
             m_pAECDataArray[i].ChannelIndex_ = i;
+            m_pAECDataArray[i].RnnGain_ = aShareData.RnnGain_;
             if (i == 1 ) {
                 //m_pAECDataArray[i].bNROn_ = false;
             }

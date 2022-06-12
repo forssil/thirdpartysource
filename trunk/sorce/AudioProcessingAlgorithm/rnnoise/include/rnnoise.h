@@ -94,6 +94,13 @@ RNNOISE_EXPORT void rnnoise_destroy(DenoiseState *st);
 RNNOISE_EXPORT float rnnoise_process_frame(DenoiseState *st, float *out, const float *in);
 
 /**
+ * Get rnn gain in frequency
+ *
+ * length og rnngian is half of fftlength.
+ */
+RNNOISE_EXPORT void get_rnn_gain(DenoiseState *st, int fftlen, float *rnn_gain);
+
+/**
  * Load a model from a file
  *
  * It must be deallocated with rnnoise_model_free()
