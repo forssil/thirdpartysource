@@ -297,6 +297,7 @@ void aec_processing_init_cpp(void  **p_aec)
     aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1024, aec_para.fremaelen);
     //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1536, aec_para.fremaelen);
     ((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->Init();
+	((CAudioProcessingFrameworkInterface *)aec_para.pAPFInterface)->SetMainMicIndex(3);
     //sharedata init
     sharedata->ppCapture_ = new float*[aec_para.mics_num];
     sharedata->nChannelsInCapture_ = aec_para.mics_num;

@@ -37,6 +37,7 @@ public:
 	CPSDsmooth *m_CPsd_echo;
 	float *m_pfNoise;
 	float *m_pfTrans;
+	float *m_pfTransGain;
 	float *m_pfAlpha;
 	float *m_pfGaintemp;
 	float *m_pfPwr; /*attention: m_pfPwr[0] is all band noise!!!!!!*/

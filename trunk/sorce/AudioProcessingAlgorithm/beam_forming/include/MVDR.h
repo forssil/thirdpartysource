@@ -41,3 +41,28 @@ private:
  //   130, -38, 130, -38, 130, -38, 130, -38, 10130, -38
 	//};
 };
+
+class CAdaptiveBeamForming {
+public:
+	CAdaptiveBeamForming(int fft_len, int fs, int bins, int channels);
+	~CAdaptiveBeamForming();
+	void init();
+	void process(audio_pro_share* input,int input_len, audio_pro_share& output, int main_channel);
+
+private:
+	int m_ncounter;
+	int m_nChannels;
+	int m_nMainChannel;
+
+	float m_fc;
+	int m_nbins;
+	int m_nFftLen;
+	int m_nFs;
+	float m_fLamda = .3f;
+
+	float **m_fppAutoCorr;//[channel-1][fftlen/2]
+	float **m_fppCrossCorr;//[channel-1][fftlen]
+	float **m_fppTransFilter;//[channel-1][fftlen]
+	float *m_fpOutPut;//[channel-1][fftlen]
+	float m_fActiveThreashold = 0.000001f;
+};

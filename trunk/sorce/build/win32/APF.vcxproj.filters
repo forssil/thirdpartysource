@@ -24,12 +24,18 @@
     <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Compandor.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioAecCpp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioProcessingFramework.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Compandor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioAecCpp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

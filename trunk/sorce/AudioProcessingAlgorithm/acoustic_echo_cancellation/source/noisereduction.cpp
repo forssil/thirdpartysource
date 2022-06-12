@@ -22,8 +22,12 @@ CNoiseRedu::CNoiseRedu(int fs, int fftlen)
 	m_pfTrans=m_CNois->GetTrans();
 	m_pfAlpha=m_CPsd->GetAlpha();
 //	m_pfGaintemp=m_CSpeech->GetGain();
-	m_pfGaintemp = new float[m_nQNum];
+	m_pfGaintemp = new float[2*m_nQNum];
+	m_pfTransGain = m_pfGaintemp + m_nQNum;
 	memset(m_pfGaintemp, 0, sizeof(float)*m_nQNum);
+	for (int i = 0; i < m_nQNum; i++) {
+		m_pfTransGain[i] = 1.f;
+	}
 	m_pfPwr=m_CPsd->GetCQPsd();
 	m_pfPwrFd=m_CPsd->GetCQPsdFd();
 	m_fMinGain=0.2f;
@@ -189,9 +193,14 @@ void CNoiseRedu::transientnois()
 {
 	int i;
 	float temp=0.f;
+	float threshold = 0.1;
+	float gain_temp = 1.f;
 	for (i=0;i<m_nQNum;i++)
-	{
-		temp=m_CPsd_echo->m_pfPsdCQ_Fd[i]*2.f;
+	{  
+		gain_temp = m_CPsd->m_pfPsdCQ_Fd[i] / (m_CPsd_echo->m_pfPsdCQ_Fd[i] + 1e-10);
+		if (gain_temp < 0.15f && 0.001f < gain_temp)
+			m_pfTransGain[i] += 0.1f *(gain_temp - m_pfTransGain[i]);
+		temp=m_CPsd_echo->m_pfPsdCQ_Fd[i]* m_pfTransGain[i];
 		m_pfTrans[i]=temp>m_pfNoise[i]/10.f?temp:m_pfNoise[i]/10.f;///for protect snr equal infinite  
 		
 	}

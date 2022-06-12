@@ -282,10 +282,13 @@ int CAudioProcessingFramework::Init()
 	m_bInit = true;
 
 	// init MVDR
-	int bins = 512;
-	float interval = 0.2;
-	float DOA = 45 / 180 * PI;
-	m_CBF = new CMVDR(m_nFFTlen, m_nFs, bins, m_nMicsNum, interval, DOA);
+	int bins = (16000 * m_nFFTlen / m_nFs) ;
+	bins = (bins > 0 && bins < m_nFFTlen / 2) ? bins : m_nFFTlen / 2 - 1;
+	//float interval = 0.2;
+	//float DOA = 45 / 180 * PI;
+	//m_CBF = new CMVDR(m_nFFTlen, m_nFs, bins, m_nMicsNum, interval, DOA);
+	m_CBF = new CAdaptiveBeamForming(m_nFFTlen, m_nFs, bins, m_nMicsNum);
+	m_CBF->init();
 	return 0;
 }
 void CAudioProcessingFramework::ProBufferCopy(float *fp, float* fpnew)
@@ -368,9 +371,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 				m_ppCAECMics[i]->process(m_pAECDataArray[i]);
 
 			}
-			//
-			
-			//
+
 
 		}
 		else
@@ -380,38 +381,19 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 		//
 
 		//F2T
-#ifdef AUDIO_WAVE_DEBUG
-		for (int i = 0; i < m_nMicsNum; i++) {
-            if (m_APFData.bAECOn_) {
-                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
-            } else {
-                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pDesireFFT_, aShareData.ppProcessOut_[i]);
-            }
-		}
-#endif
-		memcpy(m_APFData.pErrorFFT_, m_pAECDataArray[0].pErrorFFT_, m_nFFTlen * sizeof(float));
-		//m_CBF->process(0, m_pAECDataArray, &m_APFData);
-		//for (int j = 0; j < m_nFFTlen; j++) {
-		//	for (int i = 1; i < m_nMicsNum; i++) {
-		//		m_APFData.pErrorFFT_[j] += m_pAECDataArray[i].pErrorFFT_[j];
-		//			
-		//	}
-		//	m_APFData.pErrorFFT_[j] /= m_nMicsNum;
-		//}
+//#ifdef AUDIO_WAVE_DEBUG
+//		for (int i = 0; i < m_nMicsNum; i++) {
+//            if (m_APFData.bAECOn_) {
+//                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pErrorFFT_, aShareData.ppProcessOut_[i]);
+//            } else {
+//                m_ppCF2TMics[i]->F2T(m_pAECDataArray[i].pDesireFFT_, aShareData.ppProcessOut_[i]);
+//            }
+//		}
+//#endif
+		//memcpy(m_APFData.pErrorFFT_, m_pAECDataArray[m_nMain_mic_index].pErrorFFT_, m_nFFTlen * sizeof(float));
+		m_CBF->process( m_pAECDataArray, m_nMicsNum, m_APFData, m_nMain_mic_index);
+
 		m_CF2TErr->F2T(m_APFData.pErrorFFT_, aShareData.ppProcessOut_[0]);
-
-		
-		//m_CF2TErr->F2T(m_pAECDataArray[0].pErrorFFT_, aShareData.ppProcessOut_[0]);
-
-		//if (aShareData.bNRCNGOn_)
-		//{
-		//	for (int j = 0; j < m_nMicsNum; j++) {
-		//		for (int i = 0; i < m_nFFTlen / 2; i++)
-		//		{
-		//			aShareData.ppProcessOut_[j][i] += m_APFData.pNRCNGBuffer_[i];
-		//		}
-		//	}
-		//}
 
 	}
 	else

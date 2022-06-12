@@ -98,7 +98,8 @@ private:
 	bool m_bVad;
 	float m_fCrossCor;
 	float m_fGain;  //full band gain
-	CMVDR* m_CBF;
+	//CMVDR* m_CBF;
+	CAdaptiveBeamForming* m_CBF;
 };
 
 

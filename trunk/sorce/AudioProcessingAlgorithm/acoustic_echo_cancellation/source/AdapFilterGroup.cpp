@@ -9,7 +9,7 @@ CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps, float mu, float delat
 {
 	m_nNumBank=numbank;
     m_npTaps=ntaps;
-	m_fMu = mu > 0.000001f?mu:0.5f;
+	m_fMu =  mu > 0.000001f ? mu : 0.8f;
 	m_deltagin = delat_gain >= 0.f? delat_gain:0.f;
 	AdapfilterIni();
 
@@ -38,12 +38,7 @@ void CAdapFilterGroup::AdapfilterIni()
 	
 	int i;
 	////add variable delta weights 20160626
-	//#ifdef ADAPTIVE_FILTER_ALGO_AP
 	SetMinMaxDelta(5e-8f, 0.1);
-	//#elif defined ADAPTIVE_FILTER_ALGO_NLMS
-	//SetMinMaxDelta(5e-7f, 0.1f);
-	//#endif
-
 	//
 	m_pDeltaFreWeight=new float[m_nNumBank];
 	m_nSumTapsBank=0;
@@ -85,8 +80,8 @@ void CAdapFilterGroup::AdapfilterIni()
 
     m_fpR11sum    =m_cpR12           +m_nSumLenR12;
     m_fpR22sum    =m_fpR11sum        +m_nNumBank;
-    m_fpExpDecay  =m_fpR22sum        +m_nNumBank;
-    m_fpDen       =m_fpExpDecay      +m_nNumBank;
+	m_fpAdEstPwr  = m_fpR22sum       +m_nNumBank;
+    m_fpDen       = m_fpAdEstPwr     +m_nNumBank;
 	m_fpMaxAdp    =m_fpDen           +m_nNumBank;
     m_fpDelta     =m_fpMaxAdp        +m_nNumBank;
 	
@@ -214,26 +209,12 @@ void CAdapFilterGroup::UpdateDelta(float* fp, float fCorr)
 	
 	float DeltaGain = 0.2f;
 	float err_powr=0.f;
-	float tempf=m_fDeltaTC;
-	
+	//float tempf=m_fDeltaTC;
+	int ind5k = 102;
 	for (i=0;i<m_nNumBank;i++)
 	{
 		indx=2*i;
 	
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-		if(NULL==fp)
-		{
-			err_powr=0.f;
-		}
-		else
-		{
-			err_powr= DeltaGain * fp[i];
-		}
-		err_powr+=DeltaGain * (m_cpAdErr[indx] * m_cpAdErr[indx] + m_cpAdErr[indx+1] * m_cpAdErr[indx+1]);
-
-		m_fpDelta[i] *= m_fDeltaTC;
-		m_fpDelta[i] += (1.0f - m_fDeltaTC) * (err_powr);
-#elif defined ADAPTIVE_FILTER_ALGO_NLMS
 		if(NULL==fp)
 		{
 			err_powr = 0.f;
@@ -242,10 +223,6 @@ void CAdapFilterGroup::UpdateDelta(float* fp, float fCorr)
 		{
 			err_powr = fp[i];
 		}
-
-		// smooth the error power
-		m_cpBeta2[i] *= m_fDeltaTC;
-		m_cpBeta2[i] += (1-m_fDeltaTC) * m_cpBeta1[i];
 
 		if(fCorr<0.3)
 		{
@@ -265,10 +242,10 @@ void CAdapFilterGroup::UpdateDelta(float* fp, float fCorr)
 		{
 			DeltaGain = 0.2;
 		}
+		float den_gain = 1.f;
+		if (i > ind5k) den_gain = 0.1;
+		m_fpDelta[i] = (m_cpBeta2[i]+ den_gain*m_fpDen[i]) * DeltaGain*m_deltagin;
 
-		m_fpDelta[i] = (1*m_cpBeta2[i]+ 1*m_fpDen[i]) * DeltaGain*m_deltagin;
-
-#endif
 
 		if( m_fpDelta[i] <=  m_pDeltaFreWeight[i] )
 		{
@@ -306,8 +283,14 @@ void CAdapFilterGroup::UpdateError()
 	{
 		indx=2*i;
 
+		float op_step = 1.f;
+		//if (m_cpBeta1[i + m_nNumBank] > 5.f * m_cpBeta2[i])
+		//{
+		//	op_step = fabs(1 - sqrt(fabs(m_cpBeta1[i + m_nNumBank] - m_fpAdEstPwr[i]) / (m_cpBeta2[i] + 1e-8)));
+		//	op_step = op_step > 1.f ? 1.f : op_step;
+		//}
 		// calculate the normalize error
-		float den = 1.0f/(m_fpR11sum[i] + m_fpDelta[i]);   // (R_m(1,1)+delta)^-1
+		float den = op_step /(m_fpR11sum[i] +m_fpDelta[i]);   // (R_m(1,1)+delta)^-1
 		float normalize_error_re =  den * m_cpAdErrPre[indx];   // error_normalized=(R_m(1,1)+delta)\(error_priori)
 		float normalize_error_im =  den * m_cpAdErrPre[indx+1];
 
@@ -326,12 +309,11 @@ void CAdapFilterGroup::UpdateError()
 			float tmp1= m_cpAdErrPre[indx] - factor/10 * normalize_error_re;
 			float tmp2= m_cpAdErrPre[indx + 1] - factor/10 * normalize_error_im;
 
-
 			// constrain the posteriori error
 			float err_powr2 = tmp1 * tmp1 + tmp2 * tmp2;
 			if (err_powr2 < des_powr) {
 				m_cpAdErr[indx] = tmp1;
-					m_cpAdErr[indx + 1] = tmp2;
+				m_cpAdErr[indx + 1] = tmp2;
 				err_powr = err_powr2;
 			}
 			else {
@@ -340,25 +322,30 @@ void CAdapFilterGroup::UpdateError()
 				err_powr = des_powr;
 
 			}
-
-
 		}
-		
 
 		// update normalize error to m_cpAdErrPre
-		m_cpAdErrPre[indx] = normalize_error_re;
+
+		m_cpAdErrPre[indx] = normalize_error_re ;
 		m_cpAdErrPre[indx + 1] = normalize_error_im;
 
 		// update posteriori filter output to m_cpAdEst
 		m_cpAdEst[indx]  = m_cpDes[indx] - m_cpAdErr[indx];
 		m_cpAdEst[indx+1]= m_cpDes[indx+1] - m_cpAdErr[indx+1];
 
-		// smooth the posteriori error power
-		//m_fpDen[i] *= m_fDeltaTC;
-		//m_fpDen[i] += (1.0f - m_fDeltaTC) * (err_powr);
-
 		// update the current posteriori error power to m_cpBeta1
 		m_cpBeta1[i] = err_powr;
+
+		// smooth the error power
+		m_cpBeta2[i] *= m_fDeltaTC;
+		m_cpBeta2[i] += (1 - m_fDeltaTC) * m_cpBeta1[i];
+
+		// smooth the des power
+		m_cpBeta1[i + m_nNumBank] *= m_fDeltaTC;
+		m_cpBeta1[i + m_nNumBank] += (1 - m_fDeltaTC) * des_powr;
+		// smooth the est power
+		m_fpAdEstPwr[i] *= m_fDeltaTC;
+		m_fpAdEstPwr[i] += (1 - m_fDeltaTC) * (m_cpAdEst[indx]* m_cpAdEst[indx] + m_cpAdEst[indx+1]* m_cpAdEst[indx+1]);
 	}
 }
 
@@ -393,24 +380,13 @@ void CAdapFilterGroup::filter(void)
 			temp4  +=w_re*x_im   +w_im*x_re;*/
 		}
 		indx_dely+=2;
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-		m_cpAdEst[indx]  =temp1+m_cpCorr[indx];
-		m_cpAdEst[indx+1]=temp2+m_cpCorr[indx+1];
-		m_cpAdErr[indx] =m_cpDes[indx]-m_cpAdEst[indx];
-		m_cpAdErr[indx+1] =m_cpDes[indx+1]-m_cpAdEst[indx+1];
-#elif defined ADAPTIVE_FILTER_ALGO_NLMS
-
 		m_cpAdEst[indx]  =temp1;
 		m_cpAdEst[indx+1]=temp2;
 
 		// priori error
 		m_cpAdErrPre[indx] =m_cpDes[indx]-temp1;
 		m_cpAdErrPre[indx+1] =m_cpDes[indx+1]-temp2;
-#endif
-/*		m_cpFixEst[indx]=temp3;
-		m_cpFixEst[indx+1]=temp4;
-		m_cpFixErr[indx]=m_cpDes[indx]-m_cpFixEst[indx];
-		m_cpFixErr[indx+1]=m_cpDes[indx+1]-m_cpFixEst[indx+1];	*/	
+
 	}
 }
 
@@ -423,50 +399,27 @@ void CAdapFilterGroup::UpdateFilterWeight(void)
 	float x_re,x_im;
 	float *AttackTaps;
 
-	indy=0;
-	//AttackTaps=m_fpAttackTaps;
-	
+	indy=0;	
 	{	
 		for (i=0;i<m_nNumBank;i++)	
 		{ 
 			indx=2*i;
 
-			den = 1.0f/(m_fpR11sum[i]*m_fpR22sum[i] - m_cpR12sum[indx]*m_cpR12sum[indx] - m_cpR12sum[indx+1]*m_cpR12sum[indx+1]);
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-			beta2_re   = -(m_cpR12sum[indx] * m_cpAdErr[indx] + m_cpR12sum[indx+1] *m_cpAdErr[indx+1]) * den;
-			beta2_im   = -(m_cpR12sum[indx] * m_cpAdErr[indx+1] - m_cpR12sum[indx+1] * m_cpAdErr[indx]) * den;
+			//den = 1.0f/(m_fpR11sum[i]*m_fpR22sum[i] - m_cpR12sum[indx]*m_cpR12sum[indx] - m_cpR12sum[indx+1]*m_cpR12sum[indx+1]);
 
-
-			beta12_re          = m_cpBeta1[indx]   + beta2_re;
-			beta12_im          = m_cpBeta1[indx+1] + beta2_im;
-
-
-			m_cpBeta1[indx]   = m_fpR22sum[i] * m_cpAdErr[indx] * den;
-			m_cpBeta1[indx+1] = m_fpR22sum[i] * m_cpAdErr[indx+1] * den;
-#elif defined ADAPTIVE_FILTER_ALGO_NLMS
 			beta12_re = m_cpAdErrPre[indx];
 			beta12_im = m_cpAdErrPre[indx+1];
-#endif
-
-		/*	m_cpFixBeta[indx]   = m_fpR22sum[i] * m_cpFixErr[indx] * den;
-			m_cpFixBeta[indx+1] = m_fpR22sum[i] * m_cpFixErr[indx+1] * den;
-		*/
 		////////update adaptive weights		
 	
 			for (j=0;j<=m_npTaps[i];j++,indy+=2)
 			{			
-				//est_err2_re=m_fMu*(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
-				est_err2_re = m_fMu;
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-				x_re=m_cpReferDelayLine[indy+2];
-				x_im=m_cpReferDelayLine[indy+3];
-#elif defined ADAPTIVE_FILTER_ALGO_NLMS
+				//est_err2_re = m_fMu;
+
 				x_re=m_cpReferDelayLine[indy];
 				x_im=m_cpReferDelayLine[indy+1];
-#endif
 
-				m_cpAdW[indy  ] +=   est_err2_re* (beta12_re * x_re   + beta12_im * x_im);
-				m_cpAdW[indy+1] +=   est_err2_re* (beta12_im * x_re   - beta12_re * x_im);
+				m_cpAdW[indy  ] += m_fMu * (beta12_re * x_re   + beta12_im * x_im);
+				m_cpAdW[indy+1] += m_fMu * (beta12_im * x_re   - beta12_re * x_im);
 			}
 		}
 	}
@@ -483,89 +436,84 @@ void CAdapFilterGroup::Resetfilter(int startbin,int endbin)
     memset(m_cpAdEst+2*startbin,0,sizeof(float)*indx);
     memcpy(m_cpAdErr+2*startbin,m_cpDes+2*startbin,sizeof(float)*indx);
 }
-void CAdapFilterGroup::Adap2Fix(int startbin,int endbin)
-{
-	int i,indx,maxtaps,indy,j;
-    float *AttackTaps;
-	float tmep,beta_re,beta_im,x_re,x_im;
-	indx=m_npDelaylIndx[startbin];
+//void CAdapFilterGroup::Adap2Fix(int startbin,int endbin)
+//{
+//	int i,indx,maxtaps,indy,j;
+//    float *AttackTaps;
+//	float tmep,beta_re,beta_im,x_re,x_im;
+//	indx=m_npDelaylIndx[startbin];
+//
+//	for (i=startbin;i<endbin;i++)
+//	{
+//		indy=2*i;
+//		maxtaps=m_npTaps[i];
+//		beta_re=m_cpBeta1[indy];
+//		beta_im=m_cpBeta1[indy+1];
+//		for (j=0;j<=maxtaps;j++,indx+=2)
+//		{
+//			tmep = m_fMu;
+//			x_re=m_cpReferDelayLine[indx+2];
+//			x_im=m_cpReferDelayLine[indx+3];
+//			m_cpFixW[indx  ] = m_cpAdW[indx  ] + tmep*(beta_re*x_re + beta_im*x_im);
+//			m_cpFixW[indx+1] = m_cpAdW[indx+1] + tmep*(beta_im*x_re - beta_re*x_im);
+//		}
+//	}
+//	maxtaps=endbin-startbin;
+//	maxtaps*=2;
+//	memcpy(m_cpFixErr+2*startbin,m_cpAdErr+2*startbin,sizeof(float)*maxtaps);
+//    memcpy(m_cpFixEst+2*startbin,m_cpAdEst+2*startbin,sizeof(float)*maxtaps);
+//}
+//void CAdapFilterGroup::Fix2Adap(int startbin,int endbin)
+//{
+//	int i,indx,maxtaps,indy,j;
+//	float *AttackTaps;
+//	float tmep,beta_re,beta_im,x_re,x_im;
+//	indx=m_npDelaylIndx[startbin];
+//	for (i=startbin;i<endbin;i++)
+//	{
+//		indy=2*i;
+//		maxtaps=m_npTaps[i];
+//		beta_re=m_cpBeta1[indy];
+//		beta_im=m_cpBeta1[indy+1];
+//		for (j=0;j<=maxtaps;j++,indx+=2)
+//		{
+//			x_re=m_cpReferDelayLine[indx+2];
+//			x_im=m_cpReferDelayLine[indx+3];
+//			m_cpAdW[indx  ] = m_cpFixW[indx  ] + m_fMu *(beta_re*x_re + beta_im*x_im);
+//			m_cpAdW[indx+1] = m_cpFixW[indx+1] + m_fMu *(beta_im*x_re - beta_re*x_im);
+//		}
+//	}
+//	maxtaps=endbin-startbin;
+//	maxtaps*=2;
+//	memcpy(m_cpAdErr+2*startbin,m_cpFixErr+2*startbin,sizeof(float)*maxtaps);
+//	memcpy(m_cpAdEst+2*startbin,m_cpFixEst+2*startbin,sizeof(float)*maxtaps);
+//    memset(m_cpBeta1+2*startbin,0,sizeof(float)*maxtaps);
+//
+//}
 
-   // AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
-	for (i=startbin;i<endbin;i++)
-	{
-		indy=2*i;
-		maxtaps=m_npTaps[i];
-		beta_re=m_cpBeta1[indy];
-		beta_im=m_cpBeta1[indy+1];
-		for (j=0;j<=maxtaps;j++,indx+=2)
-		{
-			//tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
-			tmep = m_fMu;
-			x_re=m_cpReferDelayLine[indx+2];
-			x_im=m_cpReferDelayLine[indx+3];
-			m_cpFixW[indx  ] = m_cpAdW[indx  ] + tmep*(beta_re*x_re + beta_im*x_im);
-			m_cpFixW[indx+1] = m_cpAdW[indx+1] + tmep*(beta_im*x_re - beta_re*x_im);
-		}
-	}
-	maxtaps=endbin-startbin;
-	maxtaps*=2;
-	memcpy(m_cpFixErr+2*startbin,m_cpAdErr+2*startbin,sizeof(float)*maxtaps);
-    memcpy(m_cpFixEst+2*startbin,m_cpAdEst+2*startbin,sizeof(float)*maxtaps);
-}
-void CAdapFilterGroup::Fix2Adap(int startbin,int endbin)
-{
-	int i,indx,maxtaps,indy,j;
-	float *AttackTaps;
-	float tmep,beta_re,beta_im,x_re,x_im;
-	indx=m_npDelaylIndx[startbin];
-	//AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
-	for (i=startbin;i<endbin;i++)
-	{
-		indy=2*i;
-		maxtaps=m_npTaps[i];
-		beta_re=m_cpBeta1[indy];
-		beta_im=m_cpBeta1[indy+1];
-		for (j=0;j<=maxtaps;j++,indx+=2)
-		{
-			//tmep=m_fMu* (*AttackTaps++);/*m_fpAttackTaps[indy+i]*/	
-			x_re=m_cpReferDelayLine[indx+2];
-			x_im=m_cpReferDelayLine[indx+3];
-			m_cpAdW[indx  ] = m_cpFixW[indx  ] + m_fMu *(beta_re*x_re + beta_im*x_im);
-			m_cpAdW[indx+1] = m_cpFixW[indx+1] + m_fMu *(beta_im*x_re - beta_re*x_im);
-		}
-	}
-	maxtaps=endbin-startbin;
-	maxtaps*=2;
-	memcpy(m_cpAdErr+2*startbin,m_cpFixErr+2*startbin,sizeof(float)*maxtaps);
-	memcpy(m_cpAdEst+2*startbin,m_cpFixEst+2*startbin,sizeof(float)*maxtaps);
-    memset(m_cpBeta1+2*startbin,0,sizeof(float)*maxtaps);
-
-}
-
-float CAdapFilterGroup::GetMaxAdW(void)
-{
-
-	int i,j,indx;
-	float temp,temp1;
-	float *fp=m_cpAdW;
-	m_fMaxAdpAll=0;
-	for(i=0;i<m_nNumBank;i++)
-	//for(i=2;i<m_nNumBank-2;i++)/*for single band devergenc 2012.01.06*/
-	{
-		temp1=0;
-		indx=m_npTaps[i];
-		for (j=0;j<=indx;j++)
-		{
-			temp=*fp*(*fp)+fp[1]*fp[1];
-			fp+=2;
-			temp1=(temp1>temp)?temp1:temp;
-		}
-		m_fpMaxAdp[i]=temp1;
-        m_fMaxAdpAll=(temp1>m_fMaxAdpAll)?temp1:m_fMaxAdpAll;
-
-	}
-	return m_fMaxAdpAll;
-}
+//float CAdapFilterGroup::GetMaxAdW(void)
+//{
+//
+//	int i,j,indx;
+//	float temp,temp1;
+//	float *fp=m_cpAdW;
+//	m_fMaxAdpAll=0;
+//	for(i=0;i<m_nNumBank;i++)
+//	{
+//		temp1=0;
+//		indx=m_npTaps[i];
+//		for (j=0;j<=indx;j++)
+//		{
+//			temp=*fp*(*fp)+fp[1]*fp[1];
+//			fp+=2;
+//			temp1=(temp1>temp)?temp1:temp;
+//		}
+//		m_fpMaxAdp[i]=temp1;
+//        m_fMaxAdpAll=(temp1>m_fMaxAdpAll)?temp1:m_fMaxAdpAll;
+//
+//	}
+//	return m_fMaxAdpAll;
+//}
 
 // processing of complex adaptive filter
 //*Refer size 2*m_nNumBank
@@ -574,17 +522,11 @@ float CAdapFilterGroup::GetMaxAdW(void)
 void CAdapFilterGroup::process(const float *Refer,const float *Des,float *adest,float *err,int update_flag)
 {
 	    m_cpDes=Des;
-		//UpdateDelta();
 		UpdateDelayline(Refer);	
 		SumR11_R12();
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-		UpdateCorr();
-#endif
 		filter();
-#ifdef ADAPTIVE_FILTER_ALGO_NLMS
 		UpdateReferEnergy();
 		UpdateError();
-#endif
 		m_nFlagcnt=(update_flag==1)?20:(m_nFlagcnt-1);
 		if (m_nFlagcnt>0)
 		{
@@ -594,24 +536,24 @@ void CAdapFilterGroup::process(const float *Refer,const float *Des,float *adest,
 		memcpy(err,m_cpAdErr,2*m_nNumBank*sizeof(float));
 
 }
-
-void CAdapFilterGroup::reset_process(int startbin ,int endbin ,short flag)
-{
-	if(flag ==-3)/* Adapt set to Zero */
-	{
-		Resetfilter(startbin,endbin);
-		UpdateFilterWeight_band( startbin, endbin);
-	}
-	else if (flag==-1) /* Fixed copied to adapt */
-	{
-		Fix2Adap(startbin,endbin);
-		UpdateFilterWeight_band( startbin, endbin);
-	}
-	if (flag==1)/* Adapt copied to fixed */
-	{
-		Adap2Fix(startbin,endbin);		
-	}
-}
+//
+//void CAdapFilterGroup::reset_process(int startbin ,int endbin ,short flag)
+//{
+//	if(flag ==-3)/* Adapt set to Zero */
+//	{
+//		Resetfilter(startbin,endbin);
+//		UpdateFilterWeight_band( startbin, endbin);
+//	}
+//	else if (flag==-1) /* Fixed copied to adapt */
+//	{
+//		Fix2Adap(startbin,endbin);
+//		UpdateFilterWeight_band( startbin, endbin);
+//	}
+//	if (flag==1)/* Adapt copied to fixed */
+//	{
+//		Adap2Fix(startbin,endbin);		
+//	}
+//}
 void CAdapFilterGroup::ResetDelay_Taps(int indx)
 {
 	int len;
@@ -622,76 +564,76 @@ void CAdapFilterGroup::ResetDelay_Taps(int indx)
 	memset(m_fpR11+m_npR11Indx[indx],0,sizeof(float)*(len+1));
 	memset(m_cpR12+m_npR12Indx[indx],0,sizeof(float)*(2*len));
 }
-
-void CAdapFilterGroup::MoveTapsForward(int indx,int abs_delay)
-{
-	int frames_to_move = m_npTaps[indx] * 2 - abs_delay * 2;
-	int bytes_to_move = sizeof (float) * frames_to_move;
-	
-		memmove(m_cpFixW+m_npDelaylIndx[indx] + abs_delay * 2, m_cpFixW+m_npDelaylIndx[indx], bytes_to_move);
-		memmove(m_cpAdW +m_npDelaylIndx[indx] + abs_delay * 2, m_cpAdW +m_npDelaylIndx[indx], bytes_to_move);
-
-		memset (m_cpFixW+m_npDelaylIndx[indx], 0, sizeof (float) * abs_delay * 2);
-		memset (m_cpAdW +m_npDelaylIndx[indx], 0, sizeof (float) * abs_delay * 2);
-	
-}
-void CAdapFilterGroup::MoveTapsBackward(int indx,int abs_delay)
-{
-	int frames_to_move = m_npTaps[indx] * 2 - abs_delay * 2;
-	int bytes_to_move = sizeof (float) * frames_to_move;
-	
-	{
-		memmove(m_cpFixW+m_npDelaylIndx[indx], m_cpFixW+m_npDelaylIndx[indx] + abs_delay* 2, bytes_to_move);
-		memmove(m_cpAdW +m_npDelaylIndx[indx], m_cpAdW +m_npDelaylIndx[indx] + abs_delay* 2, bytes_to_move);
-
-		memset (m_cpFixW+m_npDelaylIndx[indx] +frames_to_move- 1, 0, sizeof (float) * abs_delay * 2);
-		memset (m_cpAdW +m_npDelaylIndx[indx] +frames_to_move- 1, 0, sizeof (float) * abs_delay * 2);
-	}	
-}
-void CAdapFilterGroup::UpdateDelaylineInvers(const float *newRefer)
-{
-
-	//int maxtaps=2*m_npTaps[];
-	int i,indx,indy;
-	memmove(m_cpReferDelayLine, m_cpReferDelayLine + 2, (m_nSumLenDelLine-2)*sizeof(float));
-
-	for (i=0;i<m_nNumBank;i++)
-	{
-		indx=2*i;
-		indy=m_npDelaylIndx[i+1]-2;
-		*(m_cpReferDelayLine+indy)  =*(newRefer+indx);
-		*(m_cpReferDelayLine+indy+1)=*(newRefer+indx+1);
-	}
-
-	UpdateR11_R12Invers(newRefer);//update R11 R12
-
-}
-void CAdapFilterGroup::UpdateR11_R12Invers(const float *newRefer)
-{
-	int indx;
-	int i;
-	const float *fpr=newRefer;
-	////update R11
-	memmove(m_fpR11,m_fpR11+1,(m_nSumLenR11-1)*sizeof(float));
- 	////update R12	
-	memmove(m_cpR12,m_cpR12+2,(m_nSumLenR12-2)*sizeof(float));
-	for (i=0;i<m_nNumBank-1;i++)
-	{		
-		////update R11
-		*(m_fpR11+m_npR11Indx[i+1]-1)=fpr[0]*fpr[0]+fpr[1]*fpr[1];
-		////update R12	
-		indx=m_npDelaylIndx[i+1]-4;
-		*(m_cpR12+m_npR12Indx[i+1]-2)=m_cpReferDelayLine[indx]*fpr[0]+m_cpReferDelayLine[indx+1]*fpr[1];
-		*(m_cpR12+m_npR12Indx[i+1]-1)=m_cpReferDelayLine[indx+1]*fpr[0]-m_cpReferDelayLine[indx]*fpr[1];
-		fpr+=2;
-	}
-	//fpr+=2;
-	*(m_fpR11+m_nSumLenR11-1)=fpr[0]*fpr[0]+fpr[1]*fpr[1];
-	indx=m_npDelaylIndx[i+1]-4;
-	*(m_cpR12+m_nSumLenR12-2)=m_cpReferDelayLine[indx]*fpr[0]+m_cpReferDelayLine[indx+1]*fpr[1];
-	*(m_cpR12+m_nSumLenR12-1)=m_cpReferDelayLine[indx+1]*fpr[0]-m_cpReferDelayLine[indx]*fpr[1];
-
-}
+//
+//void CAdapFilterGroup::MoveTapsForward(int indx,int abs_delay)
+//{
+//	int frames_to_move = m_npTaps[indx] * 2 - abs_delay * 2;
+//	int bytes_to_move = sizeof (float) * frames_to_move;
+//	
+//		memmove(m_cpFixW+m_npDelaylIndx[indx] + abs_delay * 2, m_cpFixW+m_npDelaylIndx[indx], bytes_to_move);
+//		memmove(m_cpAdW +m_npDelaylIndx[indx] + abs_delay * 2, m_cpAdW +m_npDelaylIndx[indx], bytes_to_move);
+//
+//		memset (m_cpFixW+m_npDelaylIndx[indx], 0, sizeof (float) * abs_delay * 2);
+//		memset (m_cpAdW +m_npDelaylIndx[indx], 0, sizeof (float) * abs_delay * 2);
+//	
+//}
+//void CAdapFilterGroup::MoveTapsBackward(int indx,int abs_delay)
+//{
+//	int frames_to_move = m_npTaps[indx] * 2 - abs_delay * 2;
+//	int bytes_to_move = sizeof (float) * frames_to_move;
+//	
+//	{
+//		memmove(m_cpFixW+m_npDelaylIndx[indx], m_cpFixW+m_npDelaylIndx[indx] + abs_delay* 2, bytes_to_move);
+//		memmove(m_cpAdW +m_npDelaylIndx[indx], m_cpAdW +m_npDelaylIndx[indx] + abs_delay* 2, bytes_to_move);
+//
+//		memset (m_cpFixW+m_npDelaylIndx[indx] +frames_to_move- 1, 0, sizeof (float) * abs_delay * 2);
+//		memset (m_cpAdW +m_npDelaylIndx[indx] +frames_to_move- 1, 0, sizeof (float) * abs_delay * 2);
+//	}	
+//}
+//void CAdapFilterGroup::UpdateDelaylineInvers(const float *newRefer)
+//{
+//
+//	int i,indx,indy;
+//	memmove(m_cpReferDelayLine, m_cpReferDelayLine + 2, (m_nSumLenDelLine-2)*sizeof(float));
+//
+//	for (i=0;i<m_nNumBank;i++)
+//	{
+//		indx=2*i;
+//		indy=m_npDelaylIndx[i+1]-2;
+//		*(m_cpReferDelayLine+indy)  =*(newRefer+indx);
+//		*(m_cpReferDelayLine+indy+1)=*(newRefer+indx+1);
+//	}
+//
+//	UpdateR11_R12Invers(newRefer);//update R11 R12
+//
+//}
+//
+//void CAdapFilterGroup::UpdateR11_R12Invers(const float *newRefer)
+//{
+//	int indx;
+//	int i;
+//	const float *fpr=newRefer;
+//	////update R11
+//	memmove(m_fpR11,m_fpR11+1,(m_nSumLenR11-1)*sizeof(float));
+// 	////update R12	
+//	memmove(m_cpR12,m_cpR12+2,(m_nSumLenR12-2)*sizeof(float));
+//	for (i=0;i<m_nNumBank-1;i++)
+//	{		
+//		////update R11
+//		*(m_fpR11+m_npR11Indx[i+1]-1)=fpr[0]*fpr[0]+fpr[1]*fpr[1];
+//		////update R12	
+//		indx=m_npDelaylIndx[i+1]-4;
+//		*(m_cpR12+m_npR12Indx[i+1]-2)=m_cpReferDelayLine[indx]*fpr[0]+m_cpReferDelayLine[indx+1]*fpr[1];
+//		*(m_cpR12+m_npR12Indx[i+1]-1)=m_cpReferDelayLine[indx+1]*fpr[0]-m_cpReferDelayLine[indx]*fpr[1];
+//		fpr+=2;
+//	}
+//	//fpr+=2;
+//	*(m_fpR11+m_nSumLenR11-1)=fpr[0]*fpr[0]+fpr[1]*fpr[1];
+//	indx=m_npDelaylIndx[i+1]-4;
+//	*(m_cpR12+m_nSumLenR12-2)=m_cpReferDelayLine[indx]*fpr[0]+m_cpReferDelayLine[indx+1]*fpr[1];
+//	*(m_cpR12+m_nSumLenR12-1)=m_cpReferDelayLine[indx+1]*fpr[0]-m_cpReferDelayLine[indx]*fpr[1];
+//
+//}
 void CAdapFilterGroup::SumR11_R12()
 {
 	int i,j;
@@ -716,93 +658,80 @@ void CAdapFilterGroup::SumR11_R12()
 		fpr11=m_fpR11+m_npR11Indx[i];
 		fpr22=fpr11+1;
 		fpr12=m_cpR12+m_npR12Indx[i];
-		//AttackTaps=m_fpAttackTaps+m_npR11Indx[i];
 
 		for (j=0;j<m_npTaps[i];j++)
 		{
-			//temp=*AttackTaps;
-			//r11		+= temp * (*(fpr11++));
-			//r12_re	+= temp * (*(fpr12++));
-			//r12_im	+= temp * (*(fpr12++));
-			//r22		+= temp * (*(fpr22++));
-			//AttackTaps++;
 			r11		+= (*(fpr11++));
 			r12_re	+=  (*(fpr12++));
 			r12_im	+=  (*(fpr12++));
 			r22		+=  (*(fpr22++));
 		}
 
-#ifdef ADAPTIVE_FILTER_ALGO_AP
-		m_fpR11sum[i]=r11+m_fpDelta[i];
-		m_fpR22sum[i]=r22+m_fpDelta[i];
-#elif defined ADAPTIVE_FILTER_ALGO_NLMS
 		m_fpR11sum[i]=r11;
 		m_fpR22sum[i]=r22;
-#endif
+
 		m_cpR12sum[indx]  =r12_re;
 		m_cpR12sum[indx+1]=r12_im;
 	}
 }
+//
+//void CAdapFilterGroup::UpdateFilterWeight_band(int startbin,int endbin)
+//{
+//	int i,j,indx,indy;
+//	float est_err2_re;
+//	float den,beta12_re,beta12_im,beta2_re,beta2_im;
+//	float x_re,x_im;
+//	float *AttackTaps;
+//
+//	indy=m_npDelaylIndx[startbin];
+//
+//	{	
+//		for (i=startbin;i<endbin;i++)	
+//		{ 
+//			indx=2*i;
+//			den = 1.0f/(m_fpR11sum[i]*m_fpR22sum[i] - m_cpR12sum[indx]*m_cpR12sum[indx] - m_cpR12sum[indx+1]*m_cpR12sum[indx+1]);
+//
+//			beta2_re   = -(m_cpR12sum[indx] * m_cpAdErr[indx] + m_cpR12sum[indx+1] *m_cpAdErr[indx+1]) * den;
+//			beta2_im   = -(m_cpR12sum[indx] * m_cpAdErr[indx+1] - m_cpR12sum[indx+1] * m_cpAdErr[indx]) * den;
+//
+//			beta12_re          = m_cpBeta1[indx]   + beta2_re;
+//			beta12_im          = m_cpBeta1[indx+1] + beta2_im;
+//
+//
+//			m_cpBeta1[indx]   = m_fpR22sum[i] * m_cpAdErr[indx] * den;
+//			m_cpBeta1[indx+1] = m_fpR22sum[i] * m_cpAdErr[indx+1] * den;
+//
+//
+//			m_cpFixBeta[indx]   = m_fpR22sum[i] * m_cpFixErr[indx] * den;
+//			m_cpFixBeta[indx+1] = m_fpR22sum[i] * m_cpFixErr[indx+1] * den;
+//
+//			////////update adaptive weights		
+//
+//			for (j=0;j<=m_npTaps[i];j++,indy+=2)
+//			{			
+//				x_re=m_cpReferDelayLine[indy+2];
+//				x_im=m_cpReferDelayLine[indy+3];
+//
+//				m_cpAdW[indy  ] +=  (beta12_re * x_re   + beta12_im * x_im);
+//				m_cpAdW[indy+1] +=  (beta12_im * x_re   - beta12_re * x_im);
+//			}
+//		}
+//	}
+//
+//}
 
-void CAdapFilterGroup::UpdateFilterWeight_band(int startbin,int endbin)
-{
-	int i,j,indx,indy;
-	//float expDecay[];
-	float est_err2_re;
-	float den,beta12_re,beta12_im,beta2_re,beta2_im;
-	float x_re,x_im;
-	float *AttackTaps;
-	//memset(m_fpExpDecay,1,sizeof(float)*m_nNumBank);
-	indy=m_npDelaylIndx[startbin];
-	//AttackTaps=m_fpAttackTaps+m_npR11Indx[startbin];
-
-	{	
-		for (i=startbin;i<endbin;i++)	
-		{ 
-			indx=2*i;
-			den = 1.0f/(m_fpR11sum[i]*m_fpR22sum[i] - m_cpR12sum[indx]*m_cpR12sum[indx] - m_cpR12sum[indx+1]*m_cpR12sum[indx+1]);
-
-			beta2_re   = -(m_cpR12sum[indx] * m_cpAdErr[indx] + m_cpR12sum[indx+1] *m_cpAdErr[indx+1]) * den;
-			beta2_im   = -(m_cpR12sum[indx] * m_cpAdErr[indx+1] - m_cpR12sum[indx+1] * m_cpAdErr[indx]) * den;
-
-			beta12_re          = m_cpBeta1[indx]   + beta2_re;
-			beta12_im          = m_cpBeta1[indx+1] + beta2_im;
-
-
-			m_cpBeta1[indx]   = m_fpR22sum[i] * m_cpAdErr[indx] * den;
-			m_cpBeta1[indx+1] = m_fpR22sum[i] * m_cpAdErr[indx+1] * den;
-
-
-			m_cpFixBeta[indx]   = m_fpR22sum[i] * m_cpFixErr[indx] * den;
-			m_cpFixBeta[indx+1] = m_fpR22sum[i] * m_cpFixErr[indx+1] * den;
-
-			////////update adaptive weights		
-
-			for (j=0;j<=m_npTaps[i];j++,indy+=2)
-			{			
-				//est_err2_re=(*AttackTaps++);//m_fpAttackTaps[m_npTaps[i]=0!
-				x_re=m_cpReferDelayLine[indy+2];
-				x_im=m_cpReferDelayLine[indy+3];
-
-				m_cpAdW[indy  ] +=  (beta12_re * x_re   + beta12_im * x_im);
-				m_cpAdW[indy+1] +=  (beta12_im * x_re   - beta12_re * x_im);
-			}
-		}
-	}
-
-}
-void CAdapFilterGroup::UpdateStep(float fCorr)
-{
-	if(20==m_nFlagcnt)
-	{
-		float tempf=2*(sqrtf(fCorr)-0.2);
-		tempf=tempf>1.f?1.f:tempf;
-		tempf=tempf<5e-7f?0.0f:tempf;
-
-		m_fMu*=0.95f;
-		m_fMu+=0.05f*tempf;
-		
-	}
-	
-	
-}
+//void CAdapFilterGroup::UpdateStep(float fCorr)
+//{
+//	if(20==m_nFlagcnt)
+//	{
+//		float tempf=2*(sqrtf(fCorr)-0.2);
+//		tempf=tempf>1.f?1.f:tempf;
+//		tempf=tempf<5e-7f?0.0f:tempf;
+//
+//		m_fMu*=0.95f;
+//		m_fMu+=0.05f*tempf;
+//		
+//	}
+//	
+//	
+//}
