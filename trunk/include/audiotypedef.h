@@ -700,7 +700,8 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
     bool                bPreRnnOn_;
     AUDIO_DATA_TYPE     *pRNNERROR_;
     AUDIO_DATA_TYPE     *pRNNPOWER_;
-    AUDIO_DATA_TYPE     *pRNNBuffer_;
+    AUDIO_DATA_TYPE     *pRNNBuffer_; // 10ms 480 points delay
+    AUDIO_DATA_TYPE     *pRNNBufferDiff_; // 1.13ms 64 points delay
     bool                bRNNOISEVad_;
     bool                bRNNOISEVad_enhance_;
     int                 RNNCounter_;

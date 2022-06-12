@@ -92,7 +92,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         {
             for (size_t channel = 0; channel < aec_para.mics_num; channel++)
             {
-                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + 480 * cycle]) / 32768.f;
+                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + 480 * cycle]) / 32768.f;               
             }
             sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
         }
@@ -106,46 +106,55 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             int channel1 = 0;
             float alpha = 0;
             for (int i = 0; i < aec_para.fremaelen; i++) {
-                sharedata->ppCapture_[channel1][i] *= 32767;
-                sharedata->pRNNBuffer_[i + aec_para.fremaelen] = sharedata->ppCapture_[channel1][i];
+                sharedata->pRNNBufferDiff_[i + 64] = sharedata->ppCapture_[channel1][i]*32767;
+                sharedata->pRNNBuffer_[i + aec_para.fremaelen] = sharedata->pRNNBufferDiff_[i];
                 tmp[i] = sharedata->pRNNBuffer_[i];
                 tmp_in += tmp[i] * tmp[i];
             }
-            rnnoise_process_frame(rnnoise, sharedata->ppCapture_[channel1], sharedata->ppCapture_[channel1]);
-            if (sharedata->FrameCounter_ == 2380) {
+            rnnoise_process_frame(rnnoise, sharedata->pRNNBufferDiff_, sharedata->pRNNBufferDiff_);
+            if (sharedata->FrameCounter_ == 3659) {
                 sharedata->FrameCounter_ *= 1;
             }
             for (int i = 0; i < aec_para.fremaelen; i++) {
-                sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1 - alpha) * sharedata->ppCapture_[channel1][i] * sharedata->ppCapture_[channel1][i];
+                sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1 - alpha) * sharedata->pRNNBufferDiff_[i] * sharedata->pRNNBufferDiff_[i];
                 tmp_out += sharedata->pRNNPOWER_[i];
 
-                sharedata->pRNNERROR_[i] = sharedata->pRNNBuffer_[i] - sharedata->ppCapture_[channel1][i];
+                sharedata->pRNNERROR_[i] = sharedata->pRNNBuffer_[i] - sharedata->pRNNBufferDiff_[i];
                 tmp_diff += sharedata->pRNNERROR_[i] * sharedata->pRNNERROR_[i];
+                sharedata->pRNNERROR_[i] /= 32767;
                 sharedata->pRNNBuffer_[i] = sharedata->pRNNBuffer_[i + aec_para.fremaelen]; // update one frame
+                
 
                 //sharedata->ppCapture_[channel1 - channel1][i] = sharedata->ppCapture_[channel1][i] / 32767; // out
                 //sharedata->ppCapture_[channel1 - channel1][i] = sharedata->pRNNBuffer_[i] / 32767; // 
-                sharedata->ppCapture_[channel1][i] = sharedata->pRNNBuffer_[i] / 32767;//  original input  
-                //sharedata->ppCapture_[channel1][i] = sharedata->ppCapture_[channel1][i] / 32767;//  rnn output 
+                //sharedata->ppCapture_[channel1][i] = sharedata->pRNNBuffer_[i] / 32767;//  original input  
+                //sharedata->ppCapture_[channel1][i] = sharedata->pRNNBufferDiff_[i] / 32767;//  rnn output 
                 //sharedata->ppCapture_[channel1 - channel1][i] = sharedata->pRNNERROR_[i] / 32767; // error 
-            }
 
+                if (i < 64) {
+                    sharedata->pRNNBufferDiff_[i] = sharedata->pRNNBufferDiff_[i + 480];// update 64 points;
+                }
+            }
+            float nrl = 10*log10(tmp_in/(tmp_out+0.000001));
             // to do freq vad and handover vad to protect voice
             //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
-            if (tmp_out > 1 * 1e7)
+            if (tmp_out < 1 * 1e7 || nrl > 5)
             {  // -47dB
-                sharedata->bRNNOISEVad_ = true;
-                sharedata->RNNCounter_ = 5;
-            }
-            else {
                 sharedata->RNNCounter_--;
                 sharedata->RNNCounter_ = sharedata->RNNCounter_ < 0 ? 0 : sharedata->RNNCounter_;
                 if (sharedata->RNNCounter_ == 0) {
                     sharedata->bRNNOISEVad_ = false;
                 }
+                if (nrl > 30) {
+                    sharedata->bRNNOISEVad_ = false;
+                }
+            }
+            else {
+                sharedata->bRNNOISEVad_ = true;
+                sharedata->RNNCounter_ = 20;
             }
 
-            if (tmp_out < 1 * 1e6) { // -57db
+            if (tmp_out < 1 * 1e6 || nrl > 20) { // -57db
                 sharedata->RNNCounter_enhance_--;
                 sharedata->RNNCounter_enhance_ = sharedata->RNNCounter_enhance_ < 0 ? 0 : sharedata->RNNCounter_enhance_;
                 if (sharedata->RNNCounter_enhance_ == 0) {
@@ -303,12 +312,13 @@ void aec_processing_init_cpp(void  **p_aec)
     aec_para.data_out_f = aec_para.data_in_f + aec_para.fremaelen;
     memset(aec_para.data_in_f, 0, (aec_para.fremaelen*(2 + 2 * aec_para.mics_num)) * sizeof(float));
 
-    aec_para.data_in_f2 = new float[aec_para.fremaelen * 6];
+    aec_para.data_in_f2 = new float[aec_para.fremaelen * 7 + 64];
     aec_para.data_out_f2 = aec_para.data_in_f2 + aec_para.fremaelen;
     aec_para.data_out_f3 = aec_para.data_out_f2 + aec_para.fremaelen;
     aec_para.data_out_f4 = aec_para.data_out_f3 + aec_para.fremaelen;
     aec_para.data_out_f5 = aec_para.data_out_f4 + aec_para.fremaelen;
-    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 6) * sizeof(float));
+    aec_para.data_out_f6 = aec_para.data_out_f5 + 2 * aec_para.fremaelen;
+    memset(aec_para.data_in_f2, 0, (aec_para.fremaelen * 7 + 64) * sizeof(float));
 
     for (int i = 0; i < aec_para.mics_num; i++) {
         sharedata->ppCapture_[i] = aec_para.data_out_f + i * aec_para.fremaelen;
@@ -333,6 +343,8 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->pRNNERROR_ = aec_para.data_out_f4;
     sharedata->pRNNPOWER_ = aec_para.data_out_f3;
     sharedata->pRNNBuffer_ = aec_para.data_out_f5;
+    sharedata->pRNNBufferDiff_ = aec_para.data_out_f6;
+
     // buffer
     
     //for (int i = 0; i < 5; i++) {

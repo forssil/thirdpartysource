@@ -23,7 +23,7 @@ extern void aec_processing_deinit_cpp(void *h_aec);
 //extern struct TagCAudioProcessingFrameworkInterface *GetAudioProcessingFrameworkInterface(void);
 struct AEC_parameter {
     float *data_in_f, *data_out_f;
-    float *data_in_f2, *data_out_f2, *data_out_f3, *data_out_f4, *data_out_f5;
+    float *data_in_f2, *data_out_f2, *data_out_f3, *data_out_f4, *data_out_f5, *data_out_f6;
     void* sharedata;
     void* pAPFInterface;
     //CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(4, 48000, 2 * 512, 512);

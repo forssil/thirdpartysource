@@ -626,7 +626,7 @@ int CAcousticEchoCancellation::ResetAll()
                       m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0 * aShareData.pRNNERRORFFT_[i];
                   }
                   else {
-                      m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0.01 * aShareData.pRNNERRORFFT_[i];
+                      m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 10 * aShareData.pRNNERRORFFT_[i];
                   }
                   
               }
