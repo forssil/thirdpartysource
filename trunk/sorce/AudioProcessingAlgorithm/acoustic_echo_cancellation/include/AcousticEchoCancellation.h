@@ -143,6 +143,8 @@ public:
 	float m_fGain;  //full band gain
 
     int counter_ = 0;
+    int first_render_ = 0;
+    int first_render_his_ = 0;
 };
 
 

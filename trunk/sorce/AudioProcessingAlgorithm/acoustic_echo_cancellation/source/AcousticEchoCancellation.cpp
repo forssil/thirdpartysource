@@ -506,6 +506,7 @@ int CAcousticEchoCancellation::ResetAll()
   void CAcousticEchoCancellationInFrequency::Reset()
   {
 	  m_bResetFlag = true;
+      first_render_ = 0;
   }
 
   //thread safe 
@@ -618,9 +619,10 @@ int CAcousticEchoCancellation::ResetAll()
 
 		  if (m_AECData.bNROn_)
 		  {
-              if (counter_ >=2012) {
+              if (counter_ >=950) {
                   counter_ *= 1;
               }
+
               for (int i = 0; i < m_AECData.nLengthFFT_; i++) {
                   if (aShareData.bRNNOISEVad_ || aShareData.ChannelIndex_ != 0) {
                       m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0 * aShareData.pRNNERRORFFT_[i];
@@ -628,8 +630,32 @@ int CAcousticEchoCancellation::ResetAll()
                   else {
                       m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 10 * aShareData.pRNNERRORFFT_[i];
                   }
-                  
               }
+
+              //// calculate erle
+              float Y[512] = { 0.f };
+              float X[512] = { 0.f };
+              float x_psd = 0.f;
+              float E = 0.f;
+              float E_nlp = 0.f;
+              float erle = 0.f;
+              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
+              {
+                  if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
+                      Y[i] = m_AECData.pDesireFFT_[2 * i] * m_AECData.pDesireFFT_[2 * i] + m_AECData.pDesireFFT_[2 * i + 1] * m_AECData.pDesireFFT_[2 * i + 1];
+                      X[i] = m_AECData.pRefferFFT_[2 * i] * m_AECData.pRefferFFT_[2 * i] + m_AECData.pRefferFFT_[2 * i + 1] * m_AECData.pRefferFFT_[2 * i + 1];
+
+                      E += m_AECData.pErrorFFT_[2 * i] * m_AECData.pErrorFFT_[2 * i] + m_AECData.pErrorFFT_[2 * i + 1] * m_AECData.pErrorFFT_[2 * i + 1];
+                  }
+              }
+              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
+              {
+                  if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
+                      erle += Y[i];
+                      x_psd += X[i];
+                  }
+              }
+              //////
 
               m_AECData.ChannelIndex_ = aShareData.ChannelIndex_;
               m_AECData.RnnGain_ = aShareData.RnnGain_;
@@ -640,38 +666,38 @@ int CAcousticEchoCancellation::ResetAll()
               }
 
               // residual echo suppression start
-
-              float Y[512] = { 0.f };
-              float X[512] = { 0.f };
-              float x_psd = 0.f;
-              float E = 0.f;
-              float erle = 0.f;
               for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
               {
                   if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
-                      Y[i] = m_AECData.pDesireFFT_[2 * i] * m_AECData.pDesireFFT_[2 * i] + m_AECData.pDesireFFT_[2 * i + 1] * m_AECData.pDesireFFT_[2 * i + 1];
-                      X[i] = m_AECData.pRefferFFT_[2 * i] * m_AECData.pRefferFFT_[2 * i] + m_AECData.pRefferFFT_[2 * i + 1] * m_AECData.pRefferFFT_[2 * i + 1];
-                      
-                      E += m_AECData.pErrorFFT_[2*i]* m_AECData.pErrorFFT_[2*i] + m_AECData.pErrorFFT_[2 * i + 1] * m_AECData.pErrorFFT_[2 * i + 1];
+                      E_nlp += m_AECData.pErrorFFT_[2*i]* m_AECData.pErrorFFT_[2*i] + m_AECData.pErrorFFT_[2 * i + 1] * m_AECData.pErrorFFT_[2 * i + 1];
                   }  
-              }
-              for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
-              {
-                  if (i > 1 && i < m_AECData.nLengthFFT_ / 4) {
-                      erle += Y[i];
-                      x_psd += X[i];
-                  }
               }
               erle /= (E + 0.000000001);
               erle = 10 * log10(erle);
+              m_AECData.fErle_ += 0.2*(erle - m_AECData.fErle_);
               //x_psd = 10 * log10(x_psd * 4 / m_AECData.nLengthFFT_);
+              if (x_psd > 0.00001 || m_AECData.nFarVAD_) {
+                  first_render_++;
+              }
 
               for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
               {
-                  if (erle > 15 && x_psd > 0.00001 && E < 0.000002) { // E > -52dB
+                  if (m_AECData.fErle_ > 10 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.000002) { // E > -52dB
                       m_AECData.pErrorFFT_[i] *= 0.01;
                   }
+                  else if (m_AECData.fErle_ > 8 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.0000005) {
+                      m_AECData.pErrorFFT_[i] *= 0.01; // double talk suppression
+                  }
+
+                  if (first_render_>0 && first_render_<30 && first_render_his_< first_render_ && m_AECData.fErle_ > 3) {
+                      m_AECData.pErrorFFT_[i] *= 0.01;
+                  }else if (first_render_ > 30) {
+                      first_render_ = 30;
+                  }
+                  
               }
+
+              first_render_his_ = first_render_;
               // end
 
 		  }

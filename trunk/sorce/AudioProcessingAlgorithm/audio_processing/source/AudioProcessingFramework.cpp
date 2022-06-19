@@ -255,6 +255,7 @@ int CAudioProcessingFramework::Init()
         m_pAECDataArray[i].pRNNERRORFFT_ = m_pRNNERRORFFT;
 		m_pAECDataArray[i].pErrorFFT_ = m_ppCAECMics[i]->m_AECData.pErrorFFT_;
 		m_pAECDataArray[i].pEstimationFFT_ = m_ppCAECMics[i]->m_AECData.pEstimationFFT_;
+        m_pAECDataArray[i].fErle_ = 0.f;
 	}
 
 	m_CT2FRef = new T2Ftransformer();

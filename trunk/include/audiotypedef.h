@@ -662,6 +662,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	CAUDIO_U32_t 		nOffsetBin_; //AEC start bin in fft
 	bool				bAECOn_;
 	CAUDIO_S32_t		nFarVAD_;
+    AUDIO_DATA_TYPE		fErle_;
 
 #ifdef AUDIO_WAVE_DEBUG
 	AUDIO_DATA_TYPE		*pErrorBeforeNR_;
