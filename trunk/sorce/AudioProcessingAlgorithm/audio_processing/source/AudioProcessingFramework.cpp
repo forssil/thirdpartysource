@@ -63,6 +63,8 @@ CAudioProcessingFramework::CAudioProcessingFramework(int mic_nums, int Fs, int f
 	, m_nSystemDelay(0)
 	, m_pSPest(NULL)
 	, m_pVADest(NULL)
+    , m_pSPest_near(NULL)
+    , m_pVADest_near(NULL)
 	, m_pRefSp(NULL)
 #ifdef AUDIO_WAVE_DEBUG
 	, m_CF2TErrBeforeNR(NULL)
@@ -156,6 +158,16 @@ CAudioProcessingFramework::~CAudioProcessingFramework()
 		delete m_pVADest;
 		m_pVADest = NULL;
 	}
+    if (NULL != m_pSPest_near)
+    {
+        delete m_pSPest_near;
+        m_pSPest_near = NULL;
+    }
+    if (NULL != m_pVADest_near)
+    {
+        delete m_pVADest_near;
+        m_pVADest_near = NULL;
+    }
 	if (NULL != m_ppCAECMics)
 	{
 		for (int i = 0; i < m_nMicsNum; i++) {
@@ -207,7 +219,7 @@ int CAudioProcessingFramework::Init()
 	////
 	memset(&m_APFData, 0, sizeof(audio_pro_share));
 
-	int total_size = (m_nMicsNum+8 ) * m_nFFTlen;
+	int total_size = (m_nMicsNum+10 ) * m_nFFTlen;
 	m_pMemAlocat = new float[total_size];
 	memset(m_pMemAlocat, 0, total_size * sizeof(float));
 
@@ -226,6 +238,8 @@ int CAudioProcessingFramework::Init()
 	m_APFData.pErrorSpectrumPower_= m_APFData.pError_+m_nFFTlen;
 	m_pRefSp= m_APFData.pErrorSpectrumPower_ + m_nFFTlen;  
 	m_pRefSp_nonsmooth = m_pRefSp + m_nFFTlen;
+    m_pNearSp = m_pRefSp_nonsmooth + m_nFFTlen;
+    m_pNearSp_nonsmooth = m_pNearSp + m_nFFTlen;
 	m_APFData.nLengthFFT_=m_nFFTlen;
 	m_APFData.bAECOn_= true;
 
@@ -280,6 +294,10 @@ int CAudioProcessingFramework::Init()
     m_pSPest->InitPara(m_nFramelen);
     m_pVADest = new AEC_VAD();
     m_pVADest->CreateVAD_int(m_nFs, m_nFFTlen, m_nFramelen);
+    m_pSPest_near = new SPEst();
+    m_pSPest_near->InitPara(m_nFramelen);
+    m_pVADest_near = new AEC_VAD();
+    m_pVADest_near->CreateVAD_int(m_nFs, m_nFFTlen, m_nFramelen);
 	m_bInit = true;
 
 	// init MVDR
@@ -317,6 +335,8 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 	float* fpRefFft = NULL;
 	float vadband[3] = { 0 };
 	float vadfull = 0.f;
+    float vadband_near[3] = { 0 };
+    float vadfull_near = 0.f;
 	float fcorr = 0.f;
 
 	if (!m_bInit)
@@ -353,6 +373,11 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			m_bVad = (vadfull == 1);
 			aShareData.IsResEcho_ = m_bVad;
 
+            // near vad
+            m_pSPest_near->PwrEnergy(m_APFData.ppCapureFFT_[0], m_pNearSp, m_pNearSp_nonsmooth);
+            m_pVADest_near->GetVAD(m_pNearSp, m_pNearSp_nonsmooth, vadband_near, vadfull_near);
+            near_vad_cnt_ == (vadfull_near == 1) ? near_vad_cnt_++ : 0;
+
 			//////delay est
 			Audioframe_t audioframe;
 			audioframe.fp = m_pReferFFT;
@@ -368,6 +393,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 	
 			for (int i = 0; i < m_nMicsNum; i++) {
 				m_pAECDataArray[i].nFarVAD_ = audioframe.VAD;
+                m_pAECDataArray[i].nNearVAD_ = (near_vad_cnt_ > 10);
 				m_pAECDataArray[i].fDTDgain = fcorr;
 				m_ppCAECMics[i]->process(m_pAECDataArray[i]);
 

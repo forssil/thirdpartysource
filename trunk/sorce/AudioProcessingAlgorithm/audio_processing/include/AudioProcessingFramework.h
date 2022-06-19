@@ -55,6 +55,10 @@ private:
 	SPEst* m_pSPest;
 	AEC_VAD* m_pVADest;
 
+    SPEst* m_pSPest_near;
+    AEC_VAD* m_pVADest_near;
+    int near_vad_cnt_ = 0;
+
 	CDTDetector*  m_CDTD;
 	CDelayBuffer* m_CDelayBuf;
 
@@ -85,6 +89,8 @@ private:
 	void* m_ppAudioOutBuf[2];
 	AUDIO_DATA_TYPE* m_pRefSp; 
 	AUDIO_DATA_TYPE* m_pRefSp_nonsmooth;
+    AUDIO_DATA_TYPE* m_pNearSp;
+    AUDIO_DATA_TYPE* m_pNearSp_nonsmooth;
 	int   m_nDelay; ///delay between mic and ref
 	int   m_nSystemDelay;
 	float*   m_pReferFFT;

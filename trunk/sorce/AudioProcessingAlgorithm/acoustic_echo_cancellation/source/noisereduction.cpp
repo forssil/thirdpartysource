@@ -98,7 +98,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
 	memcpy(m_pfGaintemp, m_CSpeechStatic->GetGain(), m_nQNum*sizeof(float));
 #else
     if (aecdata.ChannelIndex_ == 1) {
-        m_CSpeechStatic->SetGmin(1);
+        //m_CSpeechStatic->SetGmin(1);
     }
     
 	m_CSpeechStatic->Porcess(m_pfPwr, m_pfNoise);

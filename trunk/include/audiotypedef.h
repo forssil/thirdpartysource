@@ -662,6 +662,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	CAUDIO_U32_t 		nOffsetBin_; //AEC start bin in fft
 	bool				bAECOn_;
 	CAUDIO_S32_t		nFarVAD_;
+    CAUDIO_S32_t		nNearVAD_;
     AUDIO_DATA_TYPE		fErle_;
 
 #ifdef AUDIO_WAVE_DEBUG
@@ -695,6 +696,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 
     //AGC
     bool                bAGCOn_;
+    AUDIO_DATA_TYPE		fAGCgain_;
 
     //RNNOISE
     bool                bRNNOISEOn_;
@@ -703,8 +705,8 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
     AUDIO_DATA_TYPE     *pRNNPOWER_;
     AUDIO_DATA_TYPE     *pRNNBuffer_; // 10ms 480 points delay
     AUDIO_DATA_TYPE     *pRNNBufferDiff_; // 1.13ms 64 points delay
-    bool                bRNNOISEVad_;
-    bool                bRNNOISEVad_enhance_;
+    bool                bRNNOISEVad_ = true;
+    bool                bRNNOISEVad_enhance_ = true;
     int                 RNNCounter_;
     int                 RNNCounter_enhance_;
     int                 ChannelIndex_;

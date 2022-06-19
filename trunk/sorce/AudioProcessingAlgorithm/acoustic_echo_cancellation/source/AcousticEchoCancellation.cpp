@@ -619,15 +619,15 @@ int CAcousticEchoCancellation::ResetAll()
 
 		  if (m_AECData.bNROn_)
 		  {
-              if (counter_ >=950) {
+              if (counter_ >=2391) {
+                  counter_ *= 1;
+              }
+              if (counter_ >= 3114) {
                   counter_ *= 1;
               }
 
-              for (int i = 0; i < m_AECData.nLengthFFT_; i++) {
-                  if (aShareData.bRNNOISEVad_ || aShareData.ChannelIndex_ != 0) {
-                      m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 0 * aShareData.pRNNERRORFFT_[i];
-                  }
-                  else {
+              for (int i = 0; i < m_AECData.nLengthFFT_ / 2; i++) {
+                  if (!aShareData.bRNNOISEVad_ && !aShareData.nNearVAD_) { // || aShareData.ChannelIndex_ != 0
                       m_AECData.pEstimationFFT_[i] = m_AECData.pEstimationFFT_[i] + 10 * aShareData.pRNNERRORFFT_[i];
                   }
               }
@@ -661,8 +661,10 @@ int CAcousticEchoCancellation::ResetAll()
               m_AECData.RnnGain_ = aShareData.RnnGain_;
 			  m_pPostFil->Process(&m_AECData);
 
-              if (!aShareData.bRNNOISEVad_enhance_ && aShareData.ChannelIndex_ == 0) {
-                  memset(m_AECData.pErrorFFT_, 0, sizeof(float)*m_AECData.nLengthFFT_);
+              if (!aShareData.bRNNOISEVad_enhance_ && !aShareData.nNearVAD_) { //  && aShareData.ChannelIndex_ == 0
+                  for (int i = 0; i < m_AECData.nLengthFFT_; i++) {
+                      m_AECData.pErrorFFT_[i] *= 0.f;
+                  }
               }
 
               // residual echo suppression start
@@ -682,10 +684,10 @@ int CAcousticEchoCancellation::ResetAll()
 
               for (CAUDIO_U32_t i = 0; i < m_AECData.nLengthFFT_ / 2; i++)
               {
-                  if (m_AECData.fErle_ > 10 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.000002) { // E > -52dB
+                  if (m_AECData.fErle_ > 8 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.000002) { // E_nlp < -62dB
                       m_AECData.pErrorFFT_[i] *= 0.01;
                   }
-                  else if (m_AECData.fErle_ > 8 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.0000005) {
+                  else if (m_AECData.fErle_ > 6 && (x_psd > 0.00001 || m_AECData.nFarVAD_) && E_nlp < 0.0000005) {
                       m_AECData.pErrorFFT_[i] *= 0.01; // double talk suppression
                   }
 

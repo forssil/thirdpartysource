@@ -251,8 +251,9 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
                 //agc_process(pAgc, 1, &power, &gain, 0);
                 //agc_new_process(agc_new, 1, &power, &gain, 0);
                 agc_new_process(agc_new, 1, &power, &gain, sharedata->IsResEcho_);
+                sharedata->fAGCgain_ += 0.5*(gain - sharedata->fAGCgain_);
                 for (int i = 0; i < aec_para.fremaelen; i++) {
-                    sharedata->ppProcessOut_[channel][i] *= gain;
+                    sharedata->ppProcessOut_[channel][i] *= sharedata->fAGCgain_;
                     //data_out[i] *= gain;
                 }
             }
@@ -333,13 +334,17 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bAECOn_ = true;
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
-    sharedata->bAGCOn_ = true;
+    sharedata->bAGCOn_ = false;
     sharedata->bRNNOISEOn_ = true;
     sharedata->bPreRnnOn_ = true;
+
+    sharedata->bRNNOISEVad_ = true;
+    sharedata->bRNNOISEVad_enhance_ = true;
 
     sharedata->RNNCounter_ = 0;
     sharedata->FrameCounter_ = 0;
     sharedata->RnnVad_ = 0.f;
+    sharedata->fAGCgain_ = 1.f;
 
     sharedata->pDesire_ = aec_para.data_in_f;
     sharedata->pReffer_ = aec_para.data_in_f2;
@@ -349,6 +354,10 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->pRNNBuffer_ = aec_para.data_out_f5; // 480 * 2
     sharedata->pRNNBufferDiff_ = aec_para.data_out_f6; // 480 + 64
     sharedata->RnnGain_ = aec_para.data_out_f7; // 512
+
+    for (int i = 0; i < aec_para.fremaelen; i++) {
+        sharedata->RnnGain_[i] = 1.f;
+    }
 
     // buffer
     
