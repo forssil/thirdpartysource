@@ -125,10 +125,6 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
     float tmp_psd_low = 0.f;
     float tmp_psd_sum = 0.f;
 
-    for (CAUDIO_U32_t i = 0; i < m_nFFTLen / 2; i++)
-    {
-        //m_pfnrin_smooth[i] += 0.05 * (input[i] - m_pfnrin_smooth[i]);
-    }
     for (CAUDIO_U32_t i = 0; i < m_nFFTLen/2; i++)
     {
         m_pfnrin_smooth[i] += 0.05 * (input[i] - m_pfnrin_smooth[i]);

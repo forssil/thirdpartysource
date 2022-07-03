@@ -126,8 +126,8 @@ void agc_new_reset(struct AGCSTATE_NEW * agc)
     param->makeup = 5.0f;
 
     /*Parameters for gain smoothing*/
-    param->attack_gain = 0.05f;
-    param->release_gain = 0.15f;
+    param->attack_gain = 0.03f;// 0.05
+    param->release_gain = 0.15f;// 0.15
 
     /*Parameters for NFE (noise floor estimate)*/
     param->attack_nfe = 0.5f;

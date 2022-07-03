@@ -500,23 +500,22 @@ float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
 
 void get_rnn_gain(DenoiseState *st, int fftlen, float *rnn_gain) {
     int i;
-    float delta1 = 24000.f / 480;
-    float delta2 = 24000.f / 512;
+    float delta1 = 50.f; // 24000.f / 480;
+    float delta2 = 46.875f; //24000.f / 512;
+    int temp_index = fftlen / 2;
 
-    for (i = 0; i < FREQ_SIZE; i++) {
-        for (int j = 0; j < fftlen / 2; j++) {
-            if (j == 0) {
-                rnn_gain[j] = st->rnngain[0];
-            }
-            if (j > 0 && i < fftlen / 2 -1) {
-                int tmp = j * delta2 / delta1;
-                rnn_gain[j] = ((tmp + 1)*delta1 - j * delta2)*st->rnngain[tmp] / delta1 + \
-                    (j * delta2 - tmp * delta1)*st->rnngain[tmp + 1] / delta1;
-            }
+    for (int j = 0; j < temp_index; j++) {
+        if (j == 0) {
+            rnn_gain[j] = st->rnngain[0];
+        }
+        if (j > 0 && j < temp_index -1) {
+            int tmp = j * delta2 / delta1;
+            rnn_gain[j] = ((tmp + 1)*delta1 - j * delta2)*st->rnngain[tmp] / delta1 + \
+                (j * delta2 - tmp * delta1)*st->rnngain[tmp + 1] / delta1;
+        }
 
-            if (j == fftlen / 2 - 1) {
-                rnn_gain[j] = st->rnngain[480];
-            }
+        if (j == temp_index - 1) {
+            rnn_gain[j] = st->rnngain[FREQ_SIZE - 1];
         }
     }
 }

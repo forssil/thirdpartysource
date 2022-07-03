@@ -334,7 +334,7 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bAECOn_ = true;
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
-    sharedata->bAGCOn_ = false;
+    sharedata->bAGCOn_ = true;
     sharedata->bRNNOISEOn_ = true;
     sharedata->bPreRnnOn_ = true;
 
