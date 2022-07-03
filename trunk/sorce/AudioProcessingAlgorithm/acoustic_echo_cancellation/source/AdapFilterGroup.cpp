@@ -9,7 +9,7 @@ CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps, float mu, float delat
 {
 	m_nNumBank=numbank;
     m_npTaps=ntaps;
-	m_fMu =  mu > 0.000001f ? mu : 0.8f;
+	m_fMu =mu > 0.000001f ? mu : 0.8f;
 	m_deltagin = delat_gain >= 0.f? delat_gain:0.f;
 	AdapfilterIni();
 
@@ -242,9 +242,9 @@ void CAdapFilterGroup::UpdateDelta(float* fp, float fCorr)
 		{
 			DeltaGain = 0.2;
 		}
-		float den_gain = 1.f;
+		float den_gain = 0.5f;
 		if (i > ind5k) den_gain = 0.1;
-		m_fpDelta[i] = (m_cpBeta2[i]+ den_gain*m_fpDen[i]) * DeltaGain*m_deltagin;
+		m_fpDelta[i] = (m_cpBeta2[i]*3* DeltaGain + den_gain*m_fpDen[i]) * DeltaGain*m_deltagin;
 
 
 		if( m_fpDelta[i] <=  m_pDeltaFreWeight[i] )
