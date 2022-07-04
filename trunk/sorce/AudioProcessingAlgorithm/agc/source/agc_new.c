@@ -114,16 +114,16 @@ void agc_new_reset(struct AGCSTATE_NEW * agc)
 
     /*Setting values for the AGC parameters*/
     param->N = AUD_INT_BUFSIZE;
-    param->th_comp = -35;
-    param->th_exp = -44;
-    param->ratio_comp = 0.55f;
-    param->ratio_exp = 2.16f;
-    param->attack = 0.03f;
+    param->th_comp = -25.f;
+    param->th_exp = -40.f;
+    param->ratio_comp = 0.3f;
+    param->ratio_exp = 0.3f;
+    param->attack = 0.1f;
     param->release = 0.2f;
-    param->hold_ms = 500;
+    param->hold_ms = 0;
     param->hold = floor(AUD_INT_SAMPLERATE_HZ * param->hold_ms
                                                         / (param->N * 1000));
-    param->makeup = 5.0f;
+    param->makeup = 12.f;
 
     /*Parameters for gain smoothing*/
     param->attack_gain = 0.03f;// 0.05
@@ -148,7 +148,8 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                      const uint32_t channels,
                      const float * const absLevel,
                      float * gain,
-                     bool is_res_echo)
+                     bool is_res_echo,
+					 float rnnvad)
 {
     /*Initializing variables*/
     struct AGC_PREV * prev = &agc->prev;
@@ -176,7 +177,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     if (agc->gui_on)
         agc->guiString[0] = '\0';
     /*If gain or RMS or frame is 0 do nothing*/
-    if (inputRms == 0.0f)
+    if (rnnvad < 0.1)
     {
         /*If GUI mode write to gui string*/
         if (agc->gui_on)
@@ -220,7 +221,6 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
 
     /*convert to dB*/
     smooth_nfe_db = 20 * log10f(smooth_nfe);
-
     /*AGC NFE*/
     if (agc->nfe_on)
     {
@@ -299,7 +299,6 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
             gain_db += param->makeup;             /*Add makeup gain*/
         }
     }
-
     /*Attack/release for gain*/
     if (gain_db > prev->smooth_gain_db_prev)
         smooth_gain_db_new = param->attack_gain * gain_db
