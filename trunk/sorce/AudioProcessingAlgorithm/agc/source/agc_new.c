@@ -116,8 +116,8 @@ void agc_new_reset(struct AGCSTATE_NEW * agc)
     param->N = AUD_INT_BUFSIZE;
     param->th_comp = -25.f;
     param->th_exp = -40.f;
-    param->ratio_comp = 0.3f;
-    param->ratio_exp = 0.3f;
+    param->ratio_comp = 0.1f;
+    param->ratio_exp = 1.5f;
     param->attack = 0.1f;
     param->release = 0.2f;
     param->hold_ms = 0;
@@ -129,16 +129,21 @@ void agc_new_reset(struct AGCSTATE_NEW * agc)
     param->attack_gain = 0.03f;// 0.05
     param->release_gain = 0.15f;// 0.15
 
+
+	//param->attack = 1.f - exp(-2.2 / (0.2 * 100));
+	//param->release = 1.f - exp(-2.2 / (0.8 * 100));
+	//param->attack_gain = 1.f - exp(-2.2 / (0.1 * 100));// 0.05
+	//param->release_gain = 1.f - exp(-2.2 / (0.05 * 100));// 0.15
     /*Parameters for NFE (noise floor estimate)*/
     param->attack_nfe = 0.5f;
-    param->release_nfe = 0.001f;
+    param->release_nfe = 0.5f;
     param->hold_nfe_ms = 1000;
     param->hold_nfe = floor(AUD_INT_SAMPLERATE_HZ * param->hold_nfe_ms
                                                         / (param->N*1000));
 
-    param->target_lvl = -27;   /*Target level in dB*/
-    param->th_comp_lvl = 25;   /*dB above noise floor estimate*/
-    param->th_exp_lvl = 16;     /*dB below compressor threshold*/
+    param->target_lvl = -13;   /*Target level in dB*/
+    param->th_comp_lvl = 30;   /*dB above noise floor estimate*/
+    param->th_exp_lvl = 18;     /*dB below compressor threshold*/
 }
 
 /*
@@ -149,7 +154,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                      const float * const absLevel,
                      float * gain,
                      bool is_res_echo,
-					 float rnnvad)
+					float noisePwr)
 {
     /*Initializing variables*/
     struct AGC_PREV * prev = &agc->prev;
@@ -158,6 +163,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     float gain_db = 0, smooth_gain_db_new = 0, smooth_nfe = 0,
                                             smooth_nfe_db = 0, target_diff;
     int counter_new = 0, count_nfe = 0;
+	float noise_db = 10 * log10f(noisePwr);
 
     /*  Find RMS of signal
      *  We use absLevel as a rms value
@@ -177,7 +183,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     if (agc->gui_on)
         agc->guiString[0] = '\0';
     /*If gain or RMS or frame is 0 do nothing*/
-    if (rnnvad < 0.1)
+    if (noisePwr < 1e-7)
     {
         /*If GUI mode write to gui string*/
         if (agc->gui_on)
@@ -198,29 +204,20 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     }
 
     /*Aattack, release, hold for NFE*/
-    if (inputRms < prev->smooth_nfe_prev)
+    if (noisePwr < prev->smooth_nfe_prev)
     {
-        smooth_nfe = param->attack_nfe*inputRms + prev->smooth_nfe_prev
+        smooth_nfe = param->attack_nfe*noisePwr + prev->smooth_nfe_prev
                                                 * (1-param->attack_nfe);
-        count_nfe = 0;
     }
     else
     {
-        if (prev->count_nfe_prev >= param->hold_nfe)
-        {
-            smooth_nfe = param->release_nfe*inputRms +
+        smooth_nfe = param->release_nfe*noisePwr +
                             prev->smooth_nfe_prev * (1-param->release_nfe);
-            count_nfe = prev->count_nfe_prev + 1;
-        }
-        else
-        {
-            smooth_nfe = prev->smooth_nfe_prev;
-            count_nfe = prev->count_nfe_prev + 1;
-        }
+
     }
 
     /*convert to dB*/
-    smooth_nfe_db = 20 * log10f(smooth_nfe);
+    smooth_nfe_db = 10 * log10f(smooth_nfe);
     /*AGC NFE*/
     if (agc->nfe_on)
     {
@@ -264,12 +261,16 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     }
 
     /*Convert to Db*/
-    smooth_db = 20 * log10f(smooth_new);
+    smooth_db = 10 * log10f(smooth_new);
+	
     bool needcompress = false;
-    if (smooth_db < -50 && is_res_echo) {
-        needcompress = true;
-    }
-    if (smooth_db >= param->th_comp) /*Compress*/
+	if (smooth_db < -50 && is_res_echo) {
+		needcompress = true;
+	}
+	if (smooth_db >= param->target_lvl) { /*compress above target level*/
+		smooth_db_comp = 0.7 * (smooth_db - param->target_lvl) + param->target_lvl;
+	}
+    else if (smooth_db >= param->th_comp) /*Compress*/
         smooth_db_comp = param->ratio_comp * (smooth_db - param->th_comp)
                                                         + param->th_comp;
     else if (smooth_db < param->th_comp && smooth_db >= param->th_exp)/*Gain=1*/
@@ -277,8 +278,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     else if (smooth_db < param->th_exp) /*Expand*/
     {
         if (!needcompress) {
-            smooth_db_comp = param->ratio_exp * (smooth_db - param->th_exp)
-                + param->th_exp;
+			smooth_db_comp = (smooth_db - param->th_exp) / (param->th_exp - noise_db) * param->makeup + smooth_db;
             if (smooth_db_comp < smooth_db - param->makeup) {
                 /*Expander gain below 1 is set to 1*/
                 smooth_db_comp = smooth_db - param->makeup;
@@ -308,8 +308,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                         + prev->smooth_gain_db_prev * (1-param->release_gain);
 
     /*Convert from dB and update overall gain*/
-    (*gain) *= powf(10.0f, smooth_gain_db_new / 20.0f);
-
+    (*gain) *= exp(smooth_gain_db_new / 10.0f * log(10));
     /*Updating variables*/
     prev->counter_prev = counter_new;
     prev->smooth_prev = smooth_new;

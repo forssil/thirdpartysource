@@ -660,6 +660,9 @@ int CAcousticEchoCancellation::ResetAll()
               m_AECData.ChannelIndex_ = aShareData.ChannelIndex_;
               m_AECData.RnnGain_ = aShareData.RnnGain_;
 			  m_pPostFil->Process(&m_AECData);
+			  
+			  aShareData.fNoisePwr_ = m_AECData.fNoisePwr_;
+			  aShareData.fProiSNR_ = m_AECData.fProiSNR_;
 
               if (!aShareData.bRNNOISEVad_enhance_ && !aShareData.nNearVAD_) { //  && aShareData.ChannelIndex_ == 0
                   for (int i = 0; i < m_AECData.nLengthFFT_; i++) {

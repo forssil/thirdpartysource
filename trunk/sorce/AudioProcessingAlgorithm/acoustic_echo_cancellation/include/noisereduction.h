@@ -11,7 +11,7 @@ public:
 	//fftlen
 	CNoiseRedu(int fs, int fftlen);
 	~CNoiseRedu(void);
-	void Process(float *input,float *echonoise,audio_pro_share aecdata,float *pfAft,float *pfBef);
+	void Process(float *input,float *echonoise,audio_pro_share& aecdata,float *pfAft,float *pfBef);
 	float *GetGain(){return m_pfGainout;};
 //	void SetGmin(float f){m_CSpeech->SetGmin(f);};
 	void SetGmin(float f){ m_CSpeechStatic->SetGmin(f); };

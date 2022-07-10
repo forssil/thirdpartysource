@@ -72,7 +72,7 @@ CNoiseRedu::~CNoiseRedu(void)
 	delete m_CPsd_echo;
 	delete[]m_pfGaintemp;
 }
-void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,float *pfAft,float *pfBef)
+void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata,float *pfAft,float *pfBef)
 {
 	m_sAecdata=aecdata;
 	m_CPsd->processing(input,m_pfNoise);
@@ -155,9 +155,9 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share aecdata,f
             //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
         }
     }
-
+	aecdata.fProiSNR_ = m_CSpeechStatic->GetProiSNR();
 	m_CPsd->CQSpread(m_pfNoise,m_pfNoiseLine);	
- 
+	aecdata.fNoisePwr_ = m_pfNoiseLine[0];
 }
 ///////////////fullband control
 void CNoiseRedu::FullBandCtrl(float *pfAft,float *pfBef,float* gain)

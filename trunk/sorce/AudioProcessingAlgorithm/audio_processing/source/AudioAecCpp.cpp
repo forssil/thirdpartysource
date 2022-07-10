@@ -251,8 +251,8 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
                 power /= aec_para.fremaelen;
                 //agc_process(pAgc, 1, &power, &gain, 0);
                 //agc_new_process(agc_new, 1, &power, &gain, 0);
-                agc_new_process(agc_new, 1, &power, &gain, sharedata->IsResEcho_, sharedata->RnnVad_);
-                sharedata->fAGCgain_ += 0.5*(gain - sharedata->fAGCgain_);
+                agc_new_process(agc_new, 1, &power, &gain, sharedata->IsResEcho_, sharedata->fNoisePwr_);
+                sharedata->fAGCgain_ = gain;
                 for (int i = 0; i < aec_para.fremaelen; i++) {
                     sharedata->ppProcessOut_[channel][i] *= sharedata->fAGCgain_;
                     //data_out[i] *= gain;
@@ -374,7 +374,7 @@ void aec_processing_init_cpp(void  **p_aec)
     AGCSTATE_NEW *agc_new = agc_new_create();
     aec_para.pAgc_new = (void*)agc_new;
     agc_new_reset(agc_new);
-    agc_new_set_NFE_on_off(agc_new, false);
+    agc_new_set_NFE_on_off(agc_new, true);
     
      DenoiseState* rnnoise = rnnoise_create(NULL); 
      aec_para.pRnnoise = (void*)rnnoise;
