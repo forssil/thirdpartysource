@@ -360,7 +360,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 	        ///// NR before aec
 			////
 		}
-		if (m_APFData.bAECOn_)
+		if (1) // m_APFData.bAECOn_
 		{
 			///t2f ref
 			m_CT2FRef->T2F(fpref, m_pReferFFT);
@@ -398,14 +398,11 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 				m_ppCAECMics[i]->process(m_pAECDataArray[i]);
 
 			}
+            
 			aShareData.fNoisePwr_ = m_pAECDataArray[0].fNoisePwr_;
 			aShareData.fProiSNR_ = m_pAECDataArray[0].fProiSNR_;
-
 		}
-		else
-		{
 
-		}
 		//
 
 		//F2T

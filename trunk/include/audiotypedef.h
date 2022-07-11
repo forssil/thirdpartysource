@@ -25,6 +25,12 @@
 	#endif
 #endif 
 
+#ifdef NDEBUG
+	#ifndef AUDIO_WAVE_RELEASE
+		#define AUDIO_WAVE_RELEASE
+	#endif
+#endif 
+
 //NOTE: change filter pins to (1 OnlineClassIn + 1 OnlineClassOut + 1 SpeakerOut) 
 #define FILTER_MODE_1_IN_2_OUT           1
 

@@ -487,14 +487,14 @@ float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
     interp_band_gain(gf, g);
 #if 1
     for (i=0;i<FREQ_SIZE;i++) {
-      X[i].r *= gf[i];
-      X[i].i *= gf[i];
+      //X[i].r *= gf[i];
+      //X[i].i *= gf[i];
       st->rnngain[i] = gf[i];
     }
 #endif
   }
 
-  frame_synthesis(st, out, X);
+  //frame_synthesis(st, out, X);
   return vad_prob;
 }
 

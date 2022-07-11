@@ -53,6 +53,7 @@ CPP_FILES = \
 	$(SRC_PATH)/acoustic_echo_cancellation/source/SubbandAdap.cpp \
     $(SRC_PATH)/audio_processing/source/AudioProcessingFramework.cpp \
 	$(SRC_PATH)/audio_processing/source/AudioAecCpp.cpp \
+	$(SRC_PATH)/audio_processing/source/SUBinterface.cpp \
 	$(SRC_PATH)/common_audio/source/basemath.cpp \
 	$(SRC_PATH)/common_audio/source/DCRemover.cpp \
 	$(SRC_PATH)/common_audio/source/F2Ttransformer.cpp \

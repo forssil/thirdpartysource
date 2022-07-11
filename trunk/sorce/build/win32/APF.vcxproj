@@ -22,11 +22,13 @@
     <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioAecCpp.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioProcessingFramework.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\AudioProcessingFramework_interface.h" />
+    <ClInclude Include="..\..\AudioProcessingAlgorithm\audio_processing\include\SUBinterface.h" />
     <ClInclude Include="..\..\AudioProcessingAlgorithm\mixer\include\Compandor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioAecCpp.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\AudioProcessingFramework.cpp" />
+    <ClCompile Include="..\..\AudioProcessingAlgorithm\audio_processing\source\SUBinterface.cpp" />
     <ClCompile Include="..\..\AudioProcessingAlgorithm\mixer\source\Compandor.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
