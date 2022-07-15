@@ -368,7 +368,7 @@ void SUBinterface::task(audio_pro_share * sharedata) {
             {
                 float gain = 1, power = 0;
                 for (int i = 0; i < framelen_; i++) {
-                    power += fabs(share_data_->ppProcessOut_[channel][i]);
+					power += share_data_->ppProcessOut_[channel][i] * share_data_->ppProcessOut_[channel][i];
                     //power += abs((float)data_out[i] / 32768);
                 }
                 power /= framelen_;

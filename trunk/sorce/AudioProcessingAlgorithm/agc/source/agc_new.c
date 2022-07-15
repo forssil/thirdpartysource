@@ -143,7 +143,7 @@ void agc_new_reset(struct AGCSTATE_NEW * agc)
 
     param->target_lvl = -13;   /*Target level in dB*/
     param->th_comp_lvl = 30;   /*dB above noise floor estimate*/
-    param->th_exp_lvl = 18;     /*dB below compressor threshold*/
+    param->th_exp_lvl = 16;     /*dB below compressor threshold*/
 }
 
 /*
@@ -163,8 +163,9 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     float gain_db = 0, smooth_gain_db_new = 0, smooth_nfe = 0,
                                             smooth_nfe_db = 0, target_diff;
     int counter_new = 0, count_nfe = 0;
-	float noise_db = 10 * log10f(noisePwr);
-
+	// temp fix noise level
+	noisePwr = 1e-6;
+	float noise_db = -60.f;
     /*  Find RMS of signal
      *  We use absLevel as a rms value
      */
@@ -183,7 +184,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     if (agc->gui_on)
         agc->guiString[0] = '\0';
     /*If gain or RMS or frame is 0 do nothing*/
-    if (noisePwr < 1e-7)
+    if (noisePwr < 1e-7 || inputRms < noisePwr)
     {
         /*If GUI mode write to gui string*/
         if (agc->gui_on)
@@ -268,7 +269,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
 		needcompress = true;
 	}
 	if (smooth_db >= param->target_lvl) { /*compress above target level*/
-		smooth_db_comp = 0.7 * (smooth_db - param->target_lvl) + param->target_lvl;
+		smooth_db_comp = 0.5 * (smooth_db - param->target_lvl) + param->target_lvl - param->makeup;
 	}
     else if (smooth_db >= param->th_comp) /*Compress*/
         smooth_db_comp = param->ratio_comp * (smooth_db - param->th_comp)
@@ -308,7 +309,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
                         + prev->smooth_gain_db_prev * (1-param->release_gain);
 
     /*Convert from dB and update overall gain*/
-    (*gain) *= exp(smooth_gain_db_new / 10.0f * log(10));
+    (*gain) *= exp(smooth_gain_db_new / 20.0f * log(10));
     /*Updating variables*/
     prev->counter_prev = counter_new;
     prev->smooth_prev = smooth_new;
