@@ -14,7 +14,27 @@
 //#endif
 
 SUBinterface::SUBinterface() {
-
+	audio_3A_thread_running_ = false;
+	task_finished_ = false;
+	if (NULL == fp) {
+		fp = fopen("/dev/chn0.pcm", "wb");
+	}
+	if (NULL == fp1) {
+		fp1 = fopen("/dev/chn1.pcm", "wb");
+	}
+	if (NULL == fp2) {
+		fp2 = fopen("/dev/chn2.pcm", "wb");
+	}
+	if (NULL == fp3) {
+		fp3 = fopen("/dev/chn3.pcm", "wb");
+	}
+	if (NULL == fp_ref) {
+		fp_ref = fopen("/dev/chnref.pcm", "wb");
+	}
+	if (NULL == fp_out) {
+		fp_out = fopen("/dev/chnout.pcm", "wb");
+	}
+	dump_idx = 0;
     //aec_mic0_buffer_.reset(new SUBBuffer(50)); 
     //aec_mic0_buffer_->SetFramePara(48000,480*1,1);
     //aec_mic1_buffer_.reset(new SUBBuffer(50));
@@ -28,7 +48,7 @@ SUBinterface::SUBinterface() {
     //aec_output_buffer_.reset(new SUBBuffer(50));
     //aec_output_buffer_->SetFramePara(48000, 480 * 1, 1);
 
-    sub_create();
+    //sub_create();
 
 
     //aec_mic0_buffer_->StartBuffer();
@@ -61,9 +81,34 @@ SUBinterface::~SUBinterface() {
     agc_new_destroy(agc_new_);
 
     rnnoise_destroy(rnn_noise_);
+	if (fp != NULL) {
+		fclose(fp);
+	}
+	fp = NULL;
+	if (fp1 != NULL) {
+		fclose(fp1);
+	}
+	fp1 = NULL;
+	if (fp2 != NULL) {
+		fclose(fp2);
+	}
+	fp2 = NULL;
+	if (fp3 != NULL) {
+		fclose(fp3);
+	}
+	fp3 = NULL;
+	if (fp_ref != NULL) {
+		fclose(fp_ref);
+	}
+	fp_ref = NULL;
+	if (fp_out != NULL) {
+		fclose(fp_out);
+	}
+	fp_out = NULL;
+	dump_idx = 0;
 }
 
-void SUBinterface::sub_create() {
+void SUBinterface::sub_create(audio_pro_share * sharedata, AEC_parameter aec_para) {
     aec_ = CreateIApfInst_int(mics_num_, 48000, 1024, framelen_);
     //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1536, aec_para.fremaelen);
     aec_->Init();
@@ -136,53 +181,54 @@ void SUBinterface::sub_create() {
     agc_new_set_NFE_on_off(agc_new_, true);
 
     rnn_noise_ = rnnoise_create(NULL);
-    
+	sub_thread_ = new std::thread([this, sharedata, aec_para] {this->task(sharedata); });
 }
 
-void SUBinterface::sub_process(audio_pro_share * sharedata, AEC_parameter &aec_para) {
+void SUBinterface::sub_process(audio_pro_share * sharedata, AEC_parameter aec_para) {
     std::unique_lock<std::mutex> lock(sub_thread_mutex_);
+	task_finished_ = false;
     //push
+	while (audio_3A_thread_running_) {
+		framelen_ = aec_para.fremaelen;
+		counter++;
+		// push data to sub thread
+		//std::vector<float> tmp_mic0(480,0.f);
+		//memcpy(tmp_mic0.data(), sharedata->ppCapture_[0], sizeof(float) * 480);
+		//aec_mic0_buffer_->PushOneFrame(tmp_mic0);
 
-    framelen_ = aec_para.fremaelen;
+		//std::vector<float> tmp_mic1(480, 0.f);
+		//memcpy(tmp_mic1.data(), sharedata->ppCapture_[1], sizeof(float) * 480);
+		//aec_mic1_buffer_->PushOneFrame(tmp_mic1);
 
-    // push data to sub thread
-    //std::vector<float> tmp_mic0(480,0.f);
-    //memcpy(tmp_mic0.data(), sharedata->ppCapture_[0], sizeof(float) * 480);
-    //aec_mic0_buffer_->PushOneFrame(tmp_mic0);
+		//std::vector<float> tmp_mic2(480, 0.f);
+		//memcpy(tmp_mic2.data(), sharedata->ppCapture_[2], sizeof(float) * 480);
+		//aec_mic2_buffer_->PushOneFrame(tmp_mic2);
+		//std::vector<float> tmp_mic3(480, 0.f);
+		//memcpy(tmp_mic3.data(), sharedata->ppCapture_[3], sizeof(float) * 480);
+		//aec_mic3_buffer_->PushOneFrame(tmp_mic3);
 
-    //std::vector<float> tmp_mic1(480, 0.f);
-    //memcpy(tmp_mic1.data(), sharedata->ppCapture_[1], sizeof(float) * 480);
-    //aec_mic1_buffer_->PushOneFrame(tmp_mic1);
+		//std::vector<float> tmp_ref(480, 0.f);
+		//memcpy(tmp_ref.data(), sharedata->pReffer_, sizeof(float)*480);
+		//aec_ref_buffer_->PushOneFrame(tmp_ref);
 
-    //std::vector<float> tmp_mic2(480, 0.f);
-    //memcpy(tmp_mic2.data(), sharedata->ppCapture_[2], sizeof(float) * 480);
-    //aec_mic2_buffer_->PushOneFrame(tmp_mic2);
-    //std::vector<float> tmp_mic3(480, 0.f);
-    //memcpy(tmp_mic3.data(), sharedata->ppCapture_[3], sizeof(float) * 480);
-    //aec_mic3_buffer_->PushOneFrame(tmp_mic3);
+		task(sharedata);
+		//start_sub_thread();
+		//sub_thread_->join();
 
-    //std::vector<float> tmp_ref(480, 0.f);
-    //memcpy(tmp_ref.data(), sharedata->pReffer_, sizeof(float)*480);
-    //aec_ref_buffer_->PushOneFrame(tmp_ref);
-
-    sub_thread_ = std::thread([this, sharedata]() {
-        this->task(sharedata);
-    });
-    //start_sub_thread();
-    sub_thread_.join();
-
-    // pop data from sub thread
-    //std::vector<float> tmp_out(480, 0.f);
-    //int ret_out = aec_output_buffer_->PopOneFrame(tmp_out);
-    //for (int i = 0; i < framelen_; i++) {
-    //    sharedata->ppProcessOut_[0][i] = tmp_out[i];
-    //}
-
-
+		// pop data from sub thread
+		//std::vector<float> tmp_out(480, 0.f);
+		//int ret_out = aec_output_buffer_->PopOneFrame(tmp_out);
+		//for (int i = 0; i < framelen_; i++) {
+		//    sharedata->ppProcessOut_[0][i] = tmp_out[i];
+		//}
+		if (task_finished_) {
+			break;
+		}
+	}
 }
 void SUBinterface::start_sub_thread() {
     std::unique_lock<std::mutex> lock(sub_thread_mutex_);
-    audio_encode_running_ = true;
+    audio_3A_thread_running_ = true;
     //sub_thread_ = std::thread([this]() {
     //    this->task();
     //});
@@ -196,10 +242,10 @@ void SUBinterface::start_sub_thread() {
 
 void SUBinterface::stop_sub_thread() {
     std::unique_lock<std::mutex> lock(sub_thread_mutex_);
-    if (sub_thread_.joinable()) {
-        sub_thread_.join();
+    if (sub_thread_->joinable()) {
+        sub_thread_->join();
     }
-    audio_encode_running_ = false;
+	audio_3A_thread_running_ = false;
 }
 
 void SUBinterface::task(audio_pro_share * sharedata) {
@@ -227,6 +273,7 @@ void SUBinterface::task(audio_pro_share * sharedata) {
 
         size_t channel = 0;
         share_data_->FrameCounter_++;
+
         if (share_data_->bRNNOISEOn_ && share_data_->bPreRnnOn_) {
             float tmp[480] = { 0 };
             float tmp_in = 0.f;
@@ -375,11 +422,13 @@ void SUBinterface::task(audio_pro_share * sharedata) {
                 //agc_process(pAgc, 1, &power, &gain, 0);
                 //agc_new_process(agc_new, 1, &power, &gain, 0);
                 agc_new_process(agc_new_, 1, &power, &gain, share_data_->IsResEcho_, share_data_->fNoisePwr_);
-                sharedata->fAGCgain_ = gain;
+				float gain_smth;
                 for (int i = 0; i < framelen_; i++) {
-                    share_data_->ppProcessOut_[channel][i] *= share_data_->fAGCgain_;
+					gain_smth = (gain - sharedata->fAGCgain_) * float(i + 1) / float(framelen_) + sharedata->fAGCgain_;
+                    share_data_->ppProcessOut_[channel][i] *= gain;
                     //data_out[i] *= gain;
                 }
+				sharedata->fAGCgain_ = gain;
             }
         }
 
@@ -388,7 +437,30 @@ void SUBinterface::task(audio_pro_share * sharedata) {
         //std::vector<float> tmp_out(480, 0.f);
         //memcpy(tmp_out.data(), share_data_->ppProcessOut_[0], sizeof(float) * 480);
         //aec_ref_buffer_->PushOneFrame(tmp_out);
-
+		if (NULL != fp && NULL != fp1 && NULL != fp2 && NULL != fp3 && NULL != fp_ref && NULL != fp_out && (dump_idx < MAX_RECORD_TIMES)) {
+			fwrite((char *)(&sharedata->ppCapture_[0][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp);
+			fwrite((char *)(&sharedata->ppCapture_[1][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp1);
+			fwrite((char *)(&sharedata->ppCapture_[2][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp2);
+			fwrite((char *)(&sharedata->ppCapture_[3][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp3);
+			fwrite((char *)(&sharedata->pReffer_[0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp_ref);
+			fwrite((char *)(&share_data_->ppProcessOut_[0][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp_out);
+			dump_idx++;
+			if (dump_idx >= MAX_RECORD_TIMES) {
+				fclose(fp);
+				fclose(fp1);
+				fclose(fp2);
+				fclose(fp3);
+				fclose(fp_ref);
+				fclose(fp_out);
+				fp = NULL;
+				fp1 = NULL;
+				fp2 = NULL;
+				fp3 = NULL;
+				fp_ref = NULL;
+				fp_out = NULL;
+			}
+		}
+		task_finished_ = true;
     //}
     //}
 }

@@ -3,7 +3,7 @@
 //#include	<string.h>
 #include    <stdbool.h>
 #include    <math.h>
-
+#include    <chrono>
 #include    "AudioAecCpp.h"
 #include    "AudioProcessingFramework_interface.h"
 #include    "agc_new.h"
@@ -52,7 +52,16 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         }
 
         pSUBThread->sub_process(sharedata, aec_para);
-
+		while (1) {
+			if (pSUBThread->get_finish_flag()) {
+				break;
+			}
+			else {
+				std::chrono::duration<int, std::micro> timespan(50);
+				std::this_thread::sleep_for(timespan);
+			}
+		}
+		//pSUBThread->task(sharedata);
         for (int i = 0; i < (aec_para.fremaelen); i++)
         {
             //for (size_t channel = 0; channel < mics_num; channel++)
@@ -172,7 +181,8 @@ void aec_processing_init_cpp(void  **p_aec)
 
     
     SUBinterface *pSUBThread = new SUBinterface;
-    pSUBThread->sub_create();
+    pSUBThread->sub_create(sharedata, aec_para);
+	pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
 
     //DenoiseState* rnnoise = rnnoise_create(NULL); 
@@ -202,6 +212,7 @@ void aec_processing_deinit_cpp(void *h_aec)
     //agc_new_destroy(agc_new);
 
     SUBinterface* pSUBThread = (SUBinterface*)aec_para.pSUBThread;
+	pSUBThread->stop_sub_thread();
     delete pSUBThread;
 
     //DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
