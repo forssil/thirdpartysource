@@ -52,7 +52,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         }
 
         pSUBThread->sub_process(sharedata, aec_para);
-		while (1) {
+		/*while (1) {
 			if (pSUBThread->get_finish_flag()) {
 				break;
 			}
@@ -60,7 +60,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 				std::chrono::duration<int, std::micro> timespan(50);
 				std::this_thread::sleep_for(timespan);
 			}
-		}
+		}*/
 		//pSUBThread->task(sharedata);
         for (int i = 0; i < (aec_para.fremaelen); i++)
         {
@@ -139,7 +139,7 @@ void aec_processing_init_cpp(void  **p_aec)
     sharedata->bNROn_ = true;
     sharedata->bNRCNGOn_ = false;
     sharedata->bAGCOn_ = true;
-    sharedata->bRNNOISEOn_ = true;
+    sharedata->bRNNOISEOn_ = false;
     sharedata->bPreRnnOn_ = true;
 
     sharedata->bRNNOISEVad_ = true;
@@ -181,7 +181,7 @@ void aec_processing_init_cpp(void  **p_aec)
 
     
     SUBinterface *pSUBThread = new SUBinterface;
-    pSUBThread->sub_create(sharedata, aec_para);
+    pSUBThread->sub_create();
 	pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
 

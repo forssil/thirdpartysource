@@ -23,7 +23,7 @@ public:
 
 public:
 	int PushOneFrame(std::vector<float> frame);
-	int PopOneFrame(std::vector<float> frame);
+	int PopOneFrame(std::vector<float> &frame);
 	int GetRefQueSize()
 	{
 		if (is_started_)
@@ -82,13 +82,14 @@ public:
 	int counter = 0;
 	SUBinterface();
 	~SUBinterface();
-	void sub_create(audio_pro_share * sharedata, AEC_parameter aec_para);
+    void threadrun();
+	void sub_create();
 	void sub_processing_deinit();
 	void sub_process(audio_pro_share * sharedata, AEC_parameter aec_para);
 
 	void start_sub_thread();
 	void stop_sub_thread();
-	void task(audio_pro_share * sharedata);
+	void task();
 	bool get_finish_flag() { return task_finished_; };
 	std::thread* sub_thread_;
 	mutable std::mutex sub_thread_mutex_;
