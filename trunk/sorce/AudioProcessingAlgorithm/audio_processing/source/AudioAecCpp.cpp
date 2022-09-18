@@ -18,27 +18,26 @@ extern "C" {
 #endif
 
 
-void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out)
+void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out, int cycle_num, int index_tmp)
 {
 
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
     //AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
     //DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
     SUBinterface* pSUBThread = (SUBinterface*)aec_para.pSUBThread;
+// #ifdef AUDIO_WAVE_DEBUG
+//     int cycle_num = 1;
+//     int index_tmp = 0;
+// #else
+//     int cycle_num = 2;
+//     int index_tmp = 3;
+// #endif
 
-#ifdef AUDIO_WAVE_DEBUG
-    int cycle_num = 1;
-    int index_tmp = 0;
-#else
-    int cycle_num = 2;
-    int index_tmp = 3;
-#endif
-
-#ifdef AUDIO_WAVE_RELEASE
-    cycle_num = 1;
-    index_tmp = 0;
-#endif
-
+// #ifdef AUDIO_WAVE_RELEASE
+//     cycle_num = 1;
+//     index_tmp = 0;
+// #endif
+    //printf("[AudioAecCpp] cycle is %d, index_tmp is %d",cycle_num,index_tmp);
     for (int cycle = 0; cycle < cycle_num; cycle++) {
         //int capture[4][480] = { 0 };
 
@@ -50,7 +49,6 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             }
             sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
         }
-
         pSUBThread->sub_process(sharedata, aec_para);
 		/*while (1) {
 			if (pSUBThread->get_finish_flag()) {

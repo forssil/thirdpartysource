@@ -54,14 +54,11 @@ int main(int argc , char *argv[ ])
 	int fremaelen=480;//int(framesize*readwavhead.SampleRate/1000);
 
    {
-	    
-	   //infile=argv[1];
-	   infile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_chenan5.wav";
-		outfile=   "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcon-aecon-nron-bfoff-rnnoff-transient0.03-0.01-vad2-chn0-0612-nohand.wav";
+	    //infile=argv[1];
+	    infile = "D:/下载/A项目/数据/0731RnnOff有残余回声/5channel_out_602-offrnn.wav";
+		outfile=   "D:/下载/A项目/数据/0731RnnOff有残余回声/output-win.wav";
         //outfile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcoff-aecon-nron-bfoff-rnnon-out.wav";
-        outfile1 = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out1_expint2.wav";
-	   
-
+        outfile1 = "D:/program/thirdpartysource/trunk/tools/ut_test/win_out1.wav";
    }
 
 	
@@ -196,7 +193,7 @@ int main(int argc , char *argv[ ])
 #endif
 			//pAPFInterface->process(sharedata);
             
-            aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout);
+            aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout, 1, 0);
             //aec_processing(nullptr, micin, farin, nullptr, 0, errout);
 #ifdef WIN32
 			QueryPerformanceCounter(&finishTime);

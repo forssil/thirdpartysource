@@ -29,6 +29,7 @@ INCLUDES =\
 C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
 	$(SRC_PATH)/common_audio/source/randomization_functions.c\
+	$(SRC_PATH)/common_audio/source/fft1536.c\
 	$(SRC_PATH)/agc/source/agc_new.c \
 	$(SRC_PATH)/rnnoise/source/celt_lpc.c \
 	$(SRC_PATH)/rnnoise/source/denoise.c \

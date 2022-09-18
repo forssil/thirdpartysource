@@ -14,7 +14,7 @@ extern "C" {
 //void getEncryptedPlaintex(unsigned char* plaintexId);
 //void checkLicense(const unsigned char*dstLic);
 //int getLicState();
-extern void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out);
+extern void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out, int cycle_num, int index_tmp);
 extern void aec_processing_init_cpp(void  **p_aec);
 extern void aec_processing_deinit_cpp(void *h_aec);
 //unsigned int aec_processing_get_lib_version();

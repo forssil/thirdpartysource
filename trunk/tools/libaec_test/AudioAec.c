@@ -50,7 +50,7 @@ extern "C" {
         //printf("%s-%d: mode =%d %p %p \n",__func__,__LINE__,mode,date_in[3],&date_in[3][0]);   
         //memcpy((void *)data_out, (void *)(&date_in[3][0]), 960 * 2);
 
-        aec_processing_cpp(h_aec, date_in, ref_spk, ref_mic, mode, data_out);
+        aec_processing_cpp(h_aec, date_in, ref_spk, ref_mic, mode, data_out, 2, 3);
     }
 
     void aec_processing_init(void  **p_aec)
