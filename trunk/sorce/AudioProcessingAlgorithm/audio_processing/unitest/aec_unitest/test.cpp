@@ -26,6 +26,58 @@ typedef long clock_t;
 //void aec_processing_init(void  **p_aec);
 //void aec_processing_deinit(void *h_aec);
 
+void getconfigs(const char* input, Toggle3A *output) {
+	FILE* fp = NULL;
+	char mode[8];
+	short i;
+	char tmp;
+  	fp = fopen(input, "rb+");
+	if (NULL == fp) {
+		printf("open config file fail");
+		return;  // cann't open the file
+	}
+
+	while (!feof(fp)) {
+		auto size = fread(mode, 4, 1, fp);
+		if (size == 0) {
+			break;
+		}
+		mode[4] = '\0';
+		if (strcmp(mode, "AEC ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bAECOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "AGC ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bAGCOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "CNG ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bNRCNGOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "NR_ ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bNROn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "RNN ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bRNNOISEOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+			fread(mode, 7, 1, fp);
+			mode[7] = '\0';
+			if (strcmp(mode, "PRERNN ") == 0) {
+				fread(&tmp, 1, 1, fp);
+				output->bPreRnnOn_ = tmp - '0';
+				fread(&tmp, 1, 1, fp);
+			}
+		}
+	}
+}
+
 int main(int argc , char *argv[ ])
 {
 	
@@ -61,7 +113,25 @@ int main(int argc , char *argv[ ])
         outfile1 = "D:/program/thirdpartysource/trunk/tools/ut_test/win_out1.wav";
    }
 
-	
+   FILE* config = NULL;
+   char *configfile = NULL;
+   Toggle3A config_;
+   configfile = "D:/config.txt";
+
+   if (NULL == configfile) {
+	   printf("use default config!\n");
+	   config_.bAECOn_ = true;
+	   config_.bAGCOn_ = true;
+	   config_.bNRCNGOn_ = false;
+	   config_.bNROn_ = true;
+	   config_.bPreRnnOn_ = true;
+	   config_.bRNNOISEOn_ = false;
+   }
+   else {
+	   printf("get external config!\n");
+	   getconfigs(configfile, &config_);
+   }
+
 	readfile=new CWavFileOp(infile,"rb");
 	if (readfile->m_FileStatus==-2)
 	{
@@ -146,7 +216,7 @@ int main(int argc , char *argv[ ])
     }
     short farin[512] = { 0 };
     short errout[512] = { 0 };
-    aec_processing_init_cpp(nullptr);
+	aec_processing_init_cpp(nullptr, &config_);
     //aec_processing_init(nullptr);
 	//c
 	counttime = clock();
