@@ -66,7 +66,7 @@ extern "C" {
                 printf("%s-%d: malloc fail \n", __func__, __LINE__);
             }
         }
-        aec_processing_init_cpp(p_aec);
+        aec_processing_init_cpp(p_aec, NULL);
     }
 
     void aec_processing_deinit(void *h_aec)

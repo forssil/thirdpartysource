@@ -83,7 +83,7 @@ public:
 	SUBinterface();
 	~SUBinterface();
     void threadrun();
-	void sub_create();
+	void sub_create(audio_pro_share *share_data);
 	void sub_processing_deinit();
 	void sub_process(audio_pro_share * sharedata, AEC_parameter aec_para);
 

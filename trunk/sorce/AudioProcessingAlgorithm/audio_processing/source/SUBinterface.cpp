@@ -111,7 +111,7 @@ SUBinterface::~SUBinterface() {
 	dump_idx = 0;
 }
 
-void SUBinterface::sub_create() {
+void SUBinterface::sub_create(audio_pro_share *share_data) {
     aec_ = CreateIApfInst_int(mics_num_, 48000, 1024, framelen_);
     //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1536, aec_para.fremaelen);
     aec_->Init();
@@ -155,12 +155,12 @@ void SUBinterface::sub_create() {
     share_data_->pReffer_ = data_in_f2;
     share_data_->nSamplesInReffer_ = framelen_;
 
-    share_data_->bAECOn_ = true;
-    share_data_->bNROn_ = true;
-    share_data_->bNRCNGOn_ = false;
-    share_data_->bAGCOn_ = true;
-    share_data_->bRNNOISEOn_ = false;
-    share_data_->bPreRnnOn_ = true;
+    share_data_->bAECOn_ = share_data->bAECOn_;
+    share_data_->bNROn_ = share_data->bNROn_;
+    share_data_->bNRCNGOn_ = share_data->bNRCNGOn_;
+    share_data_->bAGCOn_ = share_data->bAGCOn_;
+    share_data_->bRNNOISEOn_ = share_data->bRNNOISEOn_;
+    share_data_->bPreRnnOn_ = share_data->bPreRnnOn_;
 
     share_data_->bRNNOISEVad_ = true;
     share_data_->bRNNOISEVad_enhance_ = true;
@@ -454,7 +454,7 @@ void SUBinterface::task() {
             }
             else {
                 share_data_->bRNNOISEVad_enhance_ = true;
-                share_data_->bRNNOISEVad_enhance_ = 20;
+                share_data_->RNNCounter_enhance_ = 20;
             }
         }
 
