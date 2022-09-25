@@ -4,6 +4,10 @@
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
+#if defined (ARM_NEON)
+#include <arm_neon.h>
+#endif
+#include <vector>
 #include "AdapFilterGroup.h"
 CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps, float mu, float delat_gain)
 {
@@ -351,43 +355,187 @@ void CAdapFilterGroup::UpdateError()
 
 void CAdapFilterGroup::filter(void)
 {
-	int i,indx_dely,indx,j,maxtaps;	
+#if 1
+    int i,indx_dely,indx,j,maxtaps;	
 	float temp1,temp2,temp3,temp4;
 	float w_re,w_im,x_re,x_im;
 	memcpy(m_cpAdErrPre,m_cpAdErr,sizeof(float)*(2*m_nNumBank));
     indx_dely=0;
-	for (i=0;i<m_nNumBank;i++)
-	{
-		indx=2*i;//x[n]
-		maxtaps=m_npTaps[i];
-		temp1=0.f;
-		temp2=0.f;
-		temp3=0.f;
-		temp4=0.f;
-		for (j=0;j<maxtaps;j++,indx_dely+=2)
-		{
-			x_re =m_cpReferDelayLine[indx_dely];
-			x_im =m_cpReferDelayLine[indx_dely+1];
-			//adaptive filter
-			w_re =m_cpAdW[indx_dely];
-			w_im =m_cpAdW[indx_dely+1];
-			temp1  +=w_re*x_re   -w_im*x_im;
-			temp2  +=w_re*x_im   +w_im*x_re;
-			//fix filter
-		/*	w_re =m_cpFixW[indx_dely];
-			w_im =m_cpFixW[indx_dely+1];
-			temp3  +=w_re*x_re   -w_im*x_im;
-			temp4  +=w_re*x_im   +w_im*x_re;*/
-		}
-		indx_dely+=2;
-		m_cpAdEst[indx]  =temp1;
-		m_cpAdEst[indx+1]=temp2;
+    bool neon_on = true;
+    if(neon_on){
+#if defined (ARM_NEON)
+        printf("using neon! \n");
+        //std::vector<float> x_re(m_nNumBank);
+        //std::vector<float> x_im(m_nNumBank);
+        //std::vector<float> h_re(m_nNumBank);
+        //std::vector<float> h_im(m_nNumBank);
+        //std::vector<float> s_re(m_nNumBank);
+        //std::vector<float> s_im(m_nNumBank);
+        
+        // vst2_f16;
 
-		// priori error
-		m_cpAdErrPre[indx] =m_cpDes[indx]-temp1;
-		m_cpAdErrPre[indx+1] =m_cpDes[indx+1]-temp2;
+        // for(size_t n =0; n < m_nNumBank/4;n++)
+        // {
+        //     float32x4x2_t  float_ref = vld2q_f32(m_cpReferDelayLine+2*n*4);
+        //     vst1q_f32(h_re+4*n, float_ref.val[0]);
+        //     vst1q_f32(h_im+4*n, float_ref.val[1]);
 
-	}
+        //     float32x4x2_t  float_h = vld2q_f32(m_cpAdW+2*n*4);
+        //     vst1q_f32(x_re+4*n, float_h.val[0]);
+        //     vst1q_f32(x_im+4*n, float_h.val[1]);
+
+        // }
+        for (i=0;i<m_nNumBank;i++)
+        {
+            indx=2*i;//x[n]
+            maxtaps=m_npTaps[i];
+            temp1=0.f;
+            temp2=0.f;
+            temp3=0.f;
+            temp4=0.f;
+            float32x4_t g = { 0.0f, 0.0f, 0.0f, 0.0f };
+            float32x4_t h = { 0.0f, 0.0f, 0.0f, 0.0f };
+            for (j=0;j<maxtaps/4;j++,indx_dely+=8)
+            {
+                // const float32x4_t X_re = vld1q_f32(&X->re[k]);
+                // const float32x4_t X_im = vld1q_f32(&X->im[k]);
+                // const float32x4_t H_re = vld1q_f32(&H_j->re[k]);
+                // const float32x4_t H_im = vld1q_f32(&H_j->im[k]);
+
+                float32x4x2_t float_ref = vld2q_f32(m_cpReferDelayLine+indx_dely);
+                // vst1q_f32(x_re+4*i, float_ref.val[0]);
+                // vst1q_f32(x_im+4*i, float_ref.val[1]);
+
+                float32x4x2_t  float_h = vld2q_f32(m_cpAdW+indx_dely);
+                // vst1q_f32(h_re+4*i, float_h.val[0]);
+                // vst1q_f32(h_im+4*i, float_h.val[1]);
+
+                // const float32x4_t S_re = vld1q_f32(&s_re[i]);
+                // const float32x4_t S_im = vld1q_f32(&s_im[i]);
+
+                const float32x4_t a = vmulq_f32(float_ref.val[0], float_h.val[0]);
+                const float32x4_t e = vmlsq_f32(a, float_ref.val[1], float_h.val[1]);
+                const float32x4_t c = vmulq_f32(float_ref.val[0], float_h.val[1]);
+                const float32x4_t f = vmlaq_f32(c, float_ref.val[1], float_h.val[0]);
+
+                g = vaddq_f32(g, e);
+                h = vaddq_f32(h, f);
+                // vst1q_f32(&s_re[i], vaddvq_f32(g));
+                // vst1q_f32(&s_im[i], vaddvq_f32(h));
+
+            }
+
+            indx_dely+=2;
+
+            float32x4x2_t float_est;
+            // vst1q_f32(&s_re[i], vaddvq_f32(g));
+            // vst1q_f32(&s_im[i], vaddvq_f32(h));
+            vst1q_f32(float_est.val[0], vaddvq_f32(g));
+            vst1q_f32(float_est.val[1], vaddvq_f32(h));
+            vst2q_f32(m_cpAdEst[indx],float_est);
+
+            // m_cpAdEst[indx]  =temp1;
+            // m_cpAdEst[indx+1]=temp2;
+
+            // priori error
+            m_cpAdErrPre[indx] =m_cpDes[indx]-m_cpAdEst[indx];
+            m_cpAdErrPre[indx+1] =m_cpDes[indx+1]-m_cpAdEst[indx+1];
+        }
+#endif
+    }else{
+        for (i=0;i<m_nNumBank;i++)
+        {
+            indx=2*i;//x[n]
+            maxtaps=m_npTaps[i];
+            temp1=0.f;
+            temp2=0.f;
+            temp3=0.f;
+            temp4=0.f;
+            for (j=0;j<maxtaps;j++,indx_dely+=2)
+            {
+                
+                x_re =m_cpReferDelayLine[indx_dely];
+                x_im =m_cpReferDelayLine[indx_dely+1];
+                //adaptive filter
+                w_re =m_cpAdW[indx_dely];
+                w_im =m_cpAdW[indx_dely+1];
+                temp1  +=w_re*x_re   -w_im*x_im;
+                temp2  +=w_re*x_im   +w_im*x_re;
+                //fix filter
+            /*	w_re =m_cpFixW[indx_dely];
+                w_im =m_cpFixW[indx_dely+1];
+                temp3  +=w_re*x_re   -w_im*x_im;
+                temp4  +=w_re*x_im   +w_im*x_re;*/
+            }
+            indx_dely+=2;
+            m_cpAdEst[indx]  =temp1;
+            m_cpAdEst[indx+1]=temp2;
+
+            // priori error
+            m_cpAdErrPre[indx] =m_cpDes[indx]-temp1;
+            m_cpAdErrPre[indx+1] =m_cpDes[indx+1]-temp2;
+
+        }
+    }
+
+#else
+//     int i,indx_dely,indx,j,maxtaps;	
+// 	float temp1,temp2,temp3,temp4;
+// 	float w_re,w_im,x_re,x_im;
+// 	memcpy(m_cpAdErrPre,m_cpAdErr,sizeof(float)*(2*m_nNumBank));
+//     indx_dely=0;
+// //   S->re.fill(0.f);
+// //   S->im.fill(0.f);
+  
+//   size_t index = indx;
+//   Boya::rtc::ArrayView<const FftDataV> render_buffer_data =
+//       render_buffer.GetFftBuffer();
+//   const int lim1 = std::min(m_nSumLenDelLine + 2 - index, maxtaps);
+//   const int lim2 = maxtaps;
+//   int kNumFourBinBands = bins / 4;
+//   const FftDataV* H_j = &H[0];
+//   const FftDataV* X = &render_buffer_data[index];
+
+//   int j = 0;
+//   int limit = lim1;
+//   do {
+//     for (; j < limit; ++j, ++H_j, ++X) {
+//       for (int k = 0, n = 0; n < kNumFourBinBands; ++n, k += 4) {
+//         const float32x4_t X_re = vld1q_f32(&X->re[k]);
+//         const float32x4_t X_im = vld1q_f32(&X->im[k]);
+//         const float32x4_t H_re = vld1q_f32(&H_j->re[k]);
+//         const float32x4_t H_im = vld1q_f32(&H_j->im[k]);
+//         const float32x4_t S_re = vld1q_f32(&S->re[k]);
+//         const float32x4_t S_im = vld1q_f32(&S->im[k]);
+//         const float32x4_t a = vmulq_f32(X_re, H_re);
+//         const float32x4_t e = vmlsq_f32(a, X_im, H_im);
+//         const float32x4_t c = vmulq_f32(X_re, H_im);
+//         const float32x4_t f = vmlaq_f32(c, X_im, H_re);
+//         const float32x4_t g = vaddq_f32(S_re, e);
+//         const float32x4_t h = vaddq_f32(S_im, f);
+//         vst1q_f32(&S->re[k], g);
+//         vst1q_f32(&S->im[k], h);
+//       }
+//     }
+//     limit = lim2;
+//     X = &render_buffer_data[0];
+//   } while (j < lim2);
+
+//   H_j = &H[0];
+//   X = &render_buffer_data[index];
+//   j = 0;
+//   limit = lim1;
+//   do {
+//     for (; j < limit; ++j, ++H_j, ++X) {
+//           S->re[bins] += X->re[bins] * H_j->re[bins] - X->im[bins] * H_j->im[bins];
+//         S->im[bins] += X->re[bins] * H_j->im[bins] + X->im[bins] * H_j->re[bins];
+//     }
+//     limit = lim2;
+//     X = &render_buffer_data[0];
+//   } while (j < lim2);
+
+#endif
+
 }
 
 void CAdapFilterGroup::UpdateFilterWeight(void)

@@ -46,8 +46,7 @@ void CSubbandAdap::Subband_init(int fiter_len, int fileter_num, float mu, float 
 	if (m_nFs == 48000)
 	{
 		fileter_num  = 0 >= fileter_num ? SUBBANDUSE44k : fileter_num;
-
-
+        // fileter_num = 0 >= fileter_num ? 256 : fileter_num; // 14971 Hz
 	}
 
 	if (m_nFs==44100)
