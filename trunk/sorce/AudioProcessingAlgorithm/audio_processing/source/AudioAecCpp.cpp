@@ -85,7 +85,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 
 }
 
-void aec_processing_init_cpp(void  **p_aec)
+void aec_processing_init_cpp(void  **p_aec, void *config)
 {
     aec_para.mics_num = 4;
     aec_para.fremaelen = 480;
@@ -132,14 +132,22 @@ void aec_processing_init_cpp(void  **p_aec)
     }
     sharedata->pReffer_ = aec_para.data_in_f2;
     sharedata->nSamplesInReffer_ = aec_para.fremaelen;
-
-    sharedata->bAECOn_ = true;
-    sharedata->bNROn_ = true;
-    sharedata->bNRCNGOn_ = false;
-    sharedata->bAGCOn_ = true;
-    sharedata->bRNNOISEOn_ = false;
-    sharedata->bPreRnnOn_ = true;
-
+	if (NULL != config) {
+		sharedata->bAECOn_ = ((Toggle3A*)config)->bAECOn_;
+		sharedata->bNROn_ = ((Toggle3A*)config)->bNROn_;
+		sharedata->bNRCNGOn_ = ((Toggle3A*)config)->bNRCNGOn_;
+		sharedata->bAGCOn_ = ((Toggle3A*)config)->bAGCOn_;
+		sharedata->bRNNOISEOn_ = ((Toggle3A*)config)->bRNNOISEOn_;
+		sharedata->bPreRnnOn_ = ((Toggle3A*)config)->bPreRnnOn_;
+	}
+	else {
+		sharedata->bAECOn_ = true;
+		sharedata->bNROn_ = true;
+		sharedata->bNRCNGOn_ = false;
+		sharedata->bAGCOn_ = true;
+		sharedata->bRNNOISEOn_ = false;
+		sharedata->bPreRnnOn_ = true;
+	}
     sharedata->bRNNOISEVad_ = true;
     sharedata->bRNNOISEVad_enhance_ = true;
 
@@ -179,7 +187,7 @@ void aec_processing_init_cpp(void  **p_aec)
 
     
     SUBinterface *pSUBThread = new SUBinterface;
-    pSUBThread->sub_create();
+    pSUBThread->sub_create(sharedata);
 	pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
 

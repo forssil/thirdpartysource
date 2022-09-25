@@ -20,6 +20,56 @@ typedef long clock_t;
 //void aec_processing(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out);
 //void aec_processing_init(void  **p_aec);
 //void aec_processing_deinit(void *h_aec);
+void getconfigs(const char* input, Toggle3A *output) {
+	FILE* fp = NULL;
+	char mode[8];
+	char tmp;
+  	fp = fopen(input, "rb+");
+	if (NULL == fp) {
+		printf("open config file fail");
+		return;  // cann't open the file
+	}
+
+	while (!feof(fp)) {
+		auto size = fread(mode, 4, 1, fp);
+		if(size == 0){
+			break;
+		}
+		mode[4] = '\0';
+		if (strcmp(mode, "AEC ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bAECOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "AGC ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bAGCOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "CNG ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bNRCNGOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "NR_ ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bNROn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+		}
+		else if (strcmp(mode, "RNN ") == 0) {
+			fread(&tmp, 1, 1, fp);
+			output->bRNNOISEOn_ = tmp - '0';
+			fread(&tmp, 1, 1, fp);
+			fread(mode, 7, 1, fp);
+			mode[7] = '\0';
+			if (strcmp(mode, "PRERNN ") == 0) {
+				fread(&tmp, 1, 1, fp);
+				output->bPreRnnOn_ = tmp - '0';
+				fread(&tmp, 1, 1, fp);
+			}
+		}
+	}
+}
 
 int main(int argc , char *argv[ ])
 {
@@ -27,23 +77,29 @@ int main(int argc , char *argv[ ])
 	short *data_in_s,*data_out_s;
 	float *data_in_f;
 	float *data_in_f2, *data_out_f2;
-	char *infile;
-	char *outfile;
+	char *infile,*outfile,*configfile = NULL;
 	long filelen;
 	long outfileleng;
 	int mics_num = 4;
     int channel_num = 5;
-	filelen=160*100*480 * channel_num;
-
+	Toggle3A config_;
 	int fremaelen=480;//int(framesize*readwavhead.SampleRate/1000);
-	printf("it starts!\n");
-    {
-	    //infile=argv[1];
-	    infile = (char*)"test_short.pcm";
-		outfile=   (char*)"pcmout.pcm";
-        //outfile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcoff-aecon-nron-bfoff-rnnon-out.wav";
-        //outfile1 = (char*)"D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out1_expint2.pcm";
-    }
+	printf("Usage: [infile.pcm] [outfile.pcm] [length] [config.txt(can be defaulted)]\n");
+    
+	if(argc < 3){
+		return 0;
+	}
+	infile=argv[1];
+	outfile = argv[2];
+	long length = strtol(argv[3], NULL, 10);
+	if(argc > 3){
+		configfile = argv[4];
+	}
+	
+	// infile = (char*)"test_short.pcm";
+	// outfile=   (char*)"pcmout.pcm";
+    
+	filelen=(int)length*100*480 * channel_num;
     input = fopen(infile, "rb+");
     output = fopen(outfile, "wb+");
 	if(NULL == input){
@@ -54,8 +110,21 @@ int main(int argc , char *argv[ ])
 		printf("open outfile failed!\n");
 		return 0;
 	}
-	
-	
+	if(NULL == configfile){
+		printf("use default config!\n");
+		config_.bAECOn_ = true;
+		config_.bAGCOn_ = true;
+		config_.bNRCNGOn_ = false;
+		config_.bNROn_ = true;
+		config_.bPreRnnOn_ = true;
+		config_.bRNNOISEOn_ = false;
+	}
+	else{
+		printf("get external config!");
+		getconfigs(configfile, &config_);
+		printf("configs: AEC: %d AGC: %d NR_: %d CNG: %d RNN: %d PRERNN: %d\n",
+				config_.bAECOn_,config_.bAGCOn_,config_.bNROn_,config_.bNRCNGOn_,config_.bPreRnnOn_,config_.bRNNOISEOn_);
+	}
 
 	data_in_s=new short[fremaelen*(channel_num+1)];
 	data_out_s=data_in_s+fremaelen*channel_num;
@@ -69,49 +138,22 @@ int main(int argc , char *argv[ ])
 	data_out_f2 = data_in_f2 + fremaelen;
 	memset(data_in_f2, 0, (fremaelen * 2)*sizeof(float));
 
-	//create AEC
-	//CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(mics_num, readwavhead.SampleRate, 2 * fremaelen, fremaelen);
-	//pAPFInterface->Init();
-	//create AGC
-	//pAgc = agc_create();
-	//agc_reset(pAgc);
-	//pAgc_new = agc_new_create();
-	//agc_new_reset(pAgc_new);
-
-    //sharedata init
-	//sharedata.ppCapture_ = new float*[mics_num];
-	//sharedata.nChannelsInCapture_ = mics_num;
-	//sharedata.nSamplesPerCaptureChannel_ = fremaelen;
-	//sharedata.ppProcessOut_ = new float*[mics_num];
-	//sharedata.nChannelsInProcessOut_ = mics_num;
-	//sharedata.nSamplesPerProcessOutChannel_ = fremaelen;
-
-	//for (int i = 0; i < mics_num; i++) {
-	//	sharedata.ppCapture_[i] = data_out_f + i * fremaelen;
-	//	sharedata.ppProcessOut_[i] = data_out_f + i * fremaelen+ mics_num* fremaelen;
-	//}
-	//sharedata.pReffer_ = data_in_f2;
-	//sharedata.nSamplesInReffer_ = fremaelen;
-
-	//sharedata.bAECOn_=true;
-	//sharedata.bNROn_= true;
-	//sharedata.bNRCNGOn_=false;
-
     short **micin = new short*[mics_num];
     for (int i = 0; i < mics_num; i++) {
         micin[i] = new short[512];
     }
     short farin[512] = { 0 };
     short errout[512] = { 0 };
-    aec_processing_init_cpp(nullptr);
+    aec_processing_init_cpp(nullptr, (void*)&config_);
 	outfileleng = 0;
-
+	
 	int cycleNum = 1;
 	int insideCycleNum = 0;
 	for (int i = 0; i < cycleNum; i++)
 	{
 		while (outfileleng < (filelen - fremaelen * channel_num))
 		{
+			//printf("outfileleng: %ld\n", outfileleng);
 			int read_len = fread(data_in_s,sizeof(short),fremaelen * channel_num,input);
 			outfileleng += read_len;
 			//if (outfileleng>=3826* fremaelen*readwavhead.NChannels)
