@@ -355,22 +355,21 @@ void CAdapFilterGroup::UpdateError()
 
 void CAdapFilterGroup::filter(void)
 {
-#if 1
     int i,indx_dely,indx,j,maxtaps;	
 	float temp1,temp2,temp3,temp4;
 	float w_re,w_im,x_re,x_im;
 	memcpy(m_cpAdErrPre,m_cpAdErr,sizeof(float)*(2*m_nNumBank));
     indx_dely=0;
-    bool neon_on = true;
+    bool neon_on = false;
     if(neon_on){
 #if defined (ARM_NEON)
-        printf("using neon! \n");
+        //printf("using neon! \n");
         //std::vector<float> x_re(m_nNumBank);
         //std::vector<float> x_im(m_nNumBank);
         //std::vector<float> h_re(m_nNumBank);
         //std::vector<float> h_im(m_nNumBank);
-        //std::vector<float> s_re(m_nNumBank);
-        //std::vector<float> s_im(m_nNumBank);
+        std::vector<float> s_re(m_nNumBank);
+        std::vector<float> s_im(m_nNumBank);
         
         // vst2_f16;
 
@@ -430,10 +429,13 @@ void CAdapFilterGroup::filter(void)
             float32x4x2_t float_est;
             // vst1q_f32(&s_re[i], vaddvq_f32(g));
             // vst1q_f32(&s_im[i], vaddvq_f32(h));
-            vst1q_f32(float_est.val[0], vaddvq_f32(g));
-            vst1q_f32(float_est.val[1], vaddvq_f32(h));
-            vst2q_f32(m_cpAdEst[indx],float_est);
-
+            // vst1q_f32(float_est.val[0], vaddvq_f32(g));
+            // vst1q_f32(float_est.val[1], vaddvq_f32(h));
+            // vst2q_f32(m_cpAdEst[indx],float_est);
+			vst1q_f32(&s_re[0], g);
+            vst1q_f32(&s_im[0], h);
+			m_cpAdEst[indx] = s_re[0] + s_re[1] + s_re[2] + s_re[3];
+			m_cpAdEst[indx + 1] = s_im[0] + s_im[1] + s_im[2] + s_im[3];
             // m_cpAdEst[indx]  =temp1;
             // m_cpAdEst[indx+1]=temp2;
 
@@ -477,65 +479,6 @@ void CAdapFilterGroup::filter(void)
 
         }
     }
-
-#else
-//     int i,indx_dely,indx,j,maxtaps;	
-// 	float temp1,temp2,temp3,temp4;
-// 	float w_re,w_im,x_re,x_im;
-// 	memcpy(m_cpAdErrPre,m_cpAdErr,sizeof(float)*(2*m_nNumBank));
-//     indx_dely=0;
-// //   S->re.fill(0.f);
-// //   S->im.fill(0.f);
-  
-//   size_t index = indx;
-//   Boya::rtc::ArrayView<const FftDataV> render_buffer_data =
-//       render_buffer.GetFftBuffer();
-//   const int lim1 = std::min(m_nSumLenDelLine + 2 - index, maxtaps);
-//   const int lim2 = maxtaps;
-//   int kNumFourBinBands = bins / 4;
-//   const FftDataV* H_j = &H[0];
-//   const FftDataV* X = &render_buffer_data[index];
-
-//   int j = 0;
-//   int limit = lim1;
-//   do {
-//     for (; j < limit; ++j, ++H_j, ++X) {
-//       for (int k = 0, n = 0; n < kNumFourBinBands; ++n, k += 4) {
-//         const float32x4_t X_re = vld1q_f32(&X->re[k]);
-//         const float32x4_t X_im = vld1q_f32(&X->im[k]);
-//         const float32x4_t H_re = vld1q_f32(&H_j->re[k]);
-//         const float32x4_t H_im = vld1q_f32(&H_j->im[k]);
-//         const float32x4_t S_re = vld1q_f32(&S->re[k]);
-//         const float32x4_t S_im = vld1q_f32(&S->im[k]);
-//         const float32x4_t a = vmulq_f32(X_re, H_re);
-//         const float32x4_t e = vmlsq_f32(a, X_im, H_im);
-//         const float32x4_t c = vmulq_f32(X_re, H_im);
-//         const float32x4_t f = vmlaq_f32(c, X_im, H_re);
-//         const float32x4_t g = vaddq_f32(S_re, e);
-//         const float32x4_t h = vaddq_f32(S_im, f);
-//         vst1q_f32(&S->re[k], g);
-//         vst1q_f32(&S->im[k], h);
-//       }
-//     }
-//     limit = lim2;
-//     X = &render_buffer_data[0];
-//   } while (j < lim2);
-
-//   H_j = &H[0];
-//   X = &render_buffer_data[index];
-//   j = 0;
-//   limit = lim1;
-//   do {
-//     for (; j < limit; ++j, ++H_j, ++X) {
-//           S->re[bins] += X->re[bins] * H_j->re[bins] - X->im[bins] * H_j->im[bins];
-//         S->im[bins] += X->re[bins] * H_j->im[bins] + X->im[bins] * H_j->re[bins];
-//     }
-//     limit = lim2;
-//     X = &render_buffer_data[0];
-//   } while (j < lim2);
-
-#endif
-
 }
 
 void CAdapFilterGroup::UpdateFilterWeight(void)
