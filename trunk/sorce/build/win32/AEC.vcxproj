@@ -67,6 +67,7 @@
       <AdditionalIncludeDirectories>..\..\..\include;..\..\AudioBufferBase\include;..\..\AudioProcessingAlgorithm\common_audio\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include;..\..\AudioProcessingAlgorithm\acoustic_echo_cancellation\include\interface;..\..\AudioUtility\interface;..\..\AudioProcessingAlgorithm\vad\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

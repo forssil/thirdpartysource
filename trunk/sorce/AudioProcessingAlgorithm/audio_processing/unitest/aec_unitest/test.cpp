@@ -106,17 +106,19 @@ int main(int argc , char *argv[ ])
 	int fremaelen=480;//int(framesize*readwavhead.SampleRate/1000);
 
    {
-	    //infile=argv[1];
-	    infile = "D:/下载/A项目/数据/0731RnnOff有残余回声/5channel_out_602-offrnn.wav";
-		outfile=   "D:/下载/A项目/数据/0731RnnOff有残余回声/output-win.wav";
-        //outfile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcoff-aecon-nron-bfoff-rnnon-out.wav";
-        outfile1 = "D:/program/thirdpartysource/trunk/tools/ut_test/win_out1.wav";
+  
+	   //infile=argv[1];
+	   infile = "D:\\work\\data\\5channel_dump1016.wav"; // keyboard-5channel 5channel_chenan5 5channel_dump1016
+		//outfile=   "D:\\work\\data\\5channel_out_chenan-agcon-aecon-nron-bfoff-rnnoff-transient0.03-0.01-vad2-chn0-0612-delay5-20-20-30-rnngain5-adf-erle-farvad4-ori.wav";
+        outfile = "D:\\work\\data\\5channel_out_dump1016-agcon-aecon-nron-bfoff-rnnoff-out-1023-rnn-new-0.5-smoothG-on5-smooth-limiter.wav";
+        outfile1 = "D:\\work\\data\\5channel_out1_expint2.wav";
+
    }
 
    FILE* config = NULL;
    char *configfile = NULL;
    Toggle3A config_;
-   configfile = "D:/config.txt";
+   //configfile = "D:/config.txt";
 
    if (NULL == configfile) {
 	   printf("use default config!\n");
@@ -125,7 +127,7 @@ int main(int argc , char *argv[ ])
 	   config_.bNRCNGOn_ = false;
 	   config_.bNROn_ = true;
 	   config_.bPreRnnOn_ = true;
-	   config_.bRNNOISEOn_ = false;
+	   config_.bRNNOISEOn_ = true;
    }
    else {
 	   printf("get external config!\n");
@@ -262,8 +264,9 @@ int main(int argc , char *argv[ ])
 			QueryPerformanceCounter(&startTime);
 #endif
 			//pAPFInterface->process(sharedata);
-            
+
             aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout, 1, 0);
+
             //aec_processing(nullptr, micin, farin, nullptr, 0, errout);
 #ifdef WIN32
 			QueryPerformanceCounter(&finishTime);

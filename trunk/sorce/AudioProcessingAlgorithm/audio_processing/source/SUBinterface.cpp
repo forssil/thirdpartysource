@@ -189,7 +189,7 @@ void SUBinterface::sub_create(audio_pro_share *share_data) {
 
     rnn_noise_ = rnnoise_create(NULL);
 	//sub_thread_ = new std::thread([this, sharedata, aec_para] {this->task(sharedata); });
-    sub_thread_ = new std::thread(&SUBinterface::threadrun,this);
+    //sub_thread_ = new std::thread(&SUBinterface::threadrun,this);
 
 }
 void SUBinterface::threadrun() {
@@ -214,7 +214,7 @@ void SUBinterface::threadrun() {
 }
 void SUBinterface::sub_process(audio_pro_share * sharedata, AEC_parameter aec_para) {
     {
-        std::unique_lock<std::mutex> lock(sub_thread_mutex_);
+        //std::unique_lock<std::mutex> lock(sub_thread_mutex_);
 
         //push
         framelen_ = aec_para.fremaelen;
@@ -241,24 +241,25 @@ void SUBinterface::sub_process(audio_pro_share * sharedata, AEC_parameter aec_pa
         task_finished_ = false;
     }
 		//task(sharedata);
+        task();
 		//start_sub_thread();
 		//sub_thread_->join();
         int counter_thread = 0;
-        while (1) {
-            if (get_finish_flag()) {
-                break;
-            }
-            else {
-                std::chrono::duration<int, std::micro> timespan(50);
-                std::this_thread::sleep_for(timespan);
-            }
-            counter_thread++;
-            if (counter_thread > 150) {
-                break;
-            }
-        }
+        //while (1) {
+        //    if (get_finish_flag()) {
+        //        break;
+        //    }
+        //    else {
+        //        std::chrono::duration<int, std::micro> timespan(50);
+        //        std::this_thread::sleep_for(timespan);
+        //    }
+        //    counter_thread++;
+        //    if (counter_thread > 150) {
+        //        break;
+        //    }
+        //}
         {
-            std::unique_lock<std::mutex> lock(sub_thread_mutex_);
+            //std::unique_lock<std::mutex> lock(sub_thread_mutex_);
             // pop data from sub thread
             std::vector<float> tmp_out(480, 0.f);
             int ret_out = aec_output_buffer_->PopOneFrame(tmp_out);
@@ -484,6 +485,7 @@ void SUBinterface::task() {
                     share_data_->ppProcessOut_[channel][i] *= gain_limiter;
                 }
                 share_data_->fAGCgain_ = gain;
+
             }
         }
 

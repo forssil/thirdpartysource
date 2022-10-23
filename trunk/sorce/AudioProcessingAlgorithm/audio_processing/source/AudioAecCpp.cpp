@@ -188,7 +188,7 @@ void aec_processing_init_cpp(void  **p_aec, void *config)
     
     SUBinterface *pSUBThread = new SUBinterface;
     pSUBThread->sub_create(sharedata);
-	pSUBThread->start_sub_thread();
+	//pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
 
     //DenoiseState* rnnoise = rnnoise_create(NULL); 
@@ -218,7 +218,7 @@ void aec_processing_deinit_cpp(void *h_aec)
     //agc_new_destroy(agc_new);
 
     SUBinterface* pSUBThread = (SUBinterface*)aec_para.pSUBThread;
-	pSUBThread->stop_sub_thread();
+	//pSUBThread->stop_sub_thread();
     delete pSUBThread;
 
     //DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
