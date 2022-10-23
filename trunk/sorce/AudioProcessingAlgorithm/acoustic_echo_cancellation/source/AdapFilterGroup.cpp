@@ -15,6 +15,11 @@ CAdapFilterGroup::CAdapFilterGroup(int numbank,int *ntaps, float mu, float delat
     m_npTaps=ntaps;
 	m_fMu =mu > 0.000001f ? mu : 0.8f;
 	m_deltagin = delat_gain >= 0.f? delat_gain:0.f;
+#if defined (ARM_NEON)
+    neon_on_ = true;
+#else
+    neon_on_ = false;
+#endif
 	AdapfilterIni();
 
 }
@@ -125,21 +130,45 @@ void CAdapFilterGroup::AdapfilterIni()
 //*newRefer size 2*m_nNumBank
 void CAdapFilterGroup::UpdateR11_R12(const float *newRefer)
 {
-	int i,indx,indy;
-	////update R11
-	memmove(m_fpR11+1,m_fpR11,(m_nSumLenR11-1)*sizeof(float));	
+    int i,indx,indy;
+    ////update R11
+    memmove(m_fpR11+1,m_fpR11,(m_nSumLenR11-1)*sizeof(float));	
 
-	////update R12		
-	memmove(m_cpR12+2,m_cpR12,(m_nSumLenR12-2)*sizeof(float));
+    ////update R12		
+    //memmove(m_cpR12+2,m_cpR12,(m_nSumLenR12-2)*sizeof(float));
+    if(neon_on_){
+#if defined (ARM_NEON)
+        std::vector<float> r11(m_nNumBank);
+        for (i=0;i<m_nNumBank/4;i++)
+        {
+            indx=8*i;
 
-	for (i=0;i<m_nNumBank;i++)
-	{
-		indx=2*i;
-		indy=*(i+m_npDelaylIndx);
-		*(m_fpR11+*(m_npR11Indx+i))  =newRefer[indx]*newRefer[indx]+newRefer[indx+1]*newRefer[indx+1];
-		*(m_cpR12+*(m_npR12Indx+i))  = *(m_cpReferDelayLine+indy+2)*newRefer[indx]+*(m_cpReferDelayLine+indy+3)*newRefer[indx+1];
-        *(m_cpR12+*(m_npR12Indx+i)+1)=-*(m_cpReferDelayLine+indy+3)*newRefer[indx]+*(m_cpReferDelayLine+indy+2)*newRefer[indx+1];
-	}
+            float32x4x2_t float_ref = vld2q_f32(newRefer+indx);
+            const float32x4_t a = vmulq_f32(float_ref.val[0], float_ref.val[0]);
+            const float32x4_t e = vmlaq_f32(a, float_ref.val[1], float_ref.val[1]);
+
+            vst1q_f32(&r11[0], e);
+
+            *(m_fpR11+*(m_npR11Indx+4*i)) = r11[0];
+            *(m_fpR11+*(m_npR11Indx+4*i + 1)) = r11[1];
+            *(m_fpR11+*(m_npR11Indx+4*i + 2)) = r11[2];
+            *(m_fpR11+*(m_npR11Indx+4*i + 3)) = r11[3];
+
+            //*(m_fpR11+*(m_npR11Indx+i))  =newRefer[indx]*newRefer[indx]+newRefer[indx+1]*newRefer[indx+1];
+
+        }
+#endif
+    }else{
+        for (i=0;i<m_nNumBank;i++)
+        {
+            indx=2*i;
+            indy=*(i+m_npDelaylIndx);
+            *(m_fpR11+*(m_npR11Indx+i))  =newRefer[indx]*newRefer[indx]+newRefer[indx+1]*newRefer[indx+1];
+            // *(m_cpR12+*(m_npR12Indx+i))  = *(m_cpReferDelayLine+indy+2)*newRefer[indx]+*(m_cpReferDelayLine+indy+3)*newRefer[indx+1];
+            // *(m_cpR12+*(m_npR12Indx+i)+1)=-*(m_cpReferDelayLine+indy+3)*newRefer[indx]+*(m_cpReferDelayLine+indy+2)*newRefer[indx+1];
+        }
+    }
+
 }
 
 void CAdapFilterGroup::UpdateReferEnergy()
@@ -360,30 +389,13 @@ void CAdapFilterGroup::filter(void)
 	float w_re,w_im,x_re,x_im;
 	memcpy(m_cpAdErrPre,m_cpAdErr,sizeof(float)*(2*m_nNumBank));
     indx_dely=0;
-    bool neon_on = false;
-    if(neon_on){
+    
+    if(neon_on_){
 #if defined (ARM_NEON)
-        //printf("using neon! \n");
-        //std::vector<float> x_re(m_nNumBank);
-        //std::vector<float> x_im(m_nNumBank);
-        //std::vector<float> h_re(m_nNumBank);
-        //std::vector<float> h_im(m_nNumBank);
+        //printf("filter using neon! \n");
         std::vector<float> s_re(m_nNumBank);
         std::vector<float> s_im(m_nNumBank);
         
-        // vst2_f16;
-
-        // for(size_t n =0; n < m_nNumBank/4;n++)
-        // {
-        //     float32x4x2_t  float_ref = vld2q_f32(m_cpReferDelayLine+2*n*4);
-        //     vst1q_f32(h_re+4*n, float_ref.val[0]);
-        //     vst1q_f32(h_im+4*n, float_ref.val[1]);
-
-        //     float32x4x2_t  float_h = vld2q_f32(m_cpAdW+2*n*4);
-        //     vst1q_f32(x_re+4*n, float_h.val[0]);
-        //     vst1q_f32(x_im+4*n, float_h.val[1]);
-
-        // }
         for (i=0;i<m_nNumBank;i++)
         {
             indx=2*i;//x[n]
@@ -402,15 +414,7 @@ void CAdapFilterGroup::filter(void)
                 // const float32x4_t H_im = vld1q_f32(&H_j->im[k]);
 
                 float32x4x2_t float_ref = vld2q_f32(m_cpReferDelayLine+indx_dely);
-                // vst1q_f32(x_re+4*i, float_ref.val[0]);
-                // vst1q_f32(x_im+4*i, float_ref.val[1]);
-
                 float32x4x2_t  float_h = vld2q_f32(m_cpAdW+indx_dely);
-                // vst1q_f32(h_re+4*i, float_h.val[0]);
-                // vst1q_f32(h_im+4*i, float_h.val[1]);
-
-                // const float32x4_t S_re = vld1q_f32(&s_re[i]);
-                // const float32x4_t S_im = vld1q_f32(&s_im[i]);
 
                 const float32x4_t a = vmulq_f32(float_ref.val[0], float_h.val[0]);
                 const float32x4_t e = vmlsq_f32(a, float_ref.val[1], float_h.val[1]);
@@ -421,23 +425,14 @@ void CAdapFilterGroup::filter(void)
                 h = vaddq_f32(h, f);
                 // vst1q_f32(&s_re[i], vaddvq_f32(g));
                 // vst1q_f32(&s_im[i], vaddvq_f32(h));
-
             }
 
             indx_dely+=2;
 
-            float32x4x2_t float_est;
-            // vst1q_f32(&s_re[i], vaddvq_f32(g));
-            // vst1q_f32(&s_im[i], vaddvq_f32(h));
-            // vst1q_f32(float_est.val[0], vaddvq_f32(g));
-            // vst1q_f32(float_est.val[1], vaddvq_f32(h));
-            // vst2q_f32(m_cpAdEst[indx],float_est);
-			vst1q_f32(&s_re[0], g);
+            vst1q_f32(&s_re[0], g);
             vst1q_f32(&s_im[0], h);
-			m_cpAdEst[indx] = s_re[0] + s_re[1] + s_re[2] + s_re[3];
-			m_cpAdEst[indx + 1] = s_im[0] + s_im[1] + s_im[2] + s_im[3];
-            // m_cpAdEst[indx]  =temp1;
-            // m_cpAdEst[indx+1]=temp2;
+            m_cpAdEst[indx] = s_re[0] + s_re[1] + s_re[2] + s_re[3];
+            m_cpAdEst[indx + 1] = s_im[0] + s_im[1] + s_im[2] + s_im[3];
 
             // priori error
             m_cpAdErrPre[indx] =m_cpDes[indx]-m_cpAdEst[indx];
@@ -489,28 +484,78 @@ void CAdapFilterGroup::UpdateFilterWeight(void)
 	float den,beta12_re,beta12_im,beta2_re,beta2_im;
 	float x_re,x_im;
 	float *AttackTaps;
+#if defined(ADF_DEBUG)
+    if (ADFW == nullptr) {
+        ADFW = fopen("adfw_1016-13.txt","wb");
+    }
+#endif
+    counter_++;
 
 	indy=0;	
-	{	
+    if(neon_on_){
+#if defined (ARM_NEON)
+        //printf("UpdateFilterWeight using neon! \n");
+        std::vector<float> w_re(m_nNumBank);
+        std::vector<float> w_im(m_nNumBank);
+		for (i=0;i<m_nNumBank/4;i++)	
+		{ 
+			indx=8*i;
+			// beta12_re = m_cpAdErrPre[indx];
+			// beta12_im = m_cpAdErrPre[indx+1];
+
+            float32x4x2_t  float_e = vld2q_f32(m_cpAdErrPre+indx);
+            float32x4_t g = { 0.0f, 0.0f, 0.0f, 0.0f };
+            float32x4_t h = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+		    ////////update adaptive weights		
+			for (j=0;j<=m_npTaps[i];j++,indy+=8)
+			{			
+				// x_re=m_cpReferDelayLine[indy];
+				// x_im=m_cpReferDelayLine[indy+1];
+                float32x4x2_t float_ref = vld2q_f32(m_cpReferDelayLine+indy);
+                const float32x4_t a = vmulq_f32(float_ref.val[0], float_e.val[0]);
+                const float32x4_t e = vmlaq_f32(a, float_ref.val[1], float_e.val[1]);
+                const float32x4_t c = vmulq_f32(float_ref.val[0], float_e.val[1]);
+                const float32x4_t f = vmlsq_f32(c, float_ref.val[1], float_e.val[0]);
+
+                g = vaddq_f32(g, e);
+                h = vaddq_f32(h, f);
+                vst1q_f32(&w_re[0], g);
+                vst1q_f32(&w_im[0], h);
+                m_cpAdW[indy] = m_fMu * w_re[0];
+                m_cpAdW[indy + 1] = m_fMu * w_im[0];
+                m_cpAdW[indy + 2] = m_fMu * w_re[1];
+                m_cpAdW[indy + 3] = m_fMu * w_im[1];
+                m_cpAdW[indy + 4] = m_fMu * w_re[2];
+                m_cpAdW[indy + 5] = m_fMu * w_im[2];
+                m_cpAdW[indy + 6] = m_fMu * w_re[3];
+                m_cpAdW[indy + 7] = m_fMu * w_im[3];
+				// m_cpAdW[indy  ] += m_fMu * (beta12_re * x_re   + beta12_im * x_im);
+				// m_cpAdW[indy+1] += m_fMu * (beta12_im * x_re   - beta12_re * x_im);           
+			}
+		}
+#endif
+    }else {	
 		for (i=0;i<m_nNumBank;i++)	
 		{ 
 			indx=2*i;
-
 			//den = 1.0f/(m_fpR11sum[i]*m_fpR22sum[i] - m_cpR12sum[indx]*m_cpR12sum[indx] - m_cpR12sum[indx+1]*m_cpR12sum[indx+1]);
-
 			beta12_re = m_cpAdErrPre[indx];
 			beta12_im = m_cpAdErrPre[indx+1];
-		////////update adaptive weights		
-	
+		////////update adaptive weights			
 			for (j=0;j<=m_npTaps[i];j++,indy+=2)
 			{			
 				//est_err2_re = m_fMu;
-
 				x_re=m_cpReferDelayLine[indy];
 				x_im=m_cpReferDelayLine[indy+1];
 
 				m_cpAdW[indy  ] += m_fMu * (beta12_re * x_re   + beta12_im * x_im);
 				m_cpAdW[indy+1] += m_fMu * (beta12_im * x_re   - beta12_re * x_im);
+#if defined(ADF_DEBUG)
+                if (counter_ > 920 && counter_ < 1420 && i == 13) {
+                    fprintf(ADFW, "%d %d %d %f %f %f %f %f %f %f\n", counter_,i,j, m_cpAdW[indy], m_cpAdW[indy+1], m_fMu, beta12_re, beta12_im, x_re, x_im);
+                }
+#endif            
 			}
 		}
 	}
@@ -653,7 +698,7 @@ void CAdapFilterGroup::ResetDelay_Taps(int indx)
 	memset(m_cpAdW+m_npDelaylIndx[indx],0,sizeof(float)*(len+1)*2);
 	memset(m_cpFixW+m_npDelaylIndx[indx],0,sizeof(float)*(len+1)*2);
 	memset(m_fpR11+m_npR11Indx[indx],0,sizeof(float)*(len+1));
-	memset(m_cpR12+m_npR12Indx[indx],0,sizeof(float)*(2*len));
+	// memset(m_cpR12+m_npR12Indx[indx],0,sizeof(float)*(2*len));
 }
 //
 //void CAdapFilterGroup::MoveTapsForward(int indx,int abs_delay)
@@ -743,26 +788,26 @@ void CAdapFilterGroup::SumR11_R12()
 	{
 		indx=2*i;
 		r11=0.f;
-		r22=0.f;
-		r12_re=0.f;
-		r12_im=0.f;
+		// r22=0.f;
+		// r12_re=0.f;
+		// r12_im=0.f;
 		fpr11=m_fpR11+m_npR11Indx[i];
-		fpr22=fpr11+1;
-		fpr12=m_cpR12+m_npR12Indx[i];
+		// fpr22=fpr11+1;
+		// fpr12=m_cpR12+m_npR12Indx[i];
 
 		for (j=0;j<m_npTaps[i];j++)
 		{
 			r11		+= (*(fpr11++));
-			r12_re	+=  (*(fpr12++));
-			r12_im	+=  (*(fpr12++));
-			r22		+=  (*(fpr22++));
+			// r12_re	+=  (*(fpr12++));
+			// r12_im	+=  (*(fpr12++));
+			// r22		+=  (*(fpr22++));
 		}
 
 		m_fpR11sum[i]=r11;
-		m_fpR22sum[i]=r22;
+		// m_fpR22sum[i]=r22;
 
-		m_cpR12sum[indx]  =r12_re;
-		m_cpR12sum[indx+1]=r12_im;
+		// m_cpR12sum[indx]  =r12_re;
+		// m_cpR12sum[indx+1]=r12_im;
 	}
 }
 //

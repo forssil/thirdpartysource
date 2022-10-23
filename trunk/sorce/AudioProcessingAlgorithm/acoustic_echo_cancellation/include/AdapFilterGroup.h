@@ -96,7 +96,11 @@ private:
 	////add variable delta weights 20160626
 	float* m_pDeltaFreWeight;
 	float m_deltagin = 1.f;
-
+#if defined(ADF_DEBUG)
+    FILE* ADFW = NULL;
+#endif
+    int32_t counter_ = 0;
+    bool neon_on_ = false;
 	
 };
 
