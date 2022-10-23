@@ -145,6 +145,7 @@ public:
     int counter_ = 0;
     int first_render_ = 0;
     int first_render_his_ = 0;
+    float smooth_gain_ = 1.f;
 };
 
 

@@ -670,6 +670,7 @@ typedef struct  AUDIO_PROCESSING_DATA_SHARE
 	CAUDIO_S32_t		nFarVAD_;
     CAUDIO_S32_t		nNearVAD_;
     AUDIO_DATA_TYPE		fErle_;
+    bool                bRnnon_;
 
 #ifdef AUDIO_WAVE_DEBUG
 	AUDIO_DATA_TYPE		*pErrorBeforeNR_;

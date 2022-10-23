@@ -475,7 +475,7 @@ void SUBinterface::task() {
 				float gain_smth;
                 for (int i = 0; i < framelen_; i++) {
 					gain_smth = (gain - share_data_->fAGCgain_) * float(i + 1) / float(framelen_) + share_data_->fAGCgain_;
-                    share_data_->ppProcessOut_[channel][i] *= gain;
+                    share_data_->ppProcessOut_[channel][i] *= gain_smth;
                     //data_out[i] *= gain;
                 }
                 share_data_->fAGCgain_ = gain;

@@ -237,7 +237,8 @@ void CPostFilter::Process(audio_pro_share *Aec)
 void CPostFilter::UpdatePwr(audio_pro_share *Aec,float speed)
 {
 	int i;
-	float* fp1,*fp2,*fp3;
+    float* fp1, *fp2, *fp3;
+    float* fp4;
 	float re,im,temp;
 	float sum=0.f;
 	float slowness = 1.0f - speed;
@@ -245,6 +246,7 @@ void CPostFilter::UpdatePwr(audio_pro_share *Aec,float speed)
 	fp1=Aec->pNRInput_;
 	fp2=Aec->pNRDynamicRefer_;
 	fp3=Aec->pNRInputRefer_;
+    fp4 = Aec->pRNNERRORFFT_;
     
 	for (i=0;i<m_nHalfFFTLen;i++)
 	{
@@ -262,8 +264,14 @@ void CPostFilter::UpdatePwr(audio_pro_share *Aec,float speed)
 			im=*fp2++;
 			temp=re*re+im*im;
 			m_pfEstPwr[i]=temp;
-			m_pfEst[i]*=slowness;
-			m_pfEst[i]+=speed_4overpi*temp;
+            if(Aec->bRnnon_){
+                re=*fp4++;
+                im=*fp4++;
+                temp=re*re+im*im;
+                m_pfEstPwr[i] += 0.5*temp;
+            }
+			// m_pfEst[i]*=slowness;
+			// m_pfEst[i]+=speed_4overpi*temp;
 
 		}
 		if(NULL != Aec->pDesireFFT_)
