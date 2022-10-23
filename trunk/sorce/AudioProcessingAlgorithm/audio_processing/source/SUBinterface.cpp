@@ -477,6 +477,11 @@ void SUBinterface::task() {
 					gain_smth = (gain - share_data_->fAGCgain_) * float(i + 1) / float(framelen_) + share_data_->fAGCgain_;
                     share_data_->ppProcessOut_[channel][i] *= gain_smth;
                     //data_out[i] *= gain;
+
+                    // do limiter
+                    float gain_limiter = share_data_->ppProcessOut_[channel][i] > m_fThres2_ ? m_fThres2_ / share_data_->ppProcessOut_[channel][i] : 1.0f;
+                    gain_limiter = smooth_attack_release(gain_limiter, m_fAlphaR_, m_fAlphaA_, &gain_state[0]);
+                    share_data_->ppProcessOut_[channel][i] *= gain_limiter;
                 }
                 share_data_->fAGCgain_ = gain;
             }

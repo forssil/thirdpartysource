@@ -95,6 +95,18 @@ public:
 	mutable std::mutex sub_thread_mutex_;
 	std::atomic_bool audio_3A_thread_running_;
 private:
+    static inline float smooth_attack_release(float x, float a, float r, float *s)
+    {
+        return smooth(x, x > *s ? a : r, s);
+    }
+    static inline float smooth(float x, float c, float *s)
+    {
+        return *s = c * (*s - x) + x;
+    }
+    float m_fThres2_ = 0.68;// 22440:32767 * powf(10.f, (m_fThres_ + 0.5 * m_fWin_) / 20);
+    float gain_state[2] = { 1.f,1.f };
+    float m_fAlphaA_ = exp(-log(9) / 48000 / 0.001);
+    float m_fAlphaR_ = exp(-log(9) / 48000 / 0.05);
 
 	std::unique_ptr<SUBBuffer> aec_mic0_buffer_;
 	std::unique_ptr<SUBBuffer> aec_mic1_buffer_;
