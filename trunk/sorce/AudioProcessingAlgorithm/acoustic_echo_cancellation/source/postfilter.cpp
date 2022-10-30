@@ -481,7 +481,8 @@ void CPostFilter::Spe_Limiter(audio_pro_share *aeinfo)
 	float lowbandgain = 1.f;
 	float frame_gain = 0;
 	int cnt_low = 0, cnt_high = 0;
-
+	int start = 1000.f / m_nFs * m_nFFTLen;
+	int end = 8000.f / m_nFs * m_nFFTLen;
 	for (int i=2;i<m_nHalfFFTLen-1;i++)
 	{ 
 		if (m_pfAft[i] * m_pfGain[i] * m_pfGain[i] > 5e-8) {
@@ -505,14 +506,12 @@ void CPostFilter::Spe_Limiter(audio_pro_share *aeinfo)
 		tempgain = 0.6;
 	}
 	if (cnt_high < 30 && frame_gain < 0.3) {
-		for (int i = 2; i < m_nInd2k; i++) {
+		for (int i = 2; i <= m_nInd2k; i++) {
 			int pitch_counter = 0;
 			if (m_pnIndex[i]) {
-				int start = 1000.f / 48000.f * 1024;
-				int end = 8000.f / 48000.f * 1024;
 				int j_start = int((float(start) / i + 0.5)) * i;
 				int j_end = int((float(end) / i - 0.5)) * i;
-				for (int j = start; j < end; j += i) {
+				for (int j = j_start; j < j_end; j += i) {
 					if (m_pnIndex[j]) {
 						pitch_counter++;
 					}
@@ -522,8 +521,8 @@ void CPostFilter::Spe_Limiter(audio_pro_share *aeinfo)
 				}
 			}
 		}
-		if (cnt_low < 3) {
-			lowbandgain = 0.1f;
+		if (cnt_low < 5) {
+			lowbandgain = 0.2f;
 		}
 	}
 	if (m_fLimiterGain > lowbandgain) {
