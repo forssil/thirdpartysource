@@ -108,7 +108,7 @@ int main(int argc , char *argv[ ])
    {
 	    //infile=argv[1];
 	    infile = "D:/下载/A项目/数据/20221016残余回声-近端语音被压-劈里啪啦/5channel_dump1016.wav";
-		outfile=   "D:/下载/A项目/数据/20221016残余回声-近端语音被压-劈里啪啦/final_output-lowerlevel1.wav";
+		outfile=   "D:/下载/A项目/数据/20221016残余回声-近端语音被压-劈里啪啦/final_output.wav";
         //outfile = "D:\\work\\thirdpartysource\\trunk\\sorce\\AudioProcessingAlgorithm\\audio_processing\\unitest\\aec_unitest\\5channel_out_chenan-agcoff-aecon-nron-bfoff-rnnon-out.wav";
         outfile1 = "D:/program/thirdpartysource/trunk/tools/ut_test/win_out1.wav";
    }
