@@ -25,6 +25,7 @@ CPostFilter::CPostFilter(int fs,int fftlen)
 	m_fReferPwrEnvelopDb = 0;
 	m_fReferPwrEnvelopUpdateStep = 5.f / (5 + 16);
 	m_fAllBandGain = 1;
+	m_fLimiterGain = 1.0;
 	
 	
 	m_CNoisRedu=new CNoiseRedu(fs,fftlen);
@@ -48,6 +49,7 @@ CPostFilter::CPostFilter(int fs,int fftlen)
 	m_pfReferPwr = m_pfCNGFFTtemp + m_nHalfFFTLen;
 	//random number for cng
 	m_pnRandW16=new int16_t[m_nHalfFFTLen];
+	m_pnIndex = new int[m_nHalfFFTLen];
 
 	Reset();
 	
@@ -115,6 +117,7 @@ void CPostFilter::Reset()
 	m_fBefadfPwr=0.f;
 	m_fAftadfPwr=0.f;
 	m_fFarEndPwr=0.f;
+	m_nInd2k = 43;
 	m_nInd65k=80;//index of 5kHz
 	m_nInd80k=127;
 	maxloop=m_nInd80k>m_nHalfFFTLen?m_nHalfFFTLen:m_nInd80k;
@@ -385,6 +388,8 @@ void CPostFilter::UpdateGain()
 	m_pfGain[i]=m_fMinGain;
 	/////////////////
 	m_pfGain[i]*=m_pfLowpassWin[i];
+
+	
 }
 void CPostFilter::ResetGain(float g)
 {
@@ -471,20 +476,68 @@ void CPostFilter::Spe_Limiter(audio_pro_share *aeinfo)
 {
 	
 	float tempPwr=0.f;
+	float tempPwr2 = 0.f;
 	float tempgain=1.f;
+	float lowbandgain = 1.f;
+	float frame_gain = 0;
+	int cnt_low = 0, cnt_high = 0;
+
 	for (int i=2;i<m_nHalfFFTLen-1;i++)
 	{ 
-		tempPwr+=m_pfAft[i]*m_pfGain[i]*m_pfGain[i];
+		if (m_pfAft[i] * m_pfGain[i] * m_pfGain[i] > 5e-8) {
+			m_pnIndex[i] = 1;
+			if (i > m_nInd2k) {
+				cnt_high++;
+			}
+			else {
+				cnt_low++;
+			}
+		}
+		else {
+			m_pnIndex[i] = 0;
+		}
+		tempPwr += m_pfAft[i] * m_pfGain[i] * m_pfGain[i];
+		tempPwr2 += m_pfBef[i];
 	}
-	if (tempPwr<2*m_fLowLevelThreashold)
+	frame_gain = tempPwr / (tempPwr2 + 1e-8);
+	if (tempPwr < 2 * m_fLowLevelThreashold)
 	{
-		tempgain=0.6;
+		tempgain = 0.6;
 	}
+	if (cnt_high < 30 && frame_gain < 0.3) {
+		for (int i = 2; i < m_nInd2k; i++) {
+			int pitch_counter = 0;
+			if (m_pnIndex[i]) {
+				int start = 1000.f / 48000.f * 1024;
+				int end = 8000.f / 48000.f * 1024;
+				int j_start = int((float(start) / i + 0.5)) * i;
+				int j_end = int((float(end) / i - 0.5)) * i;
+				for (int j = start; j < end; j += i) {
+					if (m_pnIndex[j]) {
+						pitch_counter++;
+					}
+				}
+				if (pitch_counter < 2) {
+					cnt_low--;
+				}
+			}
+		}
+		if (cnt_low < 3) {
+			lowbandgain = 0.1f;
+		}
+	}
+	if (m_fLimiterGain > lowbandgain) {
+		m_fLimiterGain = m_fLimiterGain * 0.9 + lowbandgain * 0.1;
+	}
+	else {
+		m_fLimiterGain = lowbandgain;
+	}
+	
 	m_pfGaintemp[0]= m_fMinGain;
 	m_pfGaintemp[1]=m_fMinGain;
 	for (int i=2;i<m_nHalfFFTLen-1;i++)
 	{ 			
-		m_pfGaintemp[i]=m_pfGain[i]*tempgain;
+		m_pfGaintemp[i]=m_pfGain[i]*tempgain * m_fLimiterGain;
 	}
 	m_pfGaintemp[m_nHalfFFTLen-1]=m_pfGain[m_nHalfFFTLen-1];
 }

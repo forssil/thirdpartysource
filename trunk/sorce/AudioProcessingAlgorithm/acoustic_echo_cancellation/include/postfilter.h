@@ -7,7 +7,6 @@
 class CPostFilter
 {
 public:
-
 	CPostFilter(int fs,int fftlen);
 	~CPostFilter(void);
 	void Process(audio_pro_share *Aec);
@@ -58,8 +57,11 @@ public:
 	float m_fAftadfPwr;
 	float m_fFarEndPwr;
 	float *m_pfHighFreCtr;
+	int   m_nInd2k;
 	int   m_nInd65k;
 	int   m_nInd80k;
+	int   *m_pnIndex;
+	float m_fLimiterGain;
 	//
 	int m_nBufferSize;
 	//CNLP *m_CNLP;
