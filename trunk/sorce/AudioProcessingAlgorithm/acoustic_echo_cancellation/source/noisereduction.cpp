@@ -189,16 +189,20 @@ void CNoiseRedu::transientnois()
 {
 	int i;
 	float temp=0.f;
-	float threshold = 0.15;
+	float threshold = 0.15; // ERLE = 9 dB
 	float gain_temp = 1.f;
+		
 	for (i=0;i<m_nQNum;i++)
 	{  
 		gain_temp = m_CPsd->m_pfPsdCQ_Fd[i] / (m_CPsd_echo->m_pfPsdCQ_Fd[i] + 1e-10);
-		if (gain_temp < threshold && 0.001f < gain_temp)
+		if (gain_temp < threshold && 0.001f < gain_temp) {
 			m_pfTransGain[i] += 0.1f *(gain_temp - m_pfTransGain[i]);
+		}
+		if (gain_temp >= threshold) {
+			m_pfTransGain[i] += 0.1f *(threshold - m_pfTransGain[i]);
+		}
 		temp=m_CPsd_echo->m_pfPsdCQ_Fd[i]* m_pfTransGain[i];
 		m_pfTrans[i]=temp>m_pfNoise[i]/10.f?temp:m_pfNoise[i]/10.f;///for protect snr equal infinite  
-		
 	}
 }
 

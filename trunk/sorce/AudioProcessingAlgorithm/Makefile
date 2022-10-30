@@ -76,7 +76,7 @@ AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockch
 
 DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
 INCLUDE := -Iinclude -I./extlib
-CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
+CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES) -mfpu=neon
 
 CXXFLAGS:= $(CFLAGS)
 
@@ -98,7 +98,7 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 $(OBJ_PATH)/%.o: $(SRC_PATH)/acoustic_echo_cancellation/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@ 
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
