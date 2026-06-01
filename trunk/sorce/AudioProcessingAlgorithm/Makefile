@@ -6,7 +6,7 @@
 ROOT_PATH    = ./../..
 SRC_PATH     = .
 OBJ_PATH     = $(ROOT_PATH)/objs
-OUTDIR	     = $(ROOT_PATH)/libs
+OUTDIR	     ?= $(ROOT_PATH)/libs
 STATIC_LIB   = $(OUTDIR)/libAPF.a
 #STATIC_LIB   = $(OUTDIR)/libaec.so
 ####################################################################
@@ -69,12 +69,14 @@ CPPOBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(CPP_FILES:.cpp=.o)))
 OBJ_FILES = $(COBJ_FILES) $(CPPOBJ_FILES)
 
 #compile and lib parameter
-CC      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-gcc
-CXX     := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-g++
-LD      := $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ld
-AR       = $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-ar
+CROSS_COMPILE ?= $(ROOT_PATH)/tools/rk3308gClientSDK/prebuilts/host/usr/bin/arm-rockchip-linux-gnueabihf-
+CC      ?= $(CROSS_COMPILE)gcc
+CXX     ?= $(CROSS_COMPILE)g++
+LD      ?= $(CROSS_COMPILE)ld
+AR      ?= $(CROSS_COMPILE)ar
 
-DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
+#DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
+DEFINES := -fPIC -fpermissive -Wl,-rpath=. 
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 

@@ -76,9 +76,9 @@ struct AGCSTATE_NEW {
  * Allocate memory for an AGC
  */
 
-struct AGCSTATE_NEW * agc_new_create(void)
+struct AGCSTATE_NEW* agc_new_create(void)
 {
-    struct AGCSTATE_NEW *agc = malloc(sizeof(struct AGCSTATE_NEW));
+    struct AGCSTATE_NEW *agc = (struct AGCSTATE_NEW*)malloc(sizeof(struct AGCSTATE_NEW));
     return agc;
 }
 

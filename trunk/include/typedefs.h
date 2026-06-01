@@ -14,55 +14,55 @@
 #ifndef WEBRTC_TYPEDEFS_H_
 #define WEBRTC_TYPEDEFS_H_
 
-// For access to standard POSIXish features, use WEBRTC_POSIX instead of a
-// more specific macro.
-#if defined(WEBRTC_MAC) || defined(WEBRTC_LINUX) || \
-    defined(WEBRTC_ANDROID)
-#define WEBRTC_POSIX
-#endif
+// // For access to standard POSIXish features, use WEBRTC_POSIX instead of a
+// // more specific macro.
+// #if defined(WEBRTC_MAC) || defined(WEBRTC_LINUX) || \
+//     defined(WEBRTC_ANDROID)
+// #define WEBRTC_POSIX
+// #endif
 
-// Processor architecture detection.  For more info on what's defined, see:
-//   http://msdn.microsoft.com/en-us/library/b0084kay.aspx
-//   http://www.agner.org/optimize/calling_conventions.pdf
-//   or with gcc, run: "echo | gcc -E -dM -"
-// TODO(andrew): replace WEBRTC_LITTLE_ENDIAN with WEBRTC_ARCH_LITTLE_ENDIAN.
-#if defined(_M_X64) || defined(__x86_64__)
-#define WEBRTC_ARCH_X86_FAMILY
-#define WEBRTC_ARCH_X86_64
-#define WEBRTC_ARCH_64_BITS
-#define WEBRTC_ARCH_LITTLE_ENDIAN
-#define WEBRTC_LITTLE_ENDIAN
-#elif defined(_M_IX86) || defined(__i386__)
-#define WEBRTC_ARCH_X86_FAMILY
-#define WEBRTC_ARCH_X86
-#define WEBRTC_ARCH_32_BITS
-#define WEBRTC_ARCH_LITTLE_ENDIAN
-#define WEBRTC_LITTLE_ENDIAN
-#elif defined(__ARMEL__)
-// TODO(andrew): We'd prefer to control platform defines here, but this is
-// currently provided by the Android makefiles. Commented to avoid duplicate
-// definition warnings.
-//#define WEBRTC_ARCH_ARM
-// TODO(andrew): Chromium uses the following two defines. Should we switch?
-//#define WEBRTC_ARCH_ARM_FAMILY
-//#define WEBRTC_ARCH_ARMEL
-#define WEBRTC_ARCH_32_BITS
-#define WEBRTC_ARCH_LITTLE_ENDIAN
-#define WEBRTC_LITTLE_ENDIAN
-#elif defined(__MIPSEL__)
-#define WEBRTC_ARCH_32_BITS
-#define WEBRTC_ARCH_LITTLE_ENDIAN
-#define WEBRTC_LITTLE_ENDIAN
-#else
-#error Please add support for your architecture in typedefs.h
-#endif
+// // Processor architecture detection.  For more info on what's defined, see:
+// //   http://msdn.microsoft.com/en-us/library/b0084kay.aspx
+// //   http://www.agner.org/optimize/calling_conventions.pdf
+// //   or with gcc, run: "echo | gcc -E -dM -"
+// // TODO(andrew): replace WEBRTC_LITTLE_ENDIAN with WEBRTC_ARCH_LITTLE_ENDIAN.
+// #if defined(_M_X64) || defined(__x86_64__)
+// #define WEBRTC_ARCH_X86_FAMILY
+// #define WEBRTC_ARCH_X86_64
+// #define WEBRTC_ARCH_64_BITS
+// #define WEBRTC_ARCH_LITTLE_ENDIAN
+// #define WEBRTC_LITTLE_ENDIAN
+// #elif defined(_M_IX86) || defined(__i386__)
+// #define WEBRTC_ARCH_X86_FAMILY
+// #define WEBRTC_ARCH_X86
+// #define WEBRTC_ARCH_32_BITS
+// #define WEBRTC_ARCH_LITTLE_ENDIAN
+// #define WEBRTC_LITTLE_ENDIAN
+// #elif defined(__ARMEL__)
+// // TODO(andrew): We'd prefer to control platform defines here, but this is
+// // currently provided by the Android makefiles. Commented to avoid duplicate
+// // definition warnings.
+// //#define WEBRTC_ARCH_ARM
+// // TODO(andrew): Chromium uses the following two defines. Should we switch?
+// //#define WEBRTC_ARCH_ARM_FAMILY
+// //#define WEBRTC_ARCH_ARMEL
+// #define WEBRTC_ARCH_32_BITS
+// #define WEBRTC_ARCH_LITTLE_ENDIAN
+// #define WEBRTC_LITTLE_ENDIAN
+// #elif defined(__MIPSEL__)
+// #define WEBRTC_ARCH_32_BITS
+// #define WEBRTC_ARCH_LITTLE_ENDIAN
+// #define WEBRTC_LITTLE_ENDIAN
+// #else
+// #error Please add support for your architecture in typedefs.h
+// #endif
 
 #if defined(__SSE2__) || defined(_MSC_VER)
 #define WEBRTC_USE_SSE2
 #endif
 
 #if !defined(_MSC_VER)
-#include <stdint.h>
+#include <cstdint>
 #else
 // Define C99 equivalent types, since MSVC doesn't provide stdint.h.
 typedef signed char         int8_t;
