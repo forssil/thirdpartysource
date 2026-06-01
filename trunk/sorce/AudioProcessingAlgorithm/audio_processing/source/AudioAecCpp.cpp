@@ -22,8 +22,6 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 {
 
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
-    //AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
-    //DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
     SUBinterface* pSUBThread = (SUBinterface*)aec_para.pSUBThread;
 // #ifdef AUDIO_WAVE_DEBUG
 //     int cycle_num = 1;
@@ -49,7 +47,8 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             }
             sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
         }
-        pSUBThread->sub_process(sharedata, aec_para);
+        //pSUBThread->sub_process(sharedata, aec_para);
+        pSUBThread->process_block(sharedata, aec_para);
 		/*while (1) {
 			if (pSUBThread->get_finish_flag()) {
 				break;
@@ -87,8 +86,10 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 
 void aec_processing_init_cpp(void  **p_aec, void *config)
 {
-    aec_para.mics_num = 4;
+    Toggle3A *toggle3a = (Toggle3A*)config;
+    aec_para.mics_num = toggle3a->mics_num;
     aec_para.fremaelen = 480;
+    aec_para.samplerate = 48000;
     audio_pro_share *sharedata = new audio_pro_share;
     memset(sharedata, 0, sizeof(audio_pro_share));
     
@@ -133,12 +134,12 @@ void aec_processing_init_cpp(void  **p_aec, void *config)
     sharedata->pReffer_ = aec_para.data_in_f2;
     sharedata->nSamplesInReffer_ = aec_para.fremaelen;
 	if (NULL != config) {
-		sharedata->bAECOn_ = ((Toggle3A*)config)->bAECOn_;
-		sharedata->bNROn_ = ((Toggle3A*)config)->bNROn_;
-		sharedata->bNRCNGOn_ = ((Toggle3A*)config)->bNRCNGOn_;
-		sharedata->bAGCOn_ = ((Toggle3A*)config)->bAGCOn_;
-		sharedata->bRNNOISEOn_ = ((Toggle3A*)config)->bRNNOISEOn_;
-		sharedata->bPreRnnOn_ = ((Toggle3A*)config)->bPreRnnOn_;
+		sharedata->bAECOn_ = toggle3a->bAECOn_;
+		sharedata->bNROn_ = toggle3a->bNROn_;
+		sharedata->bNRCNGOn_ = toggle3a->bNRCNGOn_;
+		sharedata->bAGCOn_ = toggle3a->bAGCOn_;
+		sharedata->bRNNOISEOn_ =  toggle3a->bRNNOISEOn_;
+		sharedata->bPreRnnOn_ = toggle3a->bPreRnnOn_;
 	}
 	else {
 		sharedata->bAECOn_ = true;
@@ -190,16 +191,12 @@ void aec_processing_init_cpp(void  **p_aec, void *config)
     pSUBThread->sub_create(sharedata);
 	pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
-
-    //DenoiseState* rnnoise = rnnoise_create(NULL); 
-    //aec_para.pRnnoise = (void*)rnnoise;
-
+    *p_aec = (void*)&aec_para;
 }
 
 void aec_processing_deinit_cpp(void *h_aec)
 {
     audio_pro_share *sharedata = (audio_pro_share *)aec_para.sharedata;
-    AGCSTATE_NEW *agc_new = (AGCSTATE_NEW *)aec_para.pAgc_new;
     delete aec_para.data_in_f;
     delete aec_para.data_in_f2;
     delete sharedata->ppCapture_;
@@ -221,10 +218,8 @@ void aec_processing_deinit_cpp(void *h_aec)
 	pSUBThread->stop_sub_thread();
     delete pSUBThread;
 
-    //DenoiseState* rnnoise = (DenoiseState*)aec_para.pRnnoise;
-    //rnnoise_destroy(rnnoise);
-
     memset(&aec_para,0,sizeof(AEC_parameter));
+    h_aec = NULL;
 
 }
 

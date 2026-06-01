@@ -90,6 +90,7 @@ public:
 	void start_sub_thread();
 	void stop_sub_thread();
 	void task();
+	void process_block(audio_pro_share * sharedata, AEC_parameter aec_para);
 	bool get_finish_flag() { return task_finished_; };
 	std::thread* sub_thread_;
 	mutable std::mutex sub_thread_mutex_;

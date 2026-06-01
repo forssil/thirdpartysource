@@ -25,15 +25,9 @@ struct AEC_parameter {
     float *data_in_f, *data_out_f;
     float *data_in_f2, *data_out_f2, *data_out_f3, *data_out_f4, *data_out_f5, *data_out_f6, *data_out_f7;
     void* sharedata;
-    void* pAPFInterface;
-    //CAudioProcessingFrameworkInterface* pAPFInterface = CreateIApfInst_int(4, 48000, 2 * 512, 512);
     int mics_num;
     int fremaelen;
-    //short **buffer = new short*[5];
-    //struct AGCSTATE* pAgc;
-    //struct AGCSTATE_NEW* pAgc_new;
-    void * pAgc_new;
-    void* pRnnoise;
+    int samplerate;
     void* pSUBThread;
 };
 struct Toggle3A{
@@ -43,6 +37,9 @@ struct Toggle3A{
     bool bAGCOn_;
     bool bRNNOISEOn_;
     bool bPreRnnOn_;
+    int mics_num;   // number of microphones
+    int fremaelen;  //480  not used currently
+    int samplerate; //48000 not used currently
 };
 
 #ifdef __cplusplus

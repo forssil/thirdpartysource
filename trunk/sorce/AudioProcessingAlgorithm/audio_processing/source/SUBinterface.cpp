@@ -16,26 +16,6 @@
 SUBinterface::SUBinterface() {
 	audio_3A_thread_running_ = true;
 	task_finished_ = false;
-    if (1) {
-        if (NULL == fp) {
-            fp = fopen("/dev/chn0.pcm", "wb");
-        }
-        if (NULL == fp1) {
-            fp1 = fopen("/dev/chn1.pcm", "wb");
-        }
-        if (NULL == fp2) {
-            fp2 = fopen("/dev/chn2.pcm", "wb");
-        }
-        if (NULL == fp3) {
-            fp3 = fopen("/dev/chn3.pcm", "wb");
-        }
-        if (NULL == fp_ref) {
-            fp_ref = fopen("/dev/chnref.pcm", "wb");
-        }
-        if (NULL == fp_out) {
-            fp_out = fopen("/dev/chnout.pcm", "wb");
-        }
-    }
 	
 	dump_idx = 0;
     aec_mic0_buffer_.reset(new SUBBuffer(2)); 
@@ -52,15 +32,12 @@ SUBinterface::SUBinterface() {
     aec_output_buffer_->SetFramePara(48000, 480 * 1, 1);
 
     //sub_create();
-
-
     aec_mic0_buffer_->StartBuffer();
     aec_mic1_buffer_->StartBuffer();
     aec_mic2_buffer_->StartBuffer();
     aec_mic3_buffer_->StartBuffer();
     aec_ref_buffer_->StartBuffer();
     aec_output_buffer_->StartBuffer();
-    
     //start_sub_thread();
 
 }
@@ -84,30 +61,7 @@ SUBinterface::~SUBinterface() {
     agc_new_destroy(agc_new_);
 
     rnnoise_destroy(rnn_noise_);
-	if (fp != NULL) {
-		fclose(fp);
-	}
-	fp = NULL;
-	if (fp1 != NULL) {
-		fclose(fp1);
-	}
-	fp1 = NULL;
-	if (fp2 != NULL) {
-		fclose(fp2);
-	}
-	fp2 = NULL;
-	if (fp3 != NULL) {
-		fclose(fp3);
-	}
-	fp3 = NULL;
-	if (fp_ref != NULL) {
-		fclose(fp_ref);
-	}
-	fp_ref = NULL;
-	if (fp_out != NULL) {
-		fclose(fp_out);
-	}
-	fp_out = NULL;
+	
 	dump_idx = 0;
 }
 
@@ -126,9 +80,6 @@ void SUBinterface::sub_create(audio_pro_share *share_data) {
     share_data_->ppProcessOut_ = new float*[mics_num_];
     share_data_->nChannelsInProcessOut_ = mics_num_;
     share_data_->nSamplesPerProcessOutChannel_ = framelen_;
-
-    ////float *data_in_f, *data_out_f;
-    ////float *data_in_f2, *data_out_f2, *data_out_f3;
 
     data_in_f = new float[framelen_*(2 + 2 * mics_num_)];
     data_out_f = data_in_f + framelen_;
@@ -296,6 +247,173 @@ void SUBinterface::stop_sub_thread() {
 	
 }
 
+void SUBinterface::process_block(audio_pro_share * sharedata, AEC_parameter aec_para)
+{
+    size_t channel = 0; //output
+     //push
+    framelen_ = aec_para.fremaelen;
+    sharedata->FrameCounter_++;
+    if (sharedata->bRNNOISEOn_ && sharedata->bPreRnnOn_) {
+        float tmp[480] = { 0 };
+        float tmp_in = 0.f;
+        float tmp_out = 0.f;
+        float tmp_diff = 0.f;
+        int channel1 = 0;
+        float alpha = 0;
+        for (int i = 0; i < framelen_; i++) {
+            sharedata->pRNNBufferDiff_[i + 64] = sharedata->ppCapture_[channel1][i] * 32767;
+            sharedata->pRNNBuffer_[i + framelen_] = sharedata->pRNNBufferDiff_[i];
+            tmp[i] = sharedata->pRNNBuffer_[i];
+            tmp_in += tmp[i] * tmp[i];
+        }
+        float RNN_vad = rnnoise_process_frame(rnn_noise_, sharedata->pRNNBufferDiff_, sharedata->pRNNBufferDiff_);
+        //share_data_->RnnVad_ += 0.1*(RNN_vad - share_data_->RnnVad_);
+        sharedata->RnnVad_ = RNN_vad;
+        get_rnn_gain(rnn_noise_, 1024, sharedata->RnnGain_);
+
+        for (int i = 0; i < framelen_; i++) {
+            sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1 - alpha) * sharedata->pRNNBufferDiff_[i] * sharedata->pRNNBufferDiff_[i];
+            tmp_out += sharedata->pRNNPOWER_[i];
+
+            sharedata->pRNNERROR_[i] = sharedata->pRNNBuffer_[i] - sharedata->pRNNBufferDiff_[i];
+            //tmp_diff += share_data_->pRNNERROR_[i] * share_data_->pRNNERROR_[i];
+            sharedata->pRNNERROR_[i] /= 32767;
+            sharedata->pRNNBuffer_[i] = sharedata->pRNNBuffer_[i + framelen_]; // update one frame
+
+
+            //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->ppCapture_[channel1][i] / 32767; // out
+            //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->psubBuffer_[i] / 32767; // 
+            //share_data_->ppCapture_[channel1][i] = share_data_->pRNNBuffer_[i] / 32767;//  original input  
+            //share_data_->ppCapture_[channel1][i] = share_data_->pRNNBufferDiff_[i] / 32767;//  RNN output 
+            //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->pRNNERROR_[i] / 32767; // error 
+
+            if (i < 64) {
+                sharedata->pRNNBufferDiff_[i] = sharedata->pRNNBufferDiff_[i + 480];// update 64 points;
+            }
+        }
+        float nrl = 10 * log10(tmp_in / (tmp_out + 0.000001));
+        // to do freq vad and handover vad to protect voice
+        //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
+        if (tmp_out < 1 * 1e7 || nrl > 5)
+        {  // -47dB
+            sharedata->RNNCounter_--;
+            sharedata->RNNCounter_ = sharedata->RNNCounter_ < 0 ? 0 : sharedata->RNNCounter_;
+            if (sharedata->RNNCounter_ == 0) {
+                sharedata->bRNNOISEVad_ = false;
+            }
+            if (nrl > 30) {
+                sharedata->bRNNOISEVad_ = false;
+            }
+        }
+        else {
+            sharedata->bRNNOISEVad_ = true;
+            sharedata->RNNCounter_ = 20;
+        }
+
+        if (tmp_out < 1 * 1e6 || nrl > 20) { // -57db
+            sharedata->RNNCounter_enhance_--;
+            sharedata->RNNCounter_enhance_ = sharedata->RNNCounter_enhance_ < 0 ? 0 : sharedata->RNNCounter_enhance_;
+            if (sharedata->RNNCounter_enhance_ == 0) {
+                sharedata->bRNNOISEVad_enhance_ = false;
+            }
+        }
+        else {
+            sharedata->bRNNOISEVad_enhance_ = true;
+            sharedata->RNNCounter_enhance_ = 20;
+        }
+    }
+
+    aec_->process(*sharedata);
+
+    //memcpy(aec_para_->data_out_f2, aec_para_->data_in_f, framelen_ * sizeof(float));
+
+
+    // do suboise
+    // to do: move sub before aec
+    if (sharedata->bRNNOISEOn_ && !sharedata->bPreRnnOn_) {
+        float tmp[480] = { 0 };
+        float tmp_in = 0.f;
+        float tmp_out = 0.f;
+        float tmp_diff = 0.f;
+        int channel1 = 1;
+        float alpha = 0;
+        for (int i = 0; i < framelen_; i++) {
+            sharedata->ppProcessOut_[channel1][i] *= 32767;
+            sharedata->pRNNBuffer_[i + framelen_] = sharedata->ppProcessOut_[channel1][i];
+            tmp[i] = sharedata->pRNNBuffer_[i];
+            tmp_in += tmp[i] * tmp[i];
+        }
+        rnnoise_process_frame(rnn_noise_, sharedata->ppProcessOut_[channel1], sharedata->ppProcessOut_[channel1]);
+
+        for (int i = 0; i < framelen_; i++) {
+            sharedata->pRNNPOWER_[i] = alpha * sharedata->pRNNPOWER_[i] + (1 - alpha) * sharedata->ppProcessOut_[channel1][i] * sharedata->ppProcessOut_[channel1][i];
+            tmp_out += sharedata->pRNNPOWER_[i];
+
+            sharedata->pRNNERROR_[i] = sharedata->pRNNBuffer_[i] - sharedata->ppProcessOut_[channel1][i];
+            tmp_diff += sharedata->pRNNERROR_[i] * sharedata->pRNNERROR_[i];
+            sharedata->pRNNBuffer_[i] = sharedata->pRNNBuffer_[i + framelen_]; // update one frame
+
+            //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->ppProcessOut_[channel1][i] / 32767;
+            //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->pRNNBuffer_[i] / 32767;
+            //share_data_->ppProcessOut_[channel1][i] = tmp[i] / 32767;
+            //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->pRNNERROR_[i] / 32767;
+        }
+
+
+        //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
+        if (tmp_out > 1 * 1e4)
+        {  // -50dB -53dB -57
+            sharedata->bRNNOISEVad_ = true;
+            sharedata->RNNCounter_ = 5;
+        }
+        else {
+            sharedata->RNNCounter_--;
+            sharedata->RNNCounter_ = sharedata->RNNCounter_ < 0 ? 0 : sharedata->RNNCounter_;
+            if (sharedata->RNNCounter_ == 0) {
+                sharedata->bRNNOISEVad_ = false;
+            }
+        }
+
+        if (tmp_out < 1 * 1e5) {
+            sharedata->RNNCounter_enhance_--;
+            sharedata->RNNCounter_enhance_ = sharedata->RNNCounter_enhance_ < 0 ? 0 : sharedata->RNNCounter_enhance_;
+            if (sharedata->RNNCounter_enhance_ == 0) {
+                sharedata->bRNNOISEVad_enhance_ = false;
+            }
+        }
+        else {
+            sharedata->bRNNOISEVad_enhance_ = true;
+            sharedata->RNNCounter_enhance_ = 20;
+        }
+    }
+
+    // do agc for every output channel
+    if (sharedata->bAGCOn_) {
+        //for (size_t channel = 0; channel < mics_num; channel++) 
+
+        {
+            float gain = 1, power = 0;
+            for (int i = 0; i < framelen_; i++) {
+                power += sharedata->ppProcessOut_[channel][i] * sharedata->ppProcessOut_[channel][i];
+                //power += abs((float)data_out[i] / 32768);
+            }
+            power /= framelen_;
+            //agc_process(pAgc, 1, &power, &gain, 0);
+            //agc_new_process(agc_new, 1, &power, &gain, 0);
+            agc_new_process(agc_new_, 1, &power, &gain, sharedata->IsResEcho_, sharedata->fNoisePwr_);
+            float gain_smth;
+            for (int i = 0; i < framelen_; i++) {
+                gain_smth = (gain - sharedata->fAGCgain_) * float(i + 1) / float(framelen_) + sharedata->fAGCgain_;
+                sharedata->ppProcessOut_[channel][i] *= gain;
+                //data_out[i] *= gain;
+            }
+            sharedata->fAGCgain_ = gain;
+        }
+    }
+
+    
+
+}
 void SUBinterface::task() {
     //while (audio_encode_running_) {
 
@@ -320,197 +438,15 @@ void SUBinterface::task() {
             }
             share_data_->pReffer_[i] = micin[4][i];
         }
+         AEC_parameter aec_para;
+         aec_para.fremaelen = framelen_;
+        process_block(share_data_, aec_para);
 
-        size_t channel = 0;
-        share_data_->FrameCounter_++;
-
-        if (share_data_->bRNNOISEOn_ && share_data_->bPreRnnOn_) {
-            float tmp[480] = { 0 };
-            float tmp_in = 0.f;
-            float tmp_out = 0.f;
-            float tmp_diff = 0.f;
-            int channel1 = 0;
-            float alpha = 0;
-            for (int i = 0; i < framelen_; i++) {
-                share_data_->pRNNBufferDiff_[i + 64] = share_data_->ppCapture_[channel1][i] * 32767;
-                share_data_->pRNNBuffer_[i + framelen_] = share_data_->pRNNBufferDiff_[i];
-                tmp[i] = share_data_->pRNNBuffer_[i];
-                tmp_in += tmp[i] * tmp[i];
-            }
-            float RNN_vad = rnnoise_process_frame(rnn_noise_, share_data_->pRNNBufferDiff_, share_data_->pRNNBufferDiff_);
-            //share_data_->RnnVad_ += 0.1*(RNN_vad - share_data_->RnnVad_);
-            share_data_->RnnVad_ = RNN_vad;
-            get_rnn_gain(rnn_noise_, 1024, share_data_->RnnGain_);
-
-            for (int i = 0; i < framelen_; i++) {
-                share_data_->pRNNPOWER_[i] = alpha * share_data_->pRNNPOWER_[i] + (1 - alpha) * share_data_->pRNNBufferDiff_[i] * share_data_->pRNNBufferDiff_[i];
-                tmp_out += share_data_->pRNNPOWER_[i];
-
-                share_data_->pRNNERROR_[i] = share_data_->pRNNBuffer_[i] - share_data_->pRNNBufferDiff_[i];
-                //tmp_diff += share_data_->pRNNERROR_[i] * share_data_->pRNNERROR_[i];
-                share_data_->pRNNERROR_[i] /= 32767;
-                share_data_->pRNNBuffer_[i] = share_data_->pRNNBuffer_[i + framelen_]; // update one frame
-
-
-                //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->ppCapture_[channel1][i] / 32767; // out
-                //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->psubBuffer_[i] / 32767; // 
-                //share_data_->ppCapture_[channel1][i] = share_data_->pRNNBuffer_[i] / 32767;//  original input  
-                //share_data_->ppCapture_[channel1][i] = share_data_->pRNNBufferDiff_[i] / 32767;//  RNN output 
-                //share_data_->ppCapture_[channel1 - channel1][i] = share_data_->pRNNERROR_[i] / 32767; // error 
-
-                if (i < 64) {
-                    share_data_->pRNNBufferDiff_[i] = share_data_->pRNNBufferDiff_[i + 480];// update 64 points;
-                }
-            }
-            float nrl = 10 * log10(tmp_in / (tmp_out + 0.000001));
-            // to do freq vad and handover vad to protect voice
-            //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
-            if (tmp_out < 1 * 1e7 || nrl > 5)
-            {  // -47dB
-                share_data_->RNNCounter_--;
-                share_data_->RNNCounter_ = share_data_->RNNCounter_ < 0 ? 0 : share_data_->RNNCounter_;
-                if (share_data_->RNNCounter_ == 0) {
-                    share_data_->bRNNOISEVad_ = false;
-                }
-                if (nrl > 30) {
-                    share_data_->bRNNOISEVad_ = false;
-                }
-            }
-            else {
-                share_data_->bRNNOISEVad_ = true;
-                share_data_->RNNCounter_ = 20;
-            }
-
-            if (tmp_out < 1 * 1e6 || nrl > 20) { // -57db
-                share_data_->RNNCounter_enhance_--;
-                share_data_->RNNCounter_enhance_ = share_data_->RNNCounter_enhance_ < 0 ? 0 : share_data_->RNNCounter_enhance_;
-                if (share_data_->RNNCounter_enhance_ == 0) {
-                    share_data_->bRNNOISEVad_enhance_ = false;
-                }
-            }
-            else {
-                share_data_->bRNNOISEVad_enhance_ = true;
-                share_data_->RNNCounter_enhance_ = 20;
-            }
-        }
-
-        aec_->process(*share_data_);
-
-        //memcpy(aec_para_->data_out_f2, aec_para_->data_in_f, framelen_ * sizeof(float));
-
-
-        // do suboise
-        // to do: move sub before aec
-        if (share_data_->bRNNOISEOn_ && !share_data_->bPreRnnOn_) {
-            float tmp[480] = { 0 };
-            float tmp_in = 0.f;
-            float tmp_out = 0.f;
-            float tmp_diff = 0.f;
-            int channel1 = 1;
-            float alpha = 0;
-            for (int i = 0; i < framelen_; i++) {
-                share_data_->ppProcessOut_[channel1][i] *= 32767;
-                share_data_->pRNNBuffer_[i + framelen_] = share_data_->ppProcessOut_[channel1][i];
-                tmp[i] = share_data_->pRNNBuffer_[i];
-                tmp_in += tmp[i] * tmp[i];
-            }
-            rnnoise_process_frame(rnn_noise_, share_data_->ppProcessOut_[channel1], share_data_->ppProcessOut_[channel1]);
-
-            for (int i = 0; i < framelen_; i++) {
-                share_data_->pRNNPOWER_[i] = alpha * share_data_->pRNNPOWER_[i] + (1 - alpha) * share_data_->ppProcessOut_[channel1][i] * share_data_->ppProcessOut_[channel1][i];
-                tmp_out += share_data_->pRNNPOWER_[i];
-
-                share_data_->pRNNERROR_[i] = share_data_->pRNNBuffer_[i] - share_data_->ppProcessOut_[channel1][i];
-                tmp_diff += share_data_->pRNNERROR_[i] * share_data_->pRNNERROR_[i];
-                share_data_->pRNNBuffer_[i] = share_data_->pRNNBuffer_[i + framelen_]; // update one frame
-
-                //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->ppProcessOut_[channel1][i] / 32767;
-                //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->pRNNBuffer_[i] / 32767;
-                //share_data_->ppProcessOut_[channel1][i] = tmp[i] / 32767;
-                //share_data_->ppProcessOut_[channel1 - channel1][i] = share_data_->pRNNERROR_[i] / 32767;
-            }
-
-
-            //if ((tmp_out > 1*1e4 && tmp_diff < 1e7)|| (tmp_out > 1 * 1e5) ) 
-            if (tmp_out > 1 * 1e4)
-            {  // -50dB -53dB -57
-                share_data_->bRNNOISEVad_ = true;
-                share_data_->RNNCounter_ = 5;
-            }
-            else {
-                share_data_->RNNCounter_--;
-                share_data_->RNNCounter_ = share_data_->RNNCounter_ < 0 ? 0 : share_data_->RNNCounter_;
-                if (share_data_->RNNCounter_ == 0) {
-                    share_data_->bRNNOISEVad_ = false;
-                }
-            }
-
-            if (tmp_out < 1 * 1e5) {
-                share_data_->RNNCounter_enhance_--;
-                share_data_->RNNCounter_enhance_ = share_data_->RNNCounter_enhance_ < 0 ? 0 : share_data_->RNNCounter_enhance_;
-                if (share_data_->RNNCounter_enhance_ == 0) {
-                    share_data_->bRNNOISEVad_enhance_ = false;
-                }
-            }
-            else {
-                share_data_->bRNNOISEVad_enhance_ = true;
-                share_data_->RNNCounter_enhance_ = 20;
-            }
-        }
-
-        // do agc for every output channel
-        if (share_data_->bAGCOn_) {
-            //for (size_t channel = 0; channel < mics_num; channel++) 
-
-            {
-                float gain = 1, power = 0;
-                for (int i = 0; i < framelen_; i++) {
-					power += share_data_->ppProcessOut_[channel][i] * share_data_->ppProcessOut_[channel][i];
-                    //power += abs((float)data_out[i] / 32768);
-                }
-                power /= framelen_;
-                //agc_process(pAgc, 1, &power, &gain, 0);
-                //agc_new_process(agc_new, 1, &power, &gain, 0);
-                agc_new_process(agc_new_, 1, &power, &gain, share_data_->IsResEcho_, share_data_->fNoisePwr_);
-				float gain_smth;
-                for (int i = 0; i < framelen_; i++) {
-					gain_smth = (gain - share_data_->fAGCgain_) * float(i + 1) / float(framelen_) + share_data_->fAGCgain_;
-                    share_data_->ppProcessOut_[channel][i] *= gain;
-                    //data_out[i] *= gain;
-                }
-                share_data_->fAGCgain_ = gain;
-            }
-        }
-
-        // push data from sub to main thread
-
+       // push data from sub to main thread
         std::vector<float> tmp_out(480, 0.f);
         memcpy(tmp_out.data(), share_data_->ppProcessOut_[0], sizeof(float) * 480);
         aec_output_buffer_->PushOneFrame(tmp_out);
 
-		if (NULL != fp && NULL != fp1 && NULL != fp2 && NULL != fp3 && NULL != fp_ref && NULL != fp_out && (dump_idx < MAX_RECORD_TIMES)) {
-			fwrite((char *)(&share_data_->ppCapture_[0][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp);
-			fwrite((char *)(&share_data_->ppCapture_[1][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp1);
-			fwrite((char *)(&share_data_->ppCapture_[2][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp2);
-			fwrite((char *)(&share_data_->ppCapture_[3][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp3);
-			fwrite((char *)(&share_data_->pReffer_[0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp_ref);
-			fwrite((char *)(&share_data_->ppProcessOut_[0][0]), sizeof(AUDIO_DATA_TYPE), framelen_, fp_out);
-			dump_idx++;
-			if (dump_idx >= MAX_RECORD_TIMES) {
-				fclose(fp);
-				fclose(fp1);
-				fclose(fp2);
-				fclose(fp3);
-				fclose(fp_ref);
-				fclose(fp_out);
-				fp = NULL;
-				fp1 = NULL;
-				fp2 = NULL;
-				fp3 = NULL;
-				fp_ref = NULL;
-				fp_out = NULL;
-			}
-		}
         task_finished_ = true;
     }
     

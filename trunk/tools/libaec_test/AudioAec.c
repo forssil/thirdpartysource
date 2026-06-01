@@ -66,7 +66,13 @@ extern "C" {
                 printf("%s-%d: malloc fail \n", __func__, __LINE__);
             }
         }
-        aec_processing_init_cpp(p_aec, NULL);
+        AEC_parameter aec_para;
+        aec_para.mics_num = 4;
+        aec_para.fremaelen = 480;
+        aec_para.samplerate = 48000;
+        aec_para.sharedata = NULL;
+        aec_para.pAPFInterface = NULL;
+        aec_processing_init_cpp(p_aec, &aec_para);
     }
 
     void aec_processing_deinit(void *h_aec)
