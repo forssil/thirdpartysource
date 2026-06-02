@@ -41,6 +41,21 @@ extern "C" {
         return gs_s32LicState;
     }
 
+
+/*
+ * AEC processing function
+ * h_aec: AEC handle pointer
+ * date_in: Input audio data pointer
+ * date_in : [(channel+index_tmp)*mic nubmer, cycle*480]
+ * mic数据读取规则 date_in[index_tmp + channel][i + 480 * cycle])
+ * ref_spk: 扬声器回采数据，没有设置为NULL
+ * ref_mic: 参考麦克风数据，可用于远场噪声抑制，没有可以设置为NULL
+ * mode: AEC mode，预留接口
+ * data_out: Output audio data pointer， 1声道输出
+ * cycle_num: Number of cycles， 输入数据为480的倍数
+ * index_tmp: Index of the current cycle，每个mic数据所在行数，debug信息放在对应通道之前，没有置0
+ *
+ */
     void aec_processing(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out)
     {
         if (gs_acallocptr == NULL) {
@@ -66,12 +81,16 @@ extern "C" {
                 printf("%s-%d: malloc fail \n", __func__, __LINE__);
             }
         }
-        AEC_parameter aec_para;
+        Toggle3A aec_para;
         aec_para.mics_num = 4;
         aec_para.fremaelen = 480;
         aec_para.samplerate = 48000;
-        aec_para.sharedata = NULL;
-        aec_para.pAPFInterface = NULL;
+        aec_para.bAECOn_ = true;
+		aec_para.bNROn_ = false;
+		aec_para.bNRCNGOn_ = false;
+		aec_para.bAGCOn_ = true;
+		aec_para.bRNNOISEOn_ = false;
+		aec_para.bPreRnnOn_ = false;
         aec_processing_init_cpp(p_aec, &aec_para);
     }
 

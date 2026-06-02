@@ -17,7 +17,20 @@ static AEC_parameter aec_para;
 extern "C" {
 #endif
 
-
+/*
+ * AEC processing function
+ * h_aec: AEC handle pointer
+ * date_in: Input audio data pointer
+ * date_in : [(channel+index_tmp)*mic nubmer, cycle*480]
+ * mic数据读取规则 date_in[index_tmp + channel][i + 480 * cycle])
+ * ref_spk: 扬声器回采数据，没有
+ * ref_mic: 参考麦克风数据，可用于远场噪声抑制，没有可以设置为NULL
+ * mode: AEC mode，预留接口
+ * data_out: Output audio data pointer， 1声道输出
+ * cycle_num: Number of cycles， 输入数据为480的倍数
+ * index_tmp: Index of the current cycle，每个mic数据所在行数，debug信息放在对应通道之前，没有置0
+ *
+ */
 void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *ref_mic, int mode, short *data_out, int cycle_num, int index_tmp)
 {
 
@@ -45,7 +58,12 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
             {
                 sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + 480 * cycle]) / 32768.f;
             }
-            sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
+            if (ref_spk != NULL) {
+                sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
+            }
+            else {
+                sharedata->pReffer_[i] = 0.f;
+            }
         }
         //pSUBThread->sub_process(sharedata, aec_para);
         pSUBThread->process_block(sharedata, aec_para);

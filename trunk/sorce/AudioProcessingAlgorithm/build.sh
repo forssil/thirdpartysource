@@ -109,3 +109,7 @@ else
 fi
 echo "---------------------------------------------------"
 echo "Done!"
+
+
+#./build.sh all  -c /Users/bytedance/work/A1T1/clangbuild/bin/llvm- -o /Users/bytedance/work/A1T1/output/android
+#./build.sh all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm
