@@ -21,6 +21,8 @@ function show_help() {
     echo "  -o, --outdir <path>           指定输出文件夹路径 (静态库将生成在此处)"
     echo "  --cc <compiler>               指定 C 编译器 (例如: gcc, clang)"
     echo "  --cxx <compiler>              指定 C++ 编译器 (例如: g++, clang++)"
+    echo "  --ld <linker>                 指定链接器 (例如: ld, ld.lld)"
+    echo "  --ar <archiver>               指定静态库打包工具 (例如: ar, llvm-ar)"
     echo ""
     echo "Examples:"
     echo "  $0                      # 使用 Makefile 中的默认工具链编译"
@@ -29,7 +31,12 @@ function show_help() {
     echo "  $0 all -c aarch64-linux-gnu- # 使用指定的交叉编译工具链前缀"
     echo "  $0 all -o /tmp/build_libs    # 指定输出目录"
     echo "  $0 all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm"
-    echo "  $0 all -c /Users/bytedance/work/A1T1/clangbuild/bin/llvm- -o /Users/bytedance/work/A1T1/output/android"
+    echo "  ./build.sh all \
+  --cc /Users/bytedance/work/A1T1/clangbuild/bin/clang \
+  --cxx /Users/bytedance/work/A1T1/clangbuild/bin/clang++ \
+  --ld /Users/bytedance/work/A1T1/clangbuild/bin/ld.lld \
+  --ar /Users/bytedance/work/A1T1/clangbuild/bin/llvm-ar \
+  -o /Users/bytedance/work/A1T1/output/android "
 }
 
 # 默认执行目标
