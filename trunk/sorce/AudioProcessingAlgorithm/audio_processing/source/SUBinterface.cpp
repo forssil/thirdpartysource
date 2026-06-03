@@ -66,6 +66,7 @@ SUBinterface::~SUBinterface() {
 }
 
 void SUBinterface::sub_create(audio_pro_share *share_data) {
+    mics_num_ = share_data->nChannelsInCapture_>0?share_data->nChannelsInCapture_:1;
     aec_ = CreateIApfInst_int(mics_num_, 48000, 1024, framelen_);
     //aec_para.pAPFInterface = (void*)CreateIApfInst_int(aec_para.mics_num, 48000, 1536, aec_para.fremaelen);
     aec_->Init();

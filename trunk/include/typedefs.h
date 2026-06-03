@@ -62,7 +62,7 @@
 #endif
 
 #if !defined(_MSC_VER)
-#include <cstdint>
+#include <stdint.h>
 #else
 // Define C99 equivalent types, since MSVC doesn't provide stdint.h.
 typedef signed char         int8_t;

@@ -209,7 +209,10 @@ void aec_processing_init_cpp(void  **p_aec, void *config)
     pSUBThread->sub_create(sharedata);
 	pSUBThread->start_sub_thread();
     aec_para.pSUBThread = (void*)pSUBThread;
-    *p_aec = (void*)&aec_para;
+    if (nullptr != p_aec) {
+        *p_aec = (void*)&aec_para;
+    }
+    
 }
 
 void aec_processing_deinit_cpp(void *h_aec)

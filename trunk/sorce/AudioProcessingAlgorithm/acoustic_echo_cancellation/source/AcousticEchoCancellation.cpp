@@ -598,15 +598,15 @@ int CAcousticEchoCancellation::ResetAll()
 	  if (m_bInit)
 	  {
 		  ////////////time domain to frequency domain
+          m_AECData.nFarVAD_ = aShareData.nFarVAD_;
+          m_AECData.fDTDgain *= 0.8f;
+          m_AECData.fDTDgain += 0.2f*aShareData.fDTDgain;
+          m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;
+          m_AECData.pRefferFFT_ = aShareData.pRefferFFT_;
+          m_AECData.pNRInputRefer_ = m_AECData.pDesireFFT_;
 		 
 		  if (m_AECData.bAECOn_)
 		  {
-			  m_AECData.nFarVAD_ = aShareData.nFarVAD_;
-			  m_AECData.fDTDgain *= 0.8f;
-			  m_AECData.fDTDgain += 0.2f*aShareData.fDTDgain;
-			  m_AECData.pDesireFFT_ = aShareData.pDesireFFT_;
-			  m_AECData.pRefferFFT_ = aShareData.pRefferFFT_;
-			  m_AECData.pNRInputRefer_ = m_AECData.pDesireFFT_;
 
 			  ////echo est
 			  m_pSubBandAdap->process(m_AECData.pRefferFFT_, m_AECData.pDesireFFT_, m_AECData.pErrorFFT_, m_AECData.pEstimationFFT_, m_AECData.nOffsetBin_, m_AECData);
