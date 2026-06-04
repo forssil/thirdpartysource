@@ -6,9 +6,9 @@
 ROOT_PATH    = ./../..
 SRC_PATH     = .
 OBJ_PATH     = $(ROOT_PATH)/objs
-OUTDIR	     ?= $(ROOT_PATH)/libs
+OUTDIR      ?= $(ROOT_PATH)/libs
 STATIC_LIB   = $(OUTDIR)/libAPF.a
-#STATIC_LIB   = $(OUTDIR)/libaec.so
+SHARED_LIB   = $(OUTDIR)/libAPF.so
 ####################################################################
 # Compile and link options
 LINK = ld
@@ -76,7 +76,7 @@ LD      ?= $(CROSS_COMPILE)ld
 AR      ?= $(CROSS_COMPILE)ar
 
 #DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
-DEFINES := -fPIC -fpermissive -Wl,-rpath=. 
+DEFINES ?= -fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so 
 INCLUDE := -Iinclude -I./extlib
 CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
@@ -84,7 +84,9 @@ CXXFLAGS:= $(CFLAGS)
 
 $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 	$(AR) rcs $(STATIC_LIB) $(OBJ_FILES)
-	#$(CXX) -shared -o $(STATIC_LIB) $(OBJ_FILES)
+
+$(SHARED_LIB): checkbindir checkdir $(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $(SHARED_LIB) $(OBJ_FILES)
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
 	
@@ -126,7 +128,11 @@ checkdir:
 	fi
 
 	
-all: $(STATIC_LIB)
-.PHONY:  clean
+static: $(STATIC_LIB)
+
+share: $(SHARED_LIB)
+
+all: share static
+.PHONY: all static share clean
 clean:
-	@rm -rf $(OBJ_FILES) $(STATIC_LIB)
+	@rm -rf $(OBJ_FILES) $(STATIC_LIB) $(SHARED_LIB)

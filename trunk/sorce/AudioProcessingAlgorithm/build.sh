@@ -23,6 +23,9 @@ function show_help() {
     echo "  --cxx <compiler>              指定 C++ 编译器 (例如: g++, clang++)"
     echo "  --ld <linker>                 指定链接器 (例如: ld, ld.lld)"
     echo "  --ar <archiver>               指定静态库打包工具 (例如: ar, llvm-ar)"
+    echo "  --ndk <arch>                  使用本地 Android NDK 环境编译，支持的架构: aarch64, arm"
+    echo "                                例如: $0 all --ndk aarch64"
+    echo "  --sigmastar                   使用 SigmaStar 交叉编译工具链编译"
     echo ""
     echo "Examples:"
     echo "  $0                      # 使用 Makefile 中的默认工具链编译"
@@ -30,18 +33,17 @@ function show_help() {
     echo "  $0 all --cc gcc         # 仅覆盖 CC 编译器为系统 gcc"
     echo "  $0 all -c aarch64-linux-gnu- # 使用指定的交叉编译工具链前缀"
     echo "  $0 all -o /tmp/build_libs    # 指定输出目录"
+    echo "  $0 all --ndk aarch64         # 使用本地下载的 NDK 编译 Android aarch64 版本"
+    echo "  $0 all --ndk arm             # 使用本地下载的 NDK 编译 Android 32位 arm 版本"
+    echo "  $0 all --sigmastar           # 使用 SigmaStar 工具链编译"
     echo "  $0 all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm"
-    echo "  ./build.sh all \
-  --cc /Users/bytedance/work/A1T1/clangbuild/bin/clang \
-  --cxx /Users/bytedance/work/A1T1/clangbuild/bin/clang++ \
-  --ld /Users/bytedance/work/A1T1/clangbuild/bin/ld.lld \
-  --ar /Users/bytedance/work/A1T1/clangbuild/bin/llvm-ar \
-  -o /Users/bytedance/work/A1T1/output/android "
 }
 
 # 默认执行目标
 TARGET="all"
 MAKE_ARGS=()
+NDK_RUNTIME_COPY=""
+AUTO_CLEAN=""
 
 # 解析第一个参数（如果是 clean，直接处理）
 if [ "$1" == "clean" ]; then
@@ -88,6 +90,64 @@ while [[ $# -gt 0 ]]; do
             echo "=> Set AR to: $AR"
             shift 2
             ;;
+        --ndk)
+            NDK_BIN="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/bin"
+            NDK_ARCH="$2"
+            
+            if [ "$NDK_ARCH" == "aarch64" ]; then
+                export CC="$NDK_BIN/aarch64-linux-android28-clang"
+                export CXX="$NDK_BIN/aarch64-linux-android28-clang++"
+                DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_arm64_v8a"
+                NDK_RUNTIME_COPY="aarch64-linux-android"
+                echo "=> Using NDK environment for Android aarch64 (API 28)"
+            elif [ "$NDK_ARCH" == "arm" ]; then
+                export CC="$NDK_BIN/armv7a-linux-androideabi28-clang"
+                export CXX="$NDK_BIN/armv7a-linux-androideabi28-clang++"
+                DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_armeabi_v7a"
+                NDK_RUNTIME_COPY="arm-linux-androideabi"
+                echo "=> Using NDK environment for Android arm (API 28)"
+            else
+                echo "Error: Invalid architecture for --ndk. Supported values are: aarch64, arm"
+                exit 1
+            fi
+            
+            export LD="$NDK_BIN/ld.lld"
+            export AR="$NDK_BIN/llvm-ar"
+            
+            # 只有当用户没有显式传入 OUTDIR 时，才使用 NDK 的默认输出目录
+            if [ -z "$OUTDIR" ]; then
+                export OUTDIR="$DEFAULT_NDK_OUTDIR"
+            fi
+            
+            echo "   CC: $CC"
+            echo "   CXX: $CXX"
+            echo "   LD: $LD"
+            echo "   AR: $AR"
+            echo "   OUTDIR: $OUTDIR"
+            AUTO_CLEAN="yes"
+            shift 2
+            ;;
+        --sigmastar)
+            SIGMA_BIN="/Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0-"
+            export CC="${SIGMA_BIN}gcc"
+            export CXX="${SIGMA_BIN}g++"
+            export LD="${SIGMA_BIN}ld"
+            export AR="${SIGMA_BIN}ar"
+            DEFAULT_SIGMA_OUTDIR="/Users/bytedance/work/A1T1/output/sigmastar"
+            
+            if [ -z "$OUTDIR" ]; then
+                export OUTDIR="$DEFAULT_SIGMA_OUTDIR"
+            fi
+            
+            echo "=> Using SigmaStar cross-compile toolchain"
+            echo "   CC: $CC"
+            echo "   CXX: $CXX"
+            echo "   LD: $LD"
+            echo "   AR: $AR"
+            echo "   OUTDIR: $OUTDIR"
+            AUTO_CLEAN="yes"
+            shift 1
+            ;;
         *)
             echo "Unknown option: $1"
             show_help
@@ -111,8 +171,24 @@ if [ "$TARGET" == "clean" ]; then
     echo "=> Running: make clean"
     make clean
 else
-    echo "=> Running: make -j${CORES} ${MAKE_ARGS[*]}"
-    make -j"${CORES}" "${MAKE_ARGS[@]}"
+    # 切换平台编译前先 clean，避免复用其它平台的 .o 文件
+    if [ -n "$AUTO_CLEAN" ]; then
+        echo "=> Running: make clean (auto clean before cross-compile)"
+        make clean
+    fi
+    echo "=> Running: make -j${CORES} ${TARGET} ${MAKE_ARGS[*]}"
+    make -j"${CORES}" "$TARGET" "${MAKE_ARGS[@]}"
+
+    # 拷贝 NDK 运行时库 libc++_shared.so 到输出目录
+    if [ -n "$NDK_RUNTIME_COPY" ] && [ -n "$OUTDIR" ]; then
+        NDK_SYSROOT="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${NDK_RUNTIME_COPY}/libc++_shared.so"
+        if [ -f "$NDK_SYSROOT" ]; then
+            cp "$NDK_SYSROOT" "$OUTDIR/"
+            echo "=> Copied libc++_shared.so to $OUTDIR"
+        else
+            echo "Warning: libc++_shared.so not found at $NDK_SYSROOT"
+        fi
+    fi
 fi
 echo "---------------------------------------------------"
 echo "Done!"
