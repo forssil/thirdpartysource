@@ -140,20 +140,20 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
     tmp_gain_sum /= (m_nFFTLen / 2);
     tmp_psd_low /= 86;
     tmp_psd_sum /= (m_nFFTLen / 2);
-
-    for (CAUDIO_U32_t i = 0; i < m_nFFTLen / 2; i++)
-    {
-        if (tmp_gain_low < 0.2 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.000001 && tmp_psd_sum < 0.000001) { // -60dB
+    if (tmp_gain_low < 0.2 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.000001 && tmp_psd_sum < 0.000001) {
+    	for (CAUDIO_U32_t i = 0; i < m_nFFTLen / 2; i++)
+    	{
+        // -60dB
             m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
         }
 
-        if (tmp_gain_low < 0.1 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.00001 && tmp_psd_sum < 0.000001) { // -60dB
-            //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
-        }
+        // if (tmp_gain_low < 0.1 && tmp_gain_sum < 0.2 && tmp_psd_low < 0.00001 && tmp_psd_sum < 0.000001) { // -60dB
+        //     //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
+        // }
 
-        if (tmp_gain_low < 0.7 && tmp_gain_sum < 0.5 && tmp_psd_low < 100) {
-            //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
-        }
+        // if (tmp_gain_low < 0.7 && tmp_gain_sum < 0.5 && tmp_psd_low < 100) {
+        //     //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
+        // }
     }
 	aecdata.fProiSNR_ = m_CSpeechStatic->GetProiSNR();
 	m_CPsd->CQSpread(m_pfNoise,m_pfNoiseLine);	
@@ -191,13 +191,18 @@ void CNoiseRedu::transientnois()
 	float temp=0.f;
 	float threshold = 0.15;
 	float gain_temp = 1.f;
+	float tmp1,tmp2,tmp3;
 	for (i=0;i<m_nQNum;i++)
 	{  
-		gain_temp = m_CPsd->m_pfPsdCQ_Fd[i] / (m_CPsd_echo->m_pfPsdCQ_Fd[i] + 1e-10);
+		tmp1 = m_CPsd->m_pfPsdCQ_Fd[i];
+		gain_temp = tmp1 / (tmp1 + 1e-10);
+		tmp2 = m_pfTransGain[i];
 		if (gain_temp < threshold && 0.001f < gain_temp)
-			m_pfTransGain[i] += 0.1f *(gain_temp - m_pfTransGain[i]);
-		temp=m_CPsd_echo->m_pfPsdCQ_Fd[i]* m_pfTransGain[i];
-		m_pfTrans[i]=temp>m_pfNoise[i]/10.f?temp:m_pfNoise[i]/10.f;///for protect snr equal infinite  
+			tmp2 += 0.1f *(gain_temp -tmp2);
+		m_pfTransGain[i] = tmp2;
+		temp=tmp1* tmp2;
+		tmp3 = m_pfNoise[i]/10.f;
+		m_pfTrans[i]=temp>tmp3?temp:tmp3;///for protect snr equal infinite  
 		
 	}
 }
