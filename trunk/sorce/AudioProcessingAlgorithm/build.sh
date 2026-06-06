@@ -26,6 +26,7 @@ function show_help() {
     echo "  --ndk <arch>                  使用本地 Android NDK 环境编译，支持的架构: aarch64, arm"
     echo "                                例如: $0 all --ndk aarch64"
     echo "  --sigmastar                   使用 SigmaStar 交叉编译工具链编译"
+    echo "  --sigmastar-docker            使用 Docker 运行 SigmaStar 交叉编译 (macOS)"
     echo ""
     echo "Examples:"
     echo "  $0                      # 使用 Makefile 中的默认工具链编译"
@@ -36,6 +37,7 @@ function show_help() {
     echo "  $0 all --ndk aarch64         # 使用本地下载的 NDK 编译 Android aarch64 版本"
     echo "  $0 all --ndk arm             # 使用本地下载的 NDK 编译 Android 32位 arm 版本"
     echo "  $0 all --sigmastar           # 使用 SigmaStar 工具链编译"
+    echo "  $0 all --sigmastar-docker    # 使用 Docker 编译 SigmaStar 版本"
     echo "  $0 all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm"
 }
 
@@ -148,6 +150,19 @@ while [[ $# -gt 0 ]]; do
             AUTO_CLEAN="yes"
             shift 1
             ;;
+        --sigmastar-docker)
+            USE_DOCKER="yes"
+            DEFAULT_SIGMA_OUTDIR="/Users/bytedance/work/A1T1/output/sigmastar"
+            
+            if [ -z "$OUTDIR" ]; then
+                export OUTDIR="$DEFAULT_SIGMA_OUTDIR"
+            fi
+            
+            echo "=> Using SigmaStar cross-compile toolchain via Docker"
+            echo "   OUTDIR: $OUTDIR"
+            AUTO_CLEAN="yes"
+            shift 1
+            ;;
         *)
             echo "Unknown option: $1"
             show_help
@@ -168,25 +183,57 @@ fi
 
 echo "---------------------------------------------------"
 if [ "$TARGET" == "clean" ]; then
-    echo "=> Running: make clean"
-    make clean
-else
-    # 切换平台编译前先 clean，避免复用其它平台的 .o 文件
-    if [ -n "$AUTO_CLEAN" ]; then
-        echo "=> Running: make clean (auto clean before cross-compile)"
+    if [ -n "$USE_DOCKER" ]; then
+        echo "=> Running: docker make clean"
+        SIGMA_DOCKER_SCRIPT="/Users/bytedance/work/A1T1/docker/sigmastar/sigmastar-docker"
+        mkdir -p "$OUTDIR"
+        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm clean OUTDIR=/work/libs/sigmastar
+    else
+        echo "=> Running: make clean"
         make clean
     fi
-    echo "=> Running: make -j${CORES} ${TARGET} ${MAKE_ARGS[*]}"
-    make -j"${CORES}" "$TARGET" "${MAKE_ARGS[@]}"
+else
+    # 切换平台编译前先 clean，避免复用其它平台的 .o 文件
+    if [ -n "$USE_DOCKER" ]; then
+        echo "=> Running: SigmaStar compilation via Docker"
+        SIGMA_DOCKER_SCRIPT="/Users/bytedance/work/A1T1/docker/sigmastar/sigmastar-docker"
+        mkdir -p "$OUTDIR"
+        
+        # Clean in Docker
+        echo "=> Running: docker make clean"
+        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm clean OUTDIR=/work/libs/sigmastar
+        
+        # Build in Docker
+        echo "=> Running: docker make -j${CORES}"
+        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm -j"${CORES}" OUTDIR=/work/libs/sigmastar 'DEFINES=-fPIC -fpermissive -Wl,-rpath=.'
+        
+        # 拷贝 SigmaStar 运行时库
+        SIGMA_TOOLCHAIN="/Users/bytedance/work/A1T1/armbuild"
+        if [ -f "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libgcc_s.so.1" ]; then
+            cp "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libgcc_s.so.1" "$OUTDIR/"
+            echo "=> Copied libgcc_s.so.1 to $OUTDIR"
+        fi
+        if [ -f "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libstdc++.so.6.0.26" ]; then
+            cp "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libstdc++.so.6.0.26" "$OUTDIR/libstdc++.so.6"
+            echo "=> Copied libstdc++.so.6 to $OUTDIR"
+        fi
+    else
+        if [ -n "$AUTO_CLEAN" ]; then
+            echo "=> Running: make clean (auto clean before cross-compile)"
+            make clean
+        fi
+        echo "=> Running: make -j${CORES} ${TARGET} ${MAKE_ARGS[*]}"
+        make -j"${CORES}" "$TARGET" "${MAKE_ARGS[@]}"
 
-    # 拷贝 NDK 运行时库 libc++_shared.so 到输出目录
-    if [ -n "$NDK_RUNTIME_COPY" ] && [ -n "$OUTDIR" ]; then
-        NDK_SYSROOT="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${NDK_RUNTIME_COPY}/libc++_shared.so"
-        if [ -f "$NDK_SYSROOT" ]; then
-            cp "$NDK_SYSROOT" "$OUTDIR/"
-            echo "=> Copied libc++_shared.so to $OUTDIR"
-        else
-            echo "Warning: libc++_shared.so not found at $NDK_SYSROOT"
+        # 拷贝 NDK 运行时库 libc++_shared.so 到输出目录
+        if [ -n "$NDK_RUNTIME_COPY" ] && [ -n "$OUTDIR" ]; then
+            NDK_SYSROOT="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${NDK_RUNTIME_COPY}/libc++_shared.so"
+            if [ -f "$NDK_SYSROOT" ]; then
+                cp "$NDK_SYSROOT" "$OUTDIR/"
+                echo "=> Copied libc++_shared.so to $OUTDIR"
+            else
+                echo "Warning: libc++_shared.so not found at $NDK_SYSROOT"
+            fi
         fi
     fi
 fi

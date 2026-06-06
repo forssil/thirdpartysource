@@ -9,10 +9,7 @@
 #include <windows.h>
 #endif
 
-#ifndef _CLOCK_T_DEFINED 
-typedef long clock_t;
-#define _CLOCK_T_DEFINED 
-#endif 
+
 
 #define framesize 04.f
 #define floatfile
@@ -77,20 +74,18 @@ int main(int argc , char *argv[ ])
 	short *data_in_s,*data_out_s;
 	float *data_in_f;
 	float *data_in_f2, *data_out_f2;
-	char *infile,*outfile,*configfile = NULL;
+	char *configfile = NULL;
 	long filelen;
 	long outfileleng;
-	int mics_num = 4;
-    int channel_num = 5;
+	int mics_num = 8;
+    int channel_num = mics_num ;
 	Toggle3A config_;
 	int fremaelen=480;//int(framesize*readwavhead.SampleRate/1000);
 	printf("Usage: [infile.pcm] [outfile.pcm] [length] [config.txt(can be defaulted)]\n");
     
-	if(argc < 3){
-		return 0;
-	}
-	infile=argv[1];
-	outfile = argv[2];
+	
+    char infile[256]="mic_8ch_final.pcm";
+	char outfile[12] = "testout.pcm";
 	long length = strtol(argv[3], NULL, 10);
 	if(argc > 3){
 		configfile = argv[4];
@@ -99,8 +94,8 @@ int main(int argc , char *argv[ ])
 	// infile = (char*)"test_short.pcm";
 	// outfile=   (char*)"pcmout.pcm";
     
-	filelen=(int)length*100*480 * channel_num;
-    input = fopen(infile, "rb+");
+	filelen=(int)10*100*480 * channel_num;
+    input = fopen(infile, "rb");
     output = fopen(outfile, "wb+");
 	if(NULL == input){
 		printf("open infile failed!\n");
@@ -114,10 +109,11 @@ int main(int argc , char *argv[ ])
 		printf("use default config!\n");
 		config_.bAECOn_ = true;
 		config_.bAGCOn_ = true;
-		config_.bNRCNGOn_ = false;
+		config_.bNRCNGOn_ = true;
 		config_.bNROn_ = true;
 		config_.bPreRnnOn_ = true;
-		config_.bRNNOISEOn_ = false;
+		config_.bRNNOISEOn_ = true;
+        config_.mics_num = mics_num;
 	}
 	else{
 		printf("get external config!");
@@ -167,7 +163,7 @@ int main(int argc , char *argv[ ])
                 farin[i] = data_in_s[i*channel_num + mics_num];
 			}
 			insideCycleNum++;
-            aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout, 1, 0);
+            aec_processing_cpp(nullptr, micin, nullptr, nullptr, 0, errout, 1, 0);
 #ifdef WIN32
 			QueryPerformanceCounter(&finishTime);
 			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);		
