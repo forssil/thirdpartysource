@@ -301,7 +301,7 @@ int CAudioProcessingFramework::Init()
 	m_bInit = true;
 
 	// init MVDR
-	int bins = (16000 * m_nFFTlen / m_nFs) ;
+	int bins = (20000 * m_nFFTlen / m_nFs) ;
 	bins = (bins > 0 && bins < m_nFFTlen / 2) ? bins : m_nFFTlen / 2 - 1;
 	//float interval = 0.2;
 	//float DOA = 45 / 180 * PI;
@@ -335,7 +335,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 {
 	int ret = 0;
 	float* fpref = ((aShareData.pReffer_));
-	float* fpRefFft = NULL;
+	//float* fpRefFft = NULL;
 	float vadband[3] = { 0 };
 	float vadfull = 0.f;
     float vadband_near[3] = { 0 };
@@ -357,9 +357,6 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
             m_pAECDataArray[i].bRNNOISEVad_enhance_ = aShareData.bRNNOISEVad_enhance_;
             m_pAECDataArray[i].ChannelIndex_ = i;
             m_pAECDataArray[i].RnnGain_ = aShareData.RnnGain_;
-            if (i == 1 ) {
-                //m_pAECDataArray[i].bNROn_ = false;
-            }
 	        ///// NR before aec
 			////
 		}
@@ -368,7 +365,7 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
 			///t2f ref
 			m_CT2FRef->T2F(fpref, m_pReferFFT);
 
-            m_CT2FRNNERROR->T2F(aShareData.pRNNERROR_, m_pRNNERRORFFT);
+            //m_CT2FRNNERROR->T2F(aShareData.pRNNERROR_, m_pRNNERRORFFT);
 
 			//////far end vad
 			m_pSPest->PwrEnergy(m_pReferFFT, m_pRefSp, m_pRefSp_nonsmooth);
@@ -427,10 +424,6 @@ int CAudioProcessingFramework::process(audio_pro_share& aShareData)
             m_CF2TErr->F2T(m_pAECDataArray[0].pErrorFFT_, aShareData.ppProcessOut_[0]);
             
         }
-		
-
-		
-
 	}
 	else
 		return -1;

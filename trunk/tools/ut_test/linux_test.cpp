@@ -4,6 +4,7 @@
 #include    <stdbool.h>
 #include "AudioAecCpp.h"
 #include <time.h>
+#include "AudioLog.h"
 //#include "timecounter.h"
 #ifdef WIN32
 #include <windows.h>
@@ -78,23 +79,43 @@ int main(int argc , char *argv[ ])
 	long filelen;
 	long outfileleng;
 	int mics_num = 8;
-    int channel_num = mics_num ;
+
+    int channel_num = 8 ;
 	Toggle3A config_;
 	int fremaelen=480;//int(framesize*readwavhead.SampleRate/1000);
-	printf("Usage: [infile.pcm] [outfile.pcm] [length] [config.txt(can be defaulted)]\n");
+	printf("Usage: [mics_num] [infile.pcm] [outfile.pcm] [length] [config.txt(can be defaulted)] [logfile.txt(can be defaulted)]\n");
     
 	
     char infile[256]="mic_8ch_final.pcm";
-	char outfile[12] = "testout.pcm";
-	long length = strtol(argv[3], NULL, 10);
-	if(argc > 3){
-		configfile = argv[4];
+	char outfile[256] = "testout.pcm";
+	char logfile[256] = "AudioLog.txt";
+	if (argc > 1) {
+		mics_num = atoi(argv[1]);
 	}
+	if (argc > 2) {
+		strncpy(infile, argv[2], sizeof(infile) - 1);
+	}
+	if (argc > 3) {
+		strncpy(outfile, argv[3], sizeof(outfile) - 1);
+	}
+	long length = 0;
+	if (argc > 4) {
+		length = strtol(argv[4], NULL, 10);
+	}
+	if(argc > 5){
+		configfile = argv[5];
+	}
+	if(argc > 6){
+		strncpy(logfile, argv[6], sizeof(logfile) - 1);
+	}
+	
+	AUDIO_LOG_INIT(logfile);
+	AUDIO_LOG_INFO("Program started.\n");
 	
 	// infile = (char*)"test_short.pcm";
 	// outfile=   (char*)"pcmout.pcm";
     
-	filelen=(int)10*100*480 * channel_num;
+	filelen=(int)15*100*480 * channel_num;
     input = fopen(infile, "rb");
     output = fopen(outfile, "wb+");
 	if(NULL == input){
@@ -107,13 +128,13 @@ int main(int argc , char *argv[ ])
 	}
 	if(NULL == configfile){
 		printf("use default config!\n");
-		config_.bAECOn_ = true;
-		config_.bAGCOn_ = true;
-		config_.bNRCNGOn_ = true;
+		config_.bAECOn_ = false;
+		config_.bAGCOn_ = false;
+		config_.bNRCNGOn_ = false;
 		config_.bNROn_ = true;
-		config_.bPreRnnOn_ = true;
-		config_.bRNNOISEOn_ = true;
-        config_.mics_num = mics_num;
+		config_.bPreRnnOn_ = false;
+		config_.bRNNOISEOn_ = false;
+        config_.mics_num = 1 ;
 	}
 	else{
 		printf("get external config!");
@@ -121,6 +142,8 @@ int main(int argc , char *argv[ ])
 		printf("configs: AEC: %d AGC: %d NR_: %d CNG: %d RNN: %d PRERNN: %d\n",
 				config_.bAECOn_,config_.bAGCOn_,config_.bNROn_,config_.bNRCNGOn_,config_.bPreRnnOn_,config_.bRNNOISEOn_);
 	}
+	AUDIO_LOG_INFO("Config: AEC:%d AGC:%d NR:%d CNG:%d RNN:%d PRERNN:%d MICS:%d\n", 
+		config_.bAECOn_, config_.bAGCOn_, config_.bNROn_, config_.bNRCNGOn_, config_.bRNNOISEOn_, config_.bPreRnnOn_, config_.mics_num);
 
 	data_in_s=new short[fremaelen*(channel_num+1)];
 	data_out_s=data_in_s+fremaelen*channel_num;
@@ -141,16 +164,22 @@ int main(int argc , char *argv[ ])
     short farin[512] = { 0 };
     short errout[512] = { 0 };
     aec_processing_init_cpp(nullptr, (void*)&config_);
+	AUDIO_LOG_INFO("Aec init finished.\n");
 	outfileleng = 0;
 	
 	int cycleNum = 1;
 	int insideCycleNum = 0;
+	AUDIO_LOG_INFO("process	 start.\n");
 	for (int i = 0; i < cycleNum; i++)
 	{
 		while (outfileleng < (filelen - fremaelen * channel_num))
 		{
 			//printf("outfileleng: %ld\n", outfileleng);
 			int read_len = fread(data_in_s,sizeof(short),fremaelen * channel_num,input);
+            if (read_len == 0) {
+                break;
+                
+            }
 			outfileleng += read_len;
 			//if (outfileleng>=3826* fremaelen*readwavhead.NChannels)
 			//	outfileleng*=1;
@@ -160,10 +189,11 @@ int main(int argc , char *argv[ ])
 				{
                     micin[channel][i] = data_in_s[i*channel_num + channel];
 				}
-                farin[i] = data_in_s[i*channel_num + mics_num];
+                //farin[i] = data_in_s[i*channel_num + mics_num];
 			}
+			printf("process  %d frames!\n", insideCycleNum);
 			insideCycleNum++;
-            aec_processing_cpp(nullptr, micin, nullptr, nullptr, 0, errout, 1, 0);
+            aec_processing_cpp(nullptr, micin, farin, nullptr, 0, errout, 1, 0);
 #ifdef WIN32
 			QueryPerformanceCounter(&finishTime);
 			elapseTimeCount = elapseTimeCount + (finishTime.QuadPart - startTime.QuadPart);		
@@ -226,5 +256,8 @@ int main(int argc , char *argv[ ])
 	//delete sharedata.ppProcessOut_;
     aec_processing_deinit_cpp(nullptr);
     //aec_processing_deinit(nullptr);
+	
+	AUDIO_LOG_INFO("Program finished.\n");
+	AUDIO_LOG_DESTROY();
 	return 1;
 }

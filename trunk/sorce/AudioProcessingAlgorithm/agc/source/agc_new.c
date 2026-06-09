@@ -218,7 +218,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     }
 
     /*convert to dB*/
-    smooth_nfe_db = 10 * log10f(smooth_nfe);
+    smooth_nfe_db = 10 * log10f(smooth_nfe + 1e-9);
     /*AGC NFE*/
     if (agc->nfe_on)
     {
@@ -262,7 +262,7 @@ void agc_new_process(struct AGCSTATE_NEW * agc,
     }
 
     /*Convert to Db*/
-    smooth_db = 10 * log10f(smooth_new);
+    smooth_db = 10 * log10f(smooth_new + 1e-9);
 	
     bool needcompress = false;
 	if (smooth_db < -50 && is_res_echo) {

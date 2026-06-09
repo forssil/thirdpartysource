@@ -4,6 +4,7 @@
 #include "processingconfig.h"
 #include "basemath.h"
 #include "SpeechEst.h"
+#include "AudioLog.h"
 CSpeechEst::CSpeechEst(float fs,int arraylen,int fftlen)
 {
 	m_nLen=arraylen;
@@ -104,6 +105,7 @@ void CSpeechEst::UpdateSNR(float *InPwr, float* Noise)
 	float pwr, noise;
 	float prisnr, possnr, prisnrest;
 	float beta, alpha;
+	AUDIO_LOG_INFO("%p CSpeechEst::UpdateSNR: %p %p \n", this, InPwr, Noise);
 	beta = (1.f - m_fBeta_prio);
 	alpha = (1.f - m_fAlpha_prio);
 	m_fPriori_frame = 0.f;

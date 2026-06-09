@@ -174,7 +174,7 @@ void CPostFilter::Process(audio_pro_share *Aec)
 	UpdateReferPwr(Aec);
 	m_fReferPwrEnvelop = TrackEnvelop(m_pfReferPwr[0], m_fReferPwrEnvelop, m_fReferPwrEnvelopUpdateStep);
 	UpdateAllBandGain();
-	m_fReferPwrEnvelopDb = 10 * log10f(m_fReferPwrEnvelop) + 6; // add power for the sync part
+	m_fReferPwrEnvelopDb = 10 * log10f(m_fReferPwrEnvelop + 1e-9) + 6; // add power for the sync part
 	
 	m_CNoisRedu->Process(m_pfPwr,m_pfEstPwr,*Aec,m_pfAft,m_pfBef);
 	{

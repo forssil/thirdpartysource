@@ -5,7 +5,7 @@
 */
 enum NoiseEstMode
 {
-	MS,  // 
+	MS = 1,  // 
 	MRCA,// no implement currently
 	SEnv// no implement currently
 };

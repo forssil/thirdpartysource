@@ -49,6 +49,7 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 //     index_tmp = 0;
 // #endif
     //printf("[AudioAecCpp] cycle is %d, index_tmp is %d",cycle_num,index_tmp);
+    int framelen = aec_para.fremaelen;
     for (int cycle = 0; cycle < cycle_num; cycle++) {
         //int capture[4][480] = { 0 };
 
@@ -56,10 +57,10 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
         {
             for (size_t channel = 0; channel < aec_para.mics_num; channel++)
             {
-                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + 480 * cycle]) / 32768.f;
+                sharedata->ppCapture_[channel][i] = float(date_in[index_tmp + channel][i + framelen * cycle]) / 32768.f;
             }
             if (ref_spk != NULL) {
-                sharedata->pReffer_[i] = float(ref_spk[i + 480 * cycle]) / 32768.f;
+                sharedata->pReffer_[i] = float(ref_spk[i + framelen * cycle]) / 32768.f;
             }
             else {
                 sharedata->pReffer_[i] = 0.f;
@@ -77,22 +78,23 @@ void aec_processing_cpp(void *h_aec, short *date_in[], short *ref_spk, short *re
 			}
 		}*/
 		//pSUBThread->task(sharedata);
+        float tempout= 0.f;
         for (int i = 0; i < (aec_para.fremaelen); i++)
         {
             //for (size_t channel = 0; channel < mics_num; channel++)
             size_t channel = 0;
             {
-                sharedata->ppProcessOut_[channel][i] *= 32767.f;
-                if (sharedata->ppProcessOut_[channel][i] > 32767.f)
+                tempout= sharedata->ppProcessOut_[channel][i] * 32767.f;
+                if (tempout > 32767.f)
                 {
                     data_out[i + channel+480*cycle] = 32767;
                 }
-                else if (sharedata->ppProcessOut_[channel][i] < -32768.f)
+                else if (tempout< -32768.f)
                 {
-                    data_out[i + channel +480*cycle] = -32768;
+                    data_out[i + channel +framelen*cycle] = -32768;
                 }
                 else {
-                    data_out[i + channel +480*cycle] = short(sharedata->ppProcessOut_[channel][i]);//*32768.f
+                    data_out[i + channel +framelen*cycle] = short(tempout);//*32768.f
                 }
             }
             //data_out[i*writewavhead.NChannels + mics_num] = (data_in_s[i*writewavhead.NChannels + mics_num]);

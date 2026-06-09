@@ -141,7 +141,7 @@ void SUBinterface::sub_create(audio_pro_share *share_data) {
 
     rnn_noise_ = rnnoise_create(NULL);
 	//sub_thread_ = new std::thread([this, sharedata, aec_para] {this->task(sharedata); });
-    sub_thread_ = new std::thread(&SUBinterface::threadrun,this);
+   // sub_thread_ = new std::thread(&SUBinterface::threadrun,this);
 
 }
 void SUBinterface::threadrun() {
@@ -236,15 +236,19 @@ void SUBinterface::start_sub_thread() {
     //sub_thread_ = std::thread([this] { this->task(); });
 }
 
-void SUBinterface::stop_sub_thread() {
+int SUBinterface::stop_sub_thread() {
+    if (!sub_thread_) {
+        return 0;
+    }
   
-    if (sub_thread_->joinable()) {
+    if ( sub_thread_->joinable()) {
         {
             std::unique_lock<std::mutex> lock(sub_thread_mutex_);
             audio_3A_thread_running_ = false;
         }
         sub_thread_->join();
     }
+    return 0;
 	
 }
 

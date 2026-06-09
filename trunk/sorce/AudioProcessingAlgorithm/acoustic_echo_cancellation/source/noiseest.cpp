@@ -3,12 +3,14 @@
 #include <memory.h>
 #include "processingconfig.h"
 #include "noiseest.h"
+//#include "AudioLog.h"
 #define Bias 2.5f // the PSD of noise est is normally lower
 CNoiseEst::CNoiseEst(float fs,int arraylen,NoiseEstMode mode)
 {
 	m_fFs=fs;
 	m_nLen=arraylen;
 	m_nMode=mode;
+	//AUDIO_LOG_INFO("%p CNoiseEst::InitNosieEst: m_nMode %d m_nLen %d m_fFs %f \n", this, m_nMode,m_nLen,m_fFs);
 	InitNosieEst();
 }
 
@@ -26,7 +28,15 @@ float CNoiseEst::MD_interp(int N)
 	float D[] ={1.f,2.f,5.f,8.f, 10.f, 15.f, 20.f ,30.f ,40.f ,60.f, 80.f, 120.f, 140.f, 160.f };
     int len=14;
     MD_N=float(N);
-	while (MD_N>D[i]) i++;
+	/*为什么 Android 开启 -O3 必定崩溃？ C/C++ 中数组越界属于 未定义行为 (Undefined Behavior, UB) 。 -O3 级别的编译器（Clang）极其激进：
+它看到你在遍历只有 14 个元素的数组 D ，就会“聪明”地假设： “既然程序员写了正确的代码，那么 i 绝不可能大于等于 14” 。
+基于这个假设，编译器会把下方原本用来保底的 if ((i>0)&&(i<14)) 检查 直接整段删除（Optimize out） ！随后编译器为了加速，可能会将这个循环向量化 (Vectorization) 或打乱寄存器映射，
+最终在越界读取栈内存时触碰到未映射的页，或者产生非预期的空指针寄存器寻址，直接导致 fault addr 0x0 的惨烈 Crash。
+	*/
+	while (MD_N>D[i]&&(i<len)) i++;
+    if (MD_N<D[0]) {
+        MD_N = 0.f;
+    }
     if ((i>0)&&(i<14))
     {
 		MD_N-=D[i-1];
@@ -34,8 +44,13 @@ float CNoiseEst::MD_interp(int N)
 		MD_N*=(MD[i]-MD[i-1]);
 		MD_N+=MD[i-1];
     }
-	else
-		MD_N=0.f;
+    if (MD_N>D[13]) {
+        MD_N-=D[13];
+        MD_N/=(D[13]-D[12]);
+        MD_N*=(MD[13]-MD[12]);
+        MD_N+=MD[13];
+    }
+
 	return MD_N;
 }
 void CNoiseEst::SetWin(int subwinlen,int subwinnum)
@@ -44,19 +59,22 @@ void CNoiseEst::SetWin(int subwinlen,int subwinnum)
 	m_nSubWinNum=subwinnum;
 	m_nWinLen=m_nSubWinNum*m_nSubWinLen;
 	m_fMSubWin=MD_interp( m_nSubWinLen);
-	m_fMWin   =MD_interp(m_nWinLen);
+	m_fMWin   = MD_interp(m_nWinLen);
 
 }
 void CNoiseEst::InitNosieEst()
 {
 	int i;
 	m_nBeginFrames=0x0000000f;//for 96ms analysis filter
-	if(m_nMode==MS)
+	//AUDIO_LOG_INFO("%p CNoiseEst::InitNosieEst: m_nMode %d \n", this, m_nMode);
+	//if(m_nMode==NoiseEstMode::MS)
 	{
 		SetWin(10,27);
+	//	AUDIO_LOG_INFO("%p CNoiseEst::InitNosieEst: SetWin m_nSubWinLen %d m_nSubWinNum %d  \n", this, m_nSubWinLen,m_nSubWinNum);
 		m_fAlpha_v=2.f;
 		i=m_nLen*(9+m_nSubWinNum);
 		m_pfPwr=new float[i];
+		//AUDIO_LOG_INFO("%p CNoiseEst::InitNosieEst: m_pfPwr %d \n", this, m_pfPwr);
 		memset(m_pfPwr,0,i*sizeof(float));
 		m_pfPwr2=m_pfPwr+m_nLen;
 		m_pfLocalMin= m_pfPwr2+m_nLen;

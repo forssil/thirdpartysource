@@ -15,6 +15,7 @@ LINK = ld
 
 INCLUDES =\
 	-I.\
+	-I$(ROOT_PATH)/..\
 	-I$(ROOT_PATH)/include\
 	-I./acoustic_echo_cancellation/include\
 	-I./acoustic_echo_cancellation/include/interface\
@@ -38,7 +39,8 @@ C_FILES = \
 	$(SRC_PATH)/rnnoise/source/rnn.c \
 	$(SRC_PATH)/rnnoise/source/rnn_data.c \
 	$(SRC_PATH)/rnnoise/source/rnn_reader.c \
-	$(SRC_PATH)/common_audio/source/Amp_compute.c
+	$(SRC_PATH)/common_audio/source/Amp_compute.c \
+	
 	
 
 CPP_FILES = \
@@ -61,7 +63,8 @@ CPP_FILES = \
 	$(SRC_PATH)/common_audio/source/SPEst.cpp \
 	$(SRC_PATH)/common_audio/source/T2Ftransformer.cpp \
 	$(SRC_PATH)/beam_forming/source/MVDR.cpp \
-	$(SRC_PATH)/vad/source/VAD.cpp 
+	$(SRC_PATH)/vad/source/VAD.cpp \
+	$(SRC_PATH)/AudioLog.cpp 
 
 COBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(C_FILES:.c=.o)))
 CPPOBJ_FILES = $(addprefix $(OBJ_PATH)/,$(notdir $(CPP_FILES:.cpp=.o)))
@@ -78,6 +81,8 @@ AR      ?= $(CROSS_COMPILE)ar
 #DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
 DEFINES ?= -fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so 
 INCLUDE := -Iinclude -I./extlib
+#
+#CFLAGS  := -Wall -O3 -g -fno-omit-frame-pointer $(DEFINES) $(INCLUDE) $(INCLUDES)
 CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
 
 CXXFLAGS:= $(CFLAGS)
@@ -88,29 +93,38 @@ $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 $(SHARED_LIB): checkbindir checkdir $(OBJ_FILES)
 	$(CXX) $(CXXFLAGS) -shared -fPIC -o $(SHARED_LIB) $(OBJ_FILES)
 
-$(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
-	
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
+#	
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/rnnoise/source/%.c
+#	$(CC) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#	
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#	
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/acoustic_echo_cancellation/source/%.cpp
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#	
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/vad/source/%.cpp
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+#
+#$(OBJ_PATH)/%.o: $(SRC_PATH)/beam_forming/source/%.cpp
+#	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 
-$(OBJ_PATH)/%.o: $(SRC_PATH)/rnnoise/source/%.c
-	$(CC) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
-	
-$(OBJ_PATH)/%.o: $(SRC_PATH)/agc/source/%.c
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+# 自动提取所有源文件所在的目录路径
+VPATH = $(sort $(dir $(C_FILES) $(CPP_FILES)))
 
-$(OBJ_PATH)/%.o: $(SRC_PATH)/audio_processing/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
-	
-$(OBJ_PATH)/%.o: $(SRC_PATH)/acoustic_echo_cancellation/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
+$(OBJ_PATH)/%.o: %.c
+	$(CC) $(CFLAGS) $(INC_DIRS) -c $< -o $@
 
-$(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
-	
-$(OBJ_PATH)/%.o: $(SRC_PATH)/vad/source/%.cpp
-	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
-
-$(OBJ_PATH)/%.o: $(SRC_PATH)/beam_forming/source/%.cpp
+$(OBJ_PATH)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INC_DIRS) -c $< -o $@
 	
 objs: $(OBJ_FILES)

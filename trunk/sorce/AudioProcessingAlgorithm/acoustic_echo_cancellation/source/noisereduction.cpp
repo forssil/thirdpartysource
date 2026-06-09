@@ -1,7 +1,7 @@
 #include "noisereduction.h"
 #include <memory.h>
 
-
+//#include "AudioLog.h"
 #include <math.h>
 #include <stdio.h>
 #include "processingconfig.h"
@@ -14,11 +14,12 @@ CNoiseRedu::CNoiseRedu(int fs, int fftlen)
 	m_CPsd=new CPSDsmooth(fftlen,fs);
 	m_nQNum=m_CPsd->GetTranfLen();
 	m_CPsd_echo=new CPSDsmooth(fftlen,fs);
-	m_CNois=new CNoiseEst(fs,m_nQNum,MS);
+	m_CNois=new CNoiseEst(fs,m_nQNum,NoiseEstMode::MS);
 //	m_CSpeech=new CSpeechEst(fs,m_nQNum,fftlen);
 	m_CSpeechStatic=new CSpeechEst(fs,m_nQNum,fftlen);
 	m_CSpeechTransient = new CSpeechEst(fs, m_nQNum, fftlen);
 	m_pfNoise=m_CNois->GetNoise();
+	//AUDIO_LOG_INFO("%p CNoiseRedu::create: m_pfNoise %p \n", this, m_pfNoise);
 	m_pfTrans=m_CNois->GetTrans();
 	m_pfAlpha=m_CPsd->GetAlpha();
 //	m_pfGaintemp=m_CSpeech->GetGain();
@@ -75,17 +76,19 @@ CNoiseRedu::~CNoiseRedu(void)
 void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata,float *pfAft,float *pfBef)
 {
 	m_sAecdata=aecdata;
+	//AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_pfNoise %p \n", this, m_pfNoise);
 	m_CPsd->processing(input,m_pfNoise);
-	if (NULL != aecdata.pNRDynamicRefer_)
+	if (NULL != aecdata.pNRDynamicRefer_ && aecdata.bAECOn_)
 	{
 		m_CPsd_echo->processing(echonoise,NULL);
 	}
 
     /*attention: m_pfPwr[0] is all band power!!!!!!*/
+	//AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_pfNoise %p \n", this, m_pfNoise);
 	m_CNois->Process(m_pfPwr,m_pfAlpha);
-
+	//AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_pfNoise %p \n", this, m_pfNoise);
 	/*transent noise*/
-	if(aecdata.pNRDynamicRefer_)
+	if(aecdata.pNRDynamicRefer_ && aecdata.bAECOn_)
 	{
 		transientnois();
 	}
@@ -97,13 +100,14 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
 	m_CSpeechStatic->Porcess(m_pfPwr, m_pfNoise, m_pfTrans);
 	memcpy(m_pfGaintemp, m_CSpeechStatic->GetGain(), m_nQNum*sizeof(float));
 #else
-    if (aecdata.ChannelIndex_ == 1) {
-        //m_CSpeechStatic->SetGmin(1);
-    }
-    
+//    if (aecdata.ChannelIndex_ == 1) {
+//        //m_CSpeechStatic->SetGmin(1);
+//    }
+   // AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_CSpeechStatic %p m_pfPwr %p m_pfNoise %p \n", this, m_CSpeechStatic, m_pfPwr, m_pfNoise);
 	m_CSpeechStatic->Porcess(m_pfPwr, m_pfNoise);
 	// set m_pfTrans[0] = 0 , so m_fAllbandProb = 1
 	m_pfTrans[0] = 0;
+	//AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_CSpeechTransient %p m_pfPwr %p m_pfNoise %p \n", this, m_CSpeechTransient, m_pfPwr, m_pfTrans);
 	m_CSpeechTransient->Porcess(m_pfPwr, m_pfTrans);
 
 	float *gain_static = m_CSpeechStatic->GetGain();
@@ -119,7 +123,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
 
 	m_CPsd->CQSpread(m_pfGaintemp,m_pfGainout);	
     // to do: add rnn gain, min
-    int valid_bin[512] = { 0 };
+    //int valid_bin[512] = { 0 };
     float tmp_gain_low = 0.f;
     float tmp_gain_sum = 0.f;
     float tmp_psd_low = 0.f;
@@ -195,7 +199,8 @@ void CNoiseRedu::transientnois()
 	for (i=0;i<m_nQNum;i++)
 	{  
 		tmp1 = m_CPsd->m_pfPsdCQ_Fd[i];
-		gain_temp = tmp1 / (tmp1 + 1e-10);
+        tmp2 = (m_CPsd_echo->m_pfPsdCQ_Fd[i] + 1e-10);
+		gain_temp = tmp1 / (tmp2 + 1e-10);
 		tmp2 = m_pfTransGain[i];
 		if (gain_temp < threshold && 0.001f < gain_temp)
 			tmp2 += 0.1f *(gain_temp -tmp2);
