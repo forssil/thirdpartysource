@@ -27,7 +27,7 @@ CNoiseRedu::CNoiseRedu(int fs, int fftlen)
 	m_pfTransGain = m_pfGaintemp + m_nQNum;
 	memset(m_pfGaintemp, 0, sizeof(float)*m_nQNum);
 	for (int i = 0; i < m_nQNum; i++) {
-		m_pfTransGain[i] = 1.f;
+		m_pfTransGain[i] = 0.f;
 	}
 	m_pfPwr=m_CPsd->GetCQPsd();
 	m_pfPwrFd=m_CPsd->GetCQPsdFd();
@@ -88,7 +88,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
 	m_CNois->Process(m_pfPwr,m_pfAlpha);
 	//AUDIO_LOG_INFO("%p CNoiseRedu::Process: m_pfNoise %p \n", this, m_pfNoise);
 	/*transent noise*/
-	if(aecdata.pNRDynamicRefer_ && aecdata.bAECOn_)
+	if(NULL != aecdata.pNRDynamicRefer_ && aecdata.bAECOn_)
 	{
 		transientnois();
 	}
@@ -124,6 +124,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
 	m_CPsd->CQSpread(m_pfGaintemp,m_pfGainout);	
     // to do: add rnn gain, min
     //int valid_bin[512] = { 0 };
+    
     float tmp_gain_low = 0.f;
     float tmp_gain_sum = 0.f;
     float tmp_psd_low = 0.f;
@@ -159,6 +160,7 @@ void CNoiseRedu::Process(float *input,float *echonoise,audio_pro_share & aecdata
         //     //m_pfGainout[i] = min(m_pfGainout[i], aecdata.RnnGain_[i]);
         // }
     }
+     
 	aecdata.fProiSNR_ = m_CSpeechStatic->GetProiSNR();
 	m_CPsd->CQSpread(m_pfNoise,m_pfNoiseLine);	
 	aecdata.fNoisePwr_ = m_pfNoiseLine[0];
