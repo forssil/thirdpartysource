@@ -144,18 +144,18 @@ void CPostFilter::Reset()
 	////////////////////20150713 lowpass 
 	for (i=0;i<m_nHalfFFTLen;i++)
 	{
-		if (i<m_nHalfFFTLen/2)
+		if (i<m_nHalfFFTLen)
 		{
 			m_pfLowpassWin[i]=1.f;
 		}
-		else if (i<m_nHalfFFTLen*3/4)
-		{
-			m_pfLowpassWin[i]=m_pfLowpassWin[i-1]*0.94f;
-		}
-		else
-		{
-			m_pfLowpassWin[i]=0.0003f;
-		}
+//		else if (i<m_nHalfFFTLen*3/4)
+//		{
+//			m_pfLowpassWin[i]=m_pfLowpassWin[i-1]*0.94f;
+//		}
+//		else
+//		{
+//			m_pfLowpassWin[i]=0.0003f;
+//		}
 		
 	}
 	
