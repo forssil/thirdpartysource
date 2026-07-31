@@ -26,6 +26,10 @@ unsigned int ToTinyalsaFlags(PcmDirection direction) {
     return direction == PcmDirection::Capture ? PCM_IN : PCM_OUT;
 }
 
+unsigned int FramesToBytes(const PcmEndpoint& endpoint, std::size_t frames) {
+    return static_cast<unsigned int>(frames * endpoint.channels * (endpoint.bits / 8));
+}
+
 }  // namespace
 #endif
 
@@ -83,7 +87,7 @@ bool PcmDevice::ReadFrames(int16_t* buffer, std::size_t frames) {
         return false;
     }
 
-    if (pcm_readi(pcm_, buffer, static_cast<unsigned int>(frames)) < 0) {
+    if (pcm_read(pcm_, buffer, FramesToBytes(endpoint_, frames)) < 0) {
         last_error_ = pcm_get_error(pcm_);
         return false;
     }
@@ -104,7 +108,7 @@ bool PcmDevice::WriteFrames(const int16_t* buffer, std::size_t frames) {
         return false;
     }
 
-    if (pcm_writei(pcm_, buffer, static_cast<unsigned int>(frames)) < 0) {
+    if (pcm_write(pcm_, buffer, FramesToBytes(endpoint_, frames)) < 0) {
         last_error_ = pcm_get_error(pcm_);
         return false;
     }
