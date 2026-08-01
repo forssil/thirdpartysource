@@ -95,7 +95,7 @@ A1usbrecord/
   - 使用 256 帧连接 buffer 转发播放数据
   - 写入 `pcmC1D0p` 本地播放输出
 - 已新增本地文件日志：
-  - 默认路径：`/data/local/tmp/av_virtual.log`
+  - 默认路径：`/data/vendor/av_virtual/av_virtual.log`
   - `FileLogger` 使用独立线程异步落盘，采集/播放线程只投递日志消息
   - 默认每 5 分钟记录采集帧数、播放帧数、采集两路帧数差、UAC2 输出滞后、播放读写差、队列深度和错误计数
 - 程序默认直接运行，便于替换 `/vendor/bin/av_virtual` 后由现有 init service 自动启动
@@ -140,7 +140,7 @@ on property:vendor.all.modules.ready=1
   - 使用 256 帧 buffer 在 UAC2 capture PCM 和本地播放 PCM 之间转发。
   - 写入 `pcmC1D0p`，输出到本地播放设备。
 - 稳定性日志：
-  - 写入 `/data/local/tmp/av_virtual.log`。
+  - 写入 `/data/vendor/av_virtual/av_virtual.log`。
   - 由独立日志线程异步写入，避免文件 I/O 阻塞音频采集和播放线程。
   - 默认每 5 分钟记录采集偏差、播放偏差、UAC2 写入滞后、队列水位和错误计数。
 
@@ -198,7 +198,7 @@ chcon u:object_r:av_virtual_exec:s0 /vendor/bin/av_virtual
 start vendor.av_virtual
 getprop init.svc.vendor.av_virtual
 getprop init.svc_debug_pid.vendor.av_virtual
-tail -f /data/local/tmp/av_virtual.log
+tail -f /data/vendor/av_virtual/av_virtual.log
 ```
 
 回滚方式是恢复原始 `/vendor/bin/av_virtual`，并重新执行权限和 label 修复。
@@ -279,7 +279,7 @@ git -C third_party/tinyalsa checkout 9fab97ca07184371ecad81154d1dadb09d0fa7cf
 查看稳定性日志：
 
 ```bash
-tail -f /data/local/tmp/av_virtual.log
+tail -f /data/vendor/av_virtual/av_virtual.log
 ```
 
 实际在 Android 目标环境构建时，需要确保 tinyalsa 头文件和 `libtinyalsa` 链接路径可用。

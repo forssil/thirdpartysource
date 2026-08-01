@@ -21,7 +21,8 @@ struct AppConfig {
     PcmEndpoint uac2Input{4, 0, 2, 48000, 16, 192, 4};
     PcmEndpoint localPlayback{1, 0, 2, 48000, 16, 192, 4};
 
-    const char* logPath = "/data/local/tmp/av_virtual.log";
+    const char* logDir = "/data/vendor/av_virtual";
+    const char* logPath = "/data/vendor/av_virtual/av_virtual.log";
     unsigned int statsLogIntervalSeconds = 300;
     unsigned int playbackBufferFrames = 256;
     bool dry_run = true;

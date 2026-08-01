@@ -49,7 +49,7 @@ out[8..9] = card1 ch0..ch1
 
 - 写入 UAC2 gadget。
 - 增加退出信号处理、错误日志和统计信息。
-- 本地日志写入 `/data/local/tmp/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟记录采集和播放链路偏差：
+- 本地日志写入 `/data/vendor/av_virtual/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟记录采集和播放链路偏差：
   - `capture_diff_frames`：card0 与 card1 累计采集帧数差。
   - `uac2_lag_frames`：已 mux 帧数与已写入 UAC2 帧数差。
   - `playback_diff_frames`：从 UAC2 读取的 PC 播放帧数与本地播放写入帧数差。

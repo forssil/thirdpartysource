@@ -1,13 +1,16 @@
-#include <cstdint>
 #include <atomic>
+#include <cerrno>
 #include <chrono>
 #include <condition_variable>
+#include <cstdint>
 #include <deque>
 #include <fstream>
 #include <iostream>
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -149,6 +152,23 @@ bool HasArg(int argc, char** argv, const std::string& expected) {
 
 int64_t Diff(uint64_t lhs, uint64_t rhs) {
     return static_cast<int64_t>(lhs) - static_cast<int64_t>(rhs);
+}
+
+bool EnsureDirectory(const char* path) {
+    if (path == nullptr || path[0] == '\0') {
+        return false;
+    }
+
+    if (mkdir(path, 0755) == 0) {
+        return true;
+    }
+
+    if (errno != EEXIST) {
+        return false;
+    }
+
+    struct stat info {};
+    return stat(path, &info) == 0 && S_ISDIR(info.st_mode);
 }
 
 void CaptureLoop(const char* name,
@@ -311,6 +331,8 @@ void StatsLoop(const RuntimeStats* stats,
                const a1usbrecord::PcmChunkQueue* input2ch_queue,
                FileLogger* logger,
                unsigned int interval_seconds,
+               std::condition_variable* stop_condition,
+               std::mutex* stop_mutex,
                std::atomic<bool>* running) {
     uint64_t last_input8 = 0;
     uint64_t last_input2 = 0;
@@ -321,7 +343,14 @@ void StatsLoop(const RuntimeStats* stats,
     // Log one summary per configured interval. Stable operation should keep
     // small queue depth and near-zero diff/lag counters over time.
     while (running->load()) {
-        std::this_thread::sleep_for(std::chrono::seconds(interval_seconds));
+        {
+            std::unique_lock<std::mutex> lock(*stop_mutex);
+            if (stop_condition->wait_for(lock,
+                                         std::chrono::seconds(interval_seconds),
+                                         [running]() { return !running->load(); })) {
+                break;
+            }
+        }
 
         const uint64_t input8 = stats->input8_frames.load();
         const uint64_t input2 = stats->input2_frames.load();
@@ -380,6 +409,7 @@ int main(int argc, char** argv) {
     PrintEndpoint("uac2Output", config.uac2Output);
     PrintEndpoint("uac2Input", config.uac2Input);
     PrintEndpoint("localPlayback", config.localPlayback);
+    std::cout << "logDir: " << config.logDir << '\n';
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
     std::cout << "playbackBufferFrames: " << config.playbackBufferFrames << '\n';
@@ -416,6 +446,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    if (!EnsureDirectory(config.logDir)) {
+        std::cerr << "failed to create log dir: " << config.logDir << '\n';
+    }
+
     FileLogger logger(config.logPath);
     if (!logger.IsOpen()) {
         std::cerr << "failed to open log file: " << config.logPath << '\n';
@@ -425,6 +459,8 @@ int main(int argc, char** argv) {
     constexpr std::size_t kQueueCapacity = 8;
     std::atomic<bool> running{true};
     RuntimeStats stats;
+    std::mutex stop_mutex;
+    std::condition_variable stop_condition;
     a1usbrecord::PcmChunkQueue input8ch_queue(kQueueCapacity);
     a1usbrecord::PcmChunkQueue input2ch_queue(kQueueCapacity);
 
@@ -470,10 +506,13 @@ int main(int argc, char** argv) {
                              &input2ch_queue,
                              &logger,
                              config.statsLogIntervalSeconds,
+                             &stop_condition,
+                             &stop_mutex,
                              &running);
 
     mux_write_thread.join();
     running.store(false);
+    stop_condition.notify_all();
     input8ch_queue.Stop();
     input2ch_queue.Stop();
     input8ch_thread.join();
