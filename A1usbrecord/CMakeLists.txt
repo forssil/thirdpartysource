@@ -22,14 +22,14 @@ target_include_directories(av_virtual
 
 target_link_libraries(av_virtual PRIVATE Threads::Threads)
 
-find_path(TINYALSA_INCLUDE_DIR tinyalsa/asoundlib.h)
-find_library(TINYALSA_LIB tinyalsa)
+# 添加 Tinyalsa 源码作为子目录编译
+add_subdirectory(third_party/tinyalsa)
 
-if(TINYALSA_INCLUDE_DIR AND TINYALSA_LIB)
-    target_include_directories(av_virtual PRIVATE ${TINYALSA_INCLUDE_DIR})
-    target_link_libraries(av_virtual PRIVATE ${TINYALSA_LIB})
+if(TARGET tinyalsa)
+    target_include_directories(av_virtual PRIVATE third_party/tinyalsa/include)
+    target_link_libraries(av_virtual PRIVATE tinyalsa)
     target_compile_definitions(av_virtual PRIVATE A1USBRECORD_HAS_TINYALSA=1)
 else()
     target_compile_definitions(av_virtual PRIVATE A1USBRECORD_HAS_TINYALSA=0)
-    message(WARNING "tinyalsa headers or library were not found. PCM access will be built as a dry-run stub.")
+    message(WARNING "tinyalsa target was not found. PCM access will be built as a dry-run stub.")
 endif()

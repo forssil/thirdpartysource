@@ -205,17 +205,62 @@ tail -f /data/local/tmp/av_virtual.log
 
 ## 构建说明
 
-当前工程使用 CMake 描述 native 可执行程序：
+### 当前构建环境
+
+- 构建主机：macOS 26.5.2 / arm64
+- CMake：3.30.1
+- Android NDK：r28 (`28.0.13004108`)
+- Android Clang：19.0.0
+- 默认目标 ABI：`arm64-v8a`
+- 最低 Android API：28
+- 构建类型：Release
+- NDK 路径：`/Users/bytedance/work/A1T1/ndk/android-ndk-r28`
+- 默认输出目录：`/Users/bytedance/work/A1T1/output/android_arm64_v8a`
+
+### Third-party 依赖
+
+工程依赖 TinyALSA，但 `third_party/` 源码不提交到当前 Git 仓库。首次构建前需下载
+指定版本：
 
 ```bash
-cmake -S . -B build
-cmake --build build
+mkdir -p third_party
+git clone https://github.com/tinyalsa/tinyalsa.git third_party/tinyalsa
+git -C third_party/tinyalsa checkout 9fab97ca07184371ecad81154d1dadb09d0fa7cf
 ```
 
-编译产物名：
+当前依赖版本：
+
+- 仓库：`https://github.com/tinyalsa/tinyalsa.git`
+- 描述：`v2.0.0-70-g9fab97c`
+- Commit：`9fab97ca07184371ecad81154d1dadb09d0fa7cf`
+- 引入方式：由 CMake 通过 `add_subdirectory(third_party/tinyalsa)` 编译并链接
+- 链接方式：TinyALSA 默认生成 `libtinyalsa.so`，`av_virtual` 运行时依赖该动态库
+
+### 编译命令
+
+使用 Android NDK 构建脚本：
+
+```bash
+./build.sh
+```
+
+清理构建目录：
+
+```bash
+./build.sh clean
+```
+
+指定 ABI 或输出目录：
+
+```bash
+./build.sh all --abi armeabi-v7a
+./build.sh all --abi arm64-v8a --outdir /tmp/a1usbrecord
+```
+
+默认编译产物：
 
 ```text
-av_virtual
+/Users/bytedance/work/A1T1/output/android_arm64_v8a/av_virtual
 ```
 
 目标部署路径：
