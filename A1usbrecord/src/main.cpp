@@ -313,7 +313,6 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
 void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
                          const a1usbrecord::PcmEndpoint input_endpoint,
                          std::size_t buffer_frames,
-                         int poll_timeout_ms,
                          float playback_gain,
                          a1usbrecord::PcmChunkQueue* playback_queue,
                          a1usbrecord::PcmChunkQueue* input8ch_queue,
@@ -324,18 +323,6 @@ void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
     // PC playback is the reverse UAC2 direction: read pcmC4D0c and push chunks
     // to a queue consumed by the local playback writer.
     while (running->load()) {
-        bool readable = false;
-        if (!input->WaitForReadable(poll_timeout_ms, &readable)) {
-            stats->playback_input_errors.fetch_add(1);
-            logger->Log(std::string("failed to poll uac2Input: ") + input->LastError());
-            running->store(false);
-            break;
-        }
-
-        if (!readable) {
-            continue;
-        }
-
         a1usbrecord::PcmChunk chunk;
         chunk.frames = buffer_frames;
         chunk.channels = input_endpoint.channels;
@@ -485,7 +472,6 @@ int main(int argc, char** argv) {
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
     std::cout << "playbackQueueChunkFrames: " << config.playbackQueueChunkFrames << '\n';
-    std::cout << "uacInputPollTimeoutMs: " << config.uacInputPollTimeoutMs << '\n';
     std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
 
     if (config.dry_run) {
@@ -569,7 +555,6 @@ int main(int argc, char** argv) {
                                         &uac2Input,
                                         config.uac2Input,
                                         config.playbackQueueChunkFrames,
-                                        config.uacInputPollTimeoutMs,
                                         config.uacPlaybackGain,
                                         &playback_queue,
                                         &input8ch_queue,

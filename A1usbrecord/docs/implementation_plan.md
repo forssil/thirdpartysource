@@ -38,7 +38,7 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
   - mux/write thread：从两个队列各取一块，合成后按 UAC2 支持的 192 帧分块写入。
 - 增加 PC 播放转发线程：
   - UAC2 playback capture thread 从 UAC2 capture PCM `pcmC4D0c` 读取 PC 播放方向 2ch/48k/S16_LE。
-  - 使用 256 帧播放队列 chunk 读取播放数据，`poll timeout=10ms`。
+  - 使用 256 帧播放队列 chunk 阻塞读取播放数据。
   - 通过播放队列解耦 UAC2 capture 和本地 playback，队列只保存真实 UAC 播放数据。
   - local playback write thread 非阻塞取播放队列；队列空时写静音，避免本地播放设备断流。
   - local playback write thread 从播放队列取到数据后写入本地播放设备 `pcmC1D0p`。

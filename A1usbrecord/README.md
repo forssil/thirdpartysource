@@ -92,7 +92,7 @@ A1usbrecord/
   - mux/write 线程：合成 10ch 后按 192 帧分块写入 `pcmC4D0p`
 - 已新增 PC 播放转发线程：
   - UAC2 playback capture 线程从 `pcmC4D0c` 读取 2ch/48k/S16_LE
-  - 使用 256 帧播放队列 chunk 读取播放数据，`poll timeout=10ms`
+  - 使用 256 帧播放队列 chunk 阻塞读取播放数据
   - 通过播放队列解耦 UAC2 capture 和本地 playback，队列只保存真实 UAC 播放数据
   - local playback write 线程非阻塞取播放队列，队列空时写静音，避免 `pcmC1D0p` 断流
   - 当前播放转发路径固定应用 `uacPlaybackGain=0.5`，即写入 `pcmC1D0p` 前将样本幅度统一乘 0.5
@@ -140,7 +140,7 @@ on property:vendor.all.modules.ready=1
   - 写入 `pcmC4D0p`，供 PC 端作为 UAC2 录音设备采集。
 - PC 播放方向：
   - 从 `pcmC4D0c` 读取 PC 下发的 2ch 播放音频。
-  - 使用 256 帧播放队列 chunk 读取播放数据，`poll timeout=10ms`。
+  - 使用 256 帧播放队列 chunk 阻塞读取播放数据。
   - 在 UAC2 capture 和本地 playback 之间增加播放队列，队列只保存真实 UAC 播放数据，写线程从队列取数据后写入 `pcmC1D0p`。
   - 写线程使用非阻塞取队列，队列空时写静音，避免本地 playback 断流。
   - 当前使用固定软件增益 `uacPlaybackGain=0.5`，先规避 UAC2 mixer 音量值变化但实际 PCM 响度不变的问题。
