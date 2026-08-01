@@ -1,4 +1,5 @@
 #include <atomic>
+#include <algorithm>
 #include <cerrno>
 #include <chrono>
 #include <condition_variable>
@@ -164,6 +165,14 @@ void ApplyGain(std::vector<int16_t>* samples, float gain) {
     }
 }
 
+void FillSilence(std::vector<int16_t>* samples) {
+    if (samples == nullptr) {
+        return;
+    }
+
+    std::fill(samples->begin(), samples->end(), 0);
+}
+
 bool EnsureDirectory(const char* path) {
     if (path == nullptr || path[0] == '\0') {
         return false;
@@ -301,40 +310,88 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
     input2ch_queue->Stop();
 }
 
-void PlaybackLoop(a1usbrecord::PcmDevice* input,
-                  a1usbrecord::PcmDevice* output,
-                  const a1usbrecord::PcmEndpoint input_endpoint,
-                  std::size_t buffer_frames,
-                  float playback_gain,
-                  a1usbrecord::PcmChunkQueue* input8ch_queue,
-                  a1usbrecord::PcmChunkQueue* input2ch_queue,
-                  RuntimeStats* stats,
-                  FileLogger* logger,
-                  std::atomic<bool>* running) {
-    std::vector<int16_t> buffer(buffer_frames * input_endpoint.channels);
-
-    // PC playback is the reverse UAC2 direction: read pcmC4D0c and forward it
-    // to the local board playback PCM.
+void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
+                         const a1usbrecord::PcmEndpoint input_endpoint,
+                         std::size_t buffer_frames,
+                         int poll_timeout_ms,
+                         float playback_gain,
+                         a1usbrecord::PcmChunkQueue* playback_queue,
+                         a1usbrecord::PcmChunkQueue* input8ch_queue,
+                         a1usbrecord::PcmChunkQueue* input2ch_queue,
+                         RuntimeStats* stats,
+                         FileLogger* logger,
+                         std::atomic<bool>* running) {
+    // PC playback is the reverse UAC2 direction: read pcmC4D0c and push chunks
+    // to a queue consumed by the local playback writer.
     while (running->load()) {
-        if (!input->ReadFrames(buffer.data(), buffer_frames)) {
+        bool readable = false;
+        if (!input->WaitForReadable(poll_timeout_ms, &readable)) {
+            stats->playback_input_errors.fetch_add(1);
+            logger->Log(std::string("failed to poll uac2Input: ") + input->LastError());
+            running->store(false);
+            break;
+        }
+
+        if (!readable) {
+            continue;
+        }
+
+        a1usbrecord::PcmChunk chunk;
+        chunk.frames = buffer_frames;
+        chunk.channels = input_endpoint.channels;
+        chunk.samples.resize(chunk.frames * chunk.channels);
+
+        if (!input->ReadFrames(chunk.samples.data(), chunk.frames)) {
             stats->playback_input_errors.fetch_add(1);
             logger->Log(std::string("failed to read uac2Input: ") + input->LastError());
             running->store(false);
             break;
         }
-        stats->playback_input_frames.fetch_add(buffer_frames);
+        stats->playback_input_frames.fetch_add(chunk.frames);
+        ApplyGain(&chunk.samples, playback_gain);
 
-        ApplyGain(&buffer, playback_gain);
+        if (!playback_queue->Push(std::move(chunk))) {
+            break;
+        }
+    }
 
-        if (!output->WriteFrames(buffer.data(), buffer_frames)) {
+    playback_queue->Stop();
+    input8ch_queue->Stop();
+    input2ch_queue->Stop();
+}
+
+void PlaybackWriteLoop(a1usbrecord::PcmDevice* output,
+                       const a1usbrecord::PcmEndpoint output_endpoint,
+                       std::size_t chunk_frames,
+                       a1usbrecord::PcmChunkQueue* playback_queue,
+                       a1usbrecord::PcmChunkQueue* input8ch_queue,
+                       a1usbrecord::PcmChunkQueue* input2ch_queue,
+                       RuntimeStats* stats,
+                       FileLogger* logger,
+                       std::atomic<bool>* running) {
+    a1usbrecord::PcmChunk chunk;
+    chunk.frames = chunk_frames;
+    chunk.channels = output_endpoint.channels;
+    chunk.samples.resize(chunk.frames * chunk.channels);
+
+    while (running->load()) {
+        if (!playback_queue->TryPop(&chunk)) {
+            chunk.frames = chunk_frames;
+            chunk.channels = output_endpoint.channels;
+            chunk.samples.resize(chunk.frames * chunk.channels);
+            FillSilence(&chunk.samples);
+        }
+
+        if (!output->WriteFrames(chunk.samples.data(), chunk.frames)) {
             stats->local_playback_errors.fetch_add(1);
             logger->Log(std::string("failed to write localPlayback: ") + output->LastError());
             running->store(false);
             break;
         }
-        stats->local_playback_frames.fetch_add(buffer_frames);
+        stats->local_playback_frames.fetch_add(chunk.frames);
     }
 
+    playback_queue->Stop();
     input8ch_queue->Stop();
     input2ch_queue->Stop();
 }
@@ -342,6 +399,7 @@ void PlaybackLoop(a1usbrecord::PcmDevice* input,
 void StatsLoop(const RuntimeStats* stats,
                const a1usbrecord::PcmChunkQueue* input8ch_queue,
                const a1usbrecord::PcmChunkQueue* input2ch_queue,
+               const a1usbrecord::PcmChunkQueue* playback_queue,
                FileLogger* logger,
                unsigned int interval_seconds,
                std::condition_variable* stop_condition,
@@ -393,6 +451,7 @@ void StatsLoop(const RuntimeStats* stats,
                 << " playback_diff_frames=" << Diff(playback_input, local_playback)
                 << " q8=" << input8ch_queue->Size() << "/" << input8ch_queue->Capacity()
                 << " q2=" << input2ch_queue->Size() << "/" << input2ch_queue->Capacity()
+                << " qplay=" << playback_queue->Size() << "/" << playback_queue->Capacity()
                 << " errors="
                 << "i8:" << stats->input8_errors.load()
                 << ",i2:" << stats->input2_errors.load()
@@ -425,7 +484,8 @@ int main(int argc, char** argv) {
     std::cout << "logDir: " << config.logDir << '\n';
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
-    std::cout << "playbackBufferFrames: " << config.playbackBufferFrames << '\n';
+    std::cout << "playbackQueueChunkFrames: " << config.playbackQueueChunkFrames << '\n';
+    std::cout << "uacInputPollTimeoutMs: " << config.uacInputPollTimeoutMs << '\n';
     std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
 
     if (config.dry_run) {
@@ -477,6 +537,7 @@ int main(int argc, char** argv) {
     std::condition_variable stop_condition;
     a1usbrecord::PcmChunkQueue input8ch_queue(kQueueCapacity);
     a1usbrecord::PcmChunkQueue input2ch_queue(kQueueCapacity);
+    a1usbrecord::PcmChunkQueue playback_queue(kQueueCapacity);
 
     std::thread input8ch_thread(CaptureLoop,
                                 "input8ch",
@@ -504,21 +565,33 @@ int main(int argc, char** argv) {
                                  &stats,
                                  &logger,
                                  &running);
-    std::thread playback_thread(PlaybackLoop,
-                                &uac2Input,
-                                &localPlayback,
-                                config.uac2Input,
-                                config.playbackBufferFrames,
-                                config.uacPlaybackGain,
-                                &input8ch_queue,
-                                &input2ch_queue,
-                                &stats,
-                                &logger,
-                                &running);
+    std::thread playback_capture_thread(PlaybackCaptureLoop,
+                                        &uac2Input,
+                                        config.uac2Input,
+                                        config.playbackQueueChunkFrames,
+                                        config.uacInputPollTimeoutMs,
+                                        config.uacPlaybackGain,
+                                        &playback_queue,
+                                        &input8ch_queue,
+                                        &input2ch_queue,
+                                        &stats,
+                                        &logger,
+                                        &running);
+    std::thread playback_write_thread(PlaybackWriteLoop,
+                                      &localPlayback,
+                                      config.localPlayback,
+                                      config.playbackQueueChunkFrames,
+                                      &playback_queue,
+                                      &input8ch_queue,
+                                      &input2ch_queue,
+                                      &stats,
+                                      &logger,
+                                      &running);
     std::thread stats_thread(StatsLoop,
                              &stats,
                              &input8ch_queue,
                              &input2ch_queue,
+                             &playback_queue,
                              &logger,
                              config.statsLogIntervalSeconds,
                              &stop_condition,
@@ -530,9 +603,11 @@ int main(int argc, char** argv) {
     stop_condition.notify_all();
     input8ch_queue.Stop();
     input2ch_queue.Stop();
+    playback_queue.Stop();
     input8ch_thread.join();
     input2ch_thread.join();
-    playback_thread.join();
+    playback_capture_thread.join();
+    playback_write_thread.join();
     stats_thread.join();
     logger.Log("av_virtual stopped");
 

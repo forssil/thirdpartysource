@@ -27,6 +27,7 @@ public:
     void Close();
 
     bool IsOpen() const;
+    bool WaitForReadable(int timeout_ms, bool* readable);
     bool ReadFrames(int16_t* buffer, std::size_t frames);
     bool WriteFrames(const int16_t* buffer, std::size_t frames);
 

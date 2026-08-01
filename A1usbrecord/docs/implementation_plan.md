@@ -37,9 +37,11 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
   - card1 capture thread：按 1024 帧阻塞读取 2ch PCM，推入队列。
   - mux/write thread：从两个队列各取一块，合成后按 UAC2 支持的 192 帧分块写入。
 - 增加 PC 播放转发线程：
-  - 从 UAC2 capture PCM `pcmC4D0c` 读取 PC 播放方向 2ch/48k/S16_LE。
-  - 使用 256 帧连接 buffer 转发播放数据。
-  - 写入本地播放设备 `pcmC1D0p`。
+  - UAC2 playback capture thread 从 UAC2 capture PCM `pcmC4D0c` 读取 PC 播放方向 2ch/48k/S16_LE。
+  - 使用 256 帧播放队列 chunk 读取播放数据，`poll timeout=10ms`。
+  - 通过播放队列解耦 UAC2 capture 和本地 playback，队列只保存真实 UAC 播放数据。
+  - local playback write thread 非阻塞取播放队列；队列空时写静音，避免本地播放设备断流。
+  - local playback write thread 从播放队列取到数据后写入本地播放设备 `pcmC1D0p`。
 - 合成为 10ch interleaved PCM：
 
 ```text
@@ -54,6 +56,7 @@ out[8..9] = card1 ch0..ch1
   - `uac2_lag_frames`：已 mux 帧数与已写入 UAC2 帧数差。
   - `playback_diff_frames`：从 UAC2 读取的 PC 播放帧数与本地播放写入帧数差。
   - `q8` / `q2`：两路采集队列水位。
+  - `qplay`：播放队列水位。
 - 部署时替换 `/vendor/bin/av_virtual`，由现有 `vendor.av_virtual` service 自动拉起。
 
 ## 阶段 5：稳定性处理

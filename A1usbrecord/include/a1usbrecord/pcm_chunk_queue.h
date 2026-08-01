@@ -21,6 +21,7 @@ public:
 
     bool Push(PcmChunk chunk);
     bool Pop(PcmChunk* chunk);
+    bool TryPop(PcmChunk* chunk);
     void Stop();
     std::size_t Size() const;
     std::size_t Capacity() const;

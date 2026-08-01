@@ -41,6 +41,22 @@ bool PcmChunkQueue::Pop(PcmChunk* chunk) {
     return true;
 }
 
+bool PcmChunkQueue::TryPop(PcmChunk* chunk) {
+    if (chunk == nullptr) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (chunks_.empty()) {
+        return false;
+    }
+
+    *chunk = std::move(chunks_.front());
+    chunks_.pop_front();
+    can_push_.notify_one();
+    return true;
+}
+
 void PcmChunkQueue::Stop() {
     {
         std::lock_guard<std::mutex> lock(mutex_);
