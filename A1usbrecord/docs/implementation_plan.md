@@ -36,6 +36,10 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
   - card0 capture thread：按 1024 帧阻塞读取 8ch PCM，推入队列。
   - card1 capture thread：按 1024 帧阻塞读取 2ch PCM，推入队列。
   - mux/write thread：从两个队列各取一块，合成后按 UAC2 支持的 192 帧分块写入。
+- 增加 PC 播放转发线程：
+  - 从 UAC2 capture PCM `pcmC4D0c` 读取 PC 播放方向 2ch/48k/S16_LE。
+  - 使用 256 帧连接 buffer 转发播放数据。
+  - 写入本地播放设备 `pcmC1D0p`。
 - 合成为 10ch interleaved PCM：
 
 ```text
@@ -45,12 +49,17 @@ out[8..9] = card1 ch0..ch1
 
 - 写入 UAC2 gadget。
 - 增加退出信号处理、错误日志和统计信息。
+- 本地日志写入 `/data/local/tmp/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟记录采集和播放链路偏差：
+  - `capture_diff_frames`：card0 与 card1 累计采集帧数差。
+  - `uac2_lag_frames`：已 mux 帧数与已写入 UAC2 帧数差。
+  - `playback_diff_frames`：从 UAC2 读取的 PC 播放帧数与本地播放写入帧数差。
+  - `q8` / `q2`：两路采集队列水位。
 - 部署时替换 `/vendor/bin/av_virtual`，由现有 `vendor.av_virtual` service 自动拉起。
 
 ## 阶段 5：稳定性处理
 
 - 增加 ring buffer 和水位统计。
-- 监控 `pcm_readi` / `pcm_writei` 阻塞和 XRUN。
+- 监控 tinyalsa `pcm_read` / `pcm_write` 阻塞和 XRUN。
 - 处理 card0 与 card1 之间可能存在的时钟漂移。
 - 必要时对 2ch 输入做轻量丢补帧或重采样。
 

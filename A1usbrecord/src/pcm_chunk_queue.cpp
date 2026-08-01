@@ -50,4 +50,13 @@ void PcmChunkQueue::Stop() {
     can_pop_.notify_all();
 }
 
+std::size_t PcmChunkQueue::Size() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return chunks_.size();
+}
+
+std::size_t PcmChunkQueue::Capacity() const {
+    return capacity_;
+}
+
 }  // namespace a1usbrecord

@@ -18,7 +18,12 @@ struct AppConfig {
     PcmEndpoint input8ch{0, 0, 8, 48000, 16, 1024, 4};
     PcmEndpoint input2ch{1, 0, 2, 48000, 16, 1024, 4};
     PcmEndpoint uac2Output{4, 0, 10, 48000, 16, 192, 4};
+    PcmEndpoint uac2Input{4, 0, 2, 48000, 16, 192, 4};
+    PcmEndpoint localPlayback{1, 0, 2, 48000, 16, 192, 4};
 
+    const char* logPath = "/data/local/tmp/av_virtual.log";
+    unsigned int statsLogIntervalSeconds = 300;
+    unsigned int playbackBufferFrames = 256;
     bool dry_run = true;
 };
 

@@ -22,11 +22,13 @@ public:
     bool Push(PcmChunk chunk);
     bool Pop(PcmChunk* chunk);
     void Stop();
+    std::size_t Size() const;
+    std::size_t Capacity() const;
 
 private:
     std::size_t capacity_;
     bool stopped_ = false;
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     std::condition_variable can_push_;
     std::condition_variable can_pop_;
     std::deque<PcmChunk> chunks_;

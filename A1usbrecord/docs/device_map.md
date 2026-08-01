@@ -24,6 +24,15 @@
 - 当前占用：`/vendor/bin/av_virtual`
 - 任务角色：额外 2 声道采集源，可能用于辅助输入、参考音或 Line-In 路径
 
+### card1 / pcmC1D0p
+
+- ALSA 名称：`rockchip-acm8625p`
+- PCM 节点：`/dev/snd/pcmC1D0p`
+- tinyalsa 参数：`-D 1 -d 0`
+- 方向：playback
+- 当前参数：2ch / 48000 Hz / S16_LE
+- 任务角色：PC 播放方向的本地输出设备
+
 ## UAC2 设备
 
 ### card4 / UAC2_Gadget
@@ -33,8 +42,9 @@
 - playback 节点：`/dev/snd/pcmC4D0p`
 - tinyalsa 参数：`-D 4 -d 0`
 - 当前 PC 录音方向参数：10ch / 48000 Hz / S16_LE
+- 当前 PC 播放方向参数：2ch / 48000 Hz / S16_LE
 - 当前占用：`/vendor/bin/av_virtual`
-- 任务角色：向 PC 暴露 USB Audio Class 2.0 录音设备
+- 任务角色：向 PC 暴露 USB Audio Class 2.0 录音设备，并接收 PC 播放音频
 
 方向关系：
 
@@ -57,9 +67,10 @@ UAC2 configfs 参数由以下 init 文件写入：
 p_chmask = 0x3ff
 p_srate  = 48000
 p_ssize  = 2
-c_chmask = 0x3 或按 PC 播放方向需求设置
+c_chmask = 0x3
 c_srate  = 48000
 c_ssize  = 2
 ```
 
 `p_chmask = 0x3ff` 表示 PC 录音方向 10 channel。该配置已通过 10ch/48k/S16_LE WAV 写入 `pcmC4D0p` 验证。
+`c_chmask = 0x3` 表示 PC 播放方向 2 channel。当前工程从 `pcmC4D0c` 读取该方向数据并写入 `pcmC1D0p`。
