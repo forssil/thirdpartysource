@@ -118,8 +118,11 @@ bool PcmDevice::WaitForReadable(int timeout_ms, bool* readable) {
         return true;
     }
     if ((poll_fd.revents & (POLLERR | POLLHUP | POLLNVAL)) != 0) {
-        last_error_ = "PCM poll returned error event";
-        return false;
+        // UAC2 playback capture can report poll error events while the host is
+        // not actively streaming. Treat this as no data so local playback can
+        // keep writing silence instead of restarting the whole service.
+        *readable = false;
+        return true;
     }
 
     *readable = (poll_fd.revents & POLLIN) != 0;
