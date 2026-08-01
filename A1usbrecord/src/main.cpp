@@ -154,6 +154,16 @@ int64_t Diff(uint64_t lhs, uint64_t rhs) {
     return static_cast<int64_t>(lhs) - static_cast<int64_t>(rhs);
 }
 
+void ApplyGain(std::vector<int16_t>* samples, float gain) {
+    if (samples == nullptr || gain == 1.0f) {
+        return;
+    }
+
+    for (int16_t& sample : *samples) {
+        sample = static_cast<int16_t>(static_cast<float>(sample) * gain);
+    }
+}
+
 bool EnsureDirectory(const char* path) {
     if (path == nullptr || path[0] == '\0') {
         return false;
@@ -295,6 +305,7 @@ void PlaybackLoop(a1usbrecord::PcmDevice* input,
                   a1usbrecord::PcmDevice* output,
                   const a1usbrecord::PcmEndpoint input_endpoint,
                   std::size_t buffer_frames,
+                  float playback_gain,
                   a1usbrecord::PcmChunkQueue* input8ch_queue,
                   a1usbrecord::PcmChunkQueue* input2ch_queue,
                   RuntimeStats* stats,
@@ -312,6 +323,8 @@ void PlaybackLoop(a1usbrecord::PcmDevice* input,
             break;
         }
         stats->playback_input_frames.fetch_add(buffer_frames);
+
+        ApplyGain(&buffer, playback_gain);
 
         if (!output->WriteFrames(buffer.data(), buffer_frames)) {
             stats->local_playback_errors.fetch_add(1);
@@ -413,6 +426,7 @@ int main(int argc, char** argv) {
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
     std::cout << "playbackBufferFrames: " << config.playbackBufferFrames << '\n';
+    std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
 
     if (config.dry_run) {
         std::cout << "dry-run mode. Run without --dry-run to open PCM devices.\n";
@@ -495,6 +509,7 @@ int main(int argc, char** argv) {
                                 &localPlayback,
                                 config.uac2Input,
                                 config.playbackBufferFrames,
+                                config.uacPlaybackGain,
                                 &input8ch_queue,
                                 &input2ch_queue,
                                 &stats,

@@ -93,6 +93,7 @@ A1usbrecord/
 - 已新增 PC 播放转发线程：
   - 从 `pcmC4D0c` 阻塞读取 2ch/48k/S16_LE
   - 使用 256 帧连接 buffer 转发播放数据
+  - 当前播放转发路径固定应用 `uacPlaybackGain=0.5`，即写入 `pcmC1D0p` 前将样本幅度统一乘 0.5
   - 写入 `pcmC1D0p` 本地播放输出
 - 已新增本地文件日志：
   - 默认路径：`/data/vendor/av_virtual/av_virtual.log`
@@ -138,6 +139,7 @@ on property:vendor.all.modules.ready=1
 - PC 播放方向：
   - 从 `pcmC4D0c` 读取 PC 下发的 2ch 播放音频。
   - 使用 256 帧 buffer 在 UAC2 capture PCM 和本地播放 PCM 之间转发。
+  - 当前使用固定软件增益 `uacPlaybackGain=0.5`，先规避 UAC2 mixer 音量值变化但实际 PCM 响度不变的问题。
   - 写入 `pcmC1D0p`，输出到本地播放设备。
 - 稳定性日志：
   - 写入 `/data/vendor/av_virtual/av_virtual.log`。
@@ -202,6 +204,24 @@ tail -f /data/vendor/av_virtual/av_virtual.log
 ```
 
 回滚方式是恢复原始 `/vendor/bin/av_virtual`，并重新执行权限和 label 修复。
+
+### 后续播放音量方案
+
+当前版本先使用固定软件增益：
+
+```text
+pcmC4D0c -> multiply 0.5 -> pcmC1D0p
+```
+
+后续实时增益方案：
+
+- 监听或周期读取 UAC2 mixer 播放方向音量，例如 `tinymix -D 4 6` 对应的 `PCM Capture Volume`。
+- 将 `0..100` 的音量值换算为软件 gain：
+  - `100 -> 1.0`
+  - `50 -> 0.5`
+  - `0 -> 0.0`
+- 在 `PlaybackLoop()` 写入 `pcmC1D0p` 前实时应用该 gain。
+- 为避免音量突变产生 click，可增加短时间平滑过渡。
 
 ## 构建说明
 

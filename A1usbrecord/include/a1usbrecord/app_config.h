@@ -25,6 +25,7 @@ struct AppConfig {
     const char* logPath = "/data/vendor/av_virtual/av_virtual.log";
     unsigned int statsLogIntervalSeconds = 300;
     unsigned int playbackBufferFrames = 256;
+    float uacPlaybackGain = 0.5f;
     bool dry_run = true;
 };
 
