@@ -149,6 +149,7 @@ on property:vendor.all.modules.ready=1
   - 写入 `/data/vendor/av_virtual/av_virtual.log`。
   - 由独立日志线程异步写入，避免文件 I/O 阻塞音频采集和播放线程。
   - 默认每 5 分钟记录采集偏差、播放偏差、UAC2 写入滞后、队列水位和错误计数。
+  - `pcmC4D0p` 写失败只累计 `uac2out` 错误并丢弃当前 pending 数据，不逐条写日志，不作为停止整个进程的条件；错误数由 300s 统计日志汇总。
 
 ### UAC2 配置要求
 

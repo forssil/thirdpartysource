@@ -226,19 +226,18 @@ void AppendSamples(std::vector<int16_t>* target, const std::vector<int16_t>& sou
 }
 
 bool WritePendingFrames(a1usbrecord::PcmDevice* output,
-                        const char* output_name,
                         std::vector<int16_t>* pending,
                         std::size_t channels,
                         std::size_t frames_per_write,
-                        RuntimeStats* stats,
-                        FileLogger* logger) {
+                        RuntimeStats* stats) {
     // UAC2 accepts a smaller period than the capture sources. Keep a pending
     // buffer and write only complete output periods.
     while (pending->size() >= frames_per_write * channels) {
         if (!output->WriteFrames(pending->data(), frames_per_write)) {
             stats->uac2_output_errors.fetch_add(1);
-            logger->Log(std::string("failed to write ") + output_name + ": " + output->LastError());
-            return false;
+            pending->clear();
+            stats->pending_output_frames.store(0);
+            return true;
         }
 
         stats->uac2_output_frames.fetch_add(frames_per_write);
@@ -295,12 +294,10 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
         AppendSamples(&pending_output, merged);
         stats->pending_output_frames.store(pending_output.size() / output_endpoint.channels);
         if (!WritePendingFrames(output,
-                                "uac2Output",
                                 &pending_output,
                                 output_endpoint.channels,
                                 output_endpoint.period_size,
-                                stats,
-                                logger)) {
+                                stats)) {
             running->store(false);
             break;
         }

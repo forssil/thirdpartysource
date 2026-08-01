@@ -51,6 +51,7 @@ out[8..9] = card1 ch0..ch1
 
 - 写入 UAC2 gadget。
 - 增加退出信号处理、错误日志和统计信息。
+- `pcmC4D0p` 写失败只累计 `uac2out` 错误并丢弃当前 pending 数据，不逐条写日志，不作为停止整个进程的条件；错误数由 300s 统计日志汇总。
 - 本地日志写入 `/data/vendor/av_virtual/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟记录采集和播放链路偏差：
   - `capture_diff_frames`：card0 与 card1 累计采集帧数差。
   - `uac2_lag_frames`：已 mux 帧数与已写入 UAC2 帧数差。
