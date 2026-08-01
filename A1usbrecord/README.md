@@ -149,7 +149,9 @@ on property:vendor.all.modules.ready=1
 - 稳定性日志：
   - 写入 `/data/vendor/av_virtual/av_virtual.log`。
   - 由独立日志线程异步写入，避免文件 I/O 阻塞音频采集和播放线程。
-  - 默认每 5 分钟记录采集偏差、播放偏差、UAC2 写入滞后、队列水位和错误计数。
+  - 默认每 5 分钟分别记录 `stats_total` 和 `stats_interval` 两条日志：
+    - `stats_total`：累计采集偏差、播放偏差、UAC2 写入滞后、队列水位和累计错误计数 `errors`。
+    - `stats_interval`：本周期帧数差、播放差、UAC2 写入滞后和新增错误计数 `interval_errors`。
   - `pcmC4D0p` 写失败只累计 `uac2out` 错误并丢弃当前 pending 数据，不逐条写日志，不作为停止整个进程的条件；错误数由 300s 统计日志汇总。
 
 ### UAC2 配置要求
@@ -199,6 +201,47 @@ u:object_r:av_virtual_exec:s0
 ```sh
 chcon u:object_r:av_virtual_exec:s0 /vendor/bin/av_virtual
 ```
+
+日志文件默认写入：
+
+```text
+/data/vendor/av_virtual/av_virtual.log
+```
+
+临时验证日志写入权限时，可以先手动创建目录并设置权限：
+
+```sh
+su 0 mkdir -p /data/vendor/av_virtual
+su 0 chown root:root /data/vendor/av_virtual
+su 0 chmod 0775 /data/vendor/av_virtual
+su 0 ls -ldZ /data/vendor/av_virtual
+```
+
+如果当前系统存在可用的 `av_virtual` data file label，可以尝试设置：
+
+```sh
+su 0 chcon u:object_r:av_virtual_data_file:s0 /data/vendor/av_virtual
+su 0 ls -ldZ /data/vendor/av_virtual
+```
+
+如果 `dmesg` 出现 `left unmapped` 或访问目标变成 `u:object_r:unlabeled:s0`，说明当前 sepolicy 没有有效映射该 label，临时 `chcon` 不能作为正式方案。
+
+只为验证代码是否能写日志时，可以短时间关闭 SELinux：
+
+```sh
+su 0 setenforce 0
+su 0 stop vendor.av_virtual
+su 0 start vendor.av_virtual
+su 0 tail -f /data/vendor/av_virtual/av_virtual.log
+```
+
+验证后恢复：
+
+```sh
+su 0 setenforce 1
+```
+
+正式方案需要在系统 sepolicy 中增加 `/data/vendor/av_virtual(/.*)?` 的 file_contexts 映射，并允许 `u:r:av_virtual:s0` 创建、读写该 data 目录和日志文件。
 
 启动和检查：
 

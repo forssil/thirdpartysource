@@ -53,10 +53,15 @@ out[8..9] = card1 ch0..ch1
 - 写入 UAC2 gadget。
 - 增加退出信号处理、错误日志和统计信息。
 - `pcmC4D0p` 写失败只累计 `uac2out` 错误并丢弃当前 pending 数据，不逐条写日志，不作为停止整个进程的条件；错误数由 300s 统计日志汇总。
-- 本地日志写入 `/data/vendor/av_virtual/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟记录采集和播放链路偏差：
+- 本地日志写入 `/data/vendor/av_virtual/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟分别记录 `stats_total` 和 `stats_interval`：
   - `capture_diff_frames`：card0 与 card1 累计采集帧数差。
+  - `capture_interval_diff_frames`：当前 300s 周期内 card0 与 card1 采集帧数差。
   - `uac2_lag_frames`：已 mux 帧数与已写入 UAC2 帧数差。
+  - `uac2_interval_lag_frames`：当前 300s 周期内 mux 帧数与写入 UAC2 帧数差。
   - `playback_diff_frames`：从 UAC2 读取的 PC 播放帧数与本地播放写入帧数差。
+  - `playback_interval_diff_frames`：当前 300s 周期内 UAC2 播放读取帧数与本地播放写入帧数差。
+  - `errors`：从进程启动开始累计的错误计数。
+  - `interval_errors`：当前 300s 周期新增的错误计数。
   - `q8` / `q2`：两路采集队列水位。
   - `qplay`：播放队列水位。
 - 部署时替换 `/vendor/bin/av_virtual`，由现有 `vendor.av_virtual` service 自动拉起。

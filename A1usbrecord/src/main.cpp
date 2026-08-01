@@ -391,9 +391,16 @@ void StatsLoop(const RuntimeStats* stats,
                std::atomic<bool>* running) {
     uint64_t last_input8 = 0;
     uint64_t last_input2 = 0;
+    uint64_t last_mux = 0;
     uint64_t last_uac2_output = 0;
     uint64_t last_playback_input = 0;
     uint64_t last_local_playback = 0;
+    uint64_t last_input8_errors = 0;
+    uint64_t last_input2_errors = 0;
+    uint64_t last_mux_errors = 0;
+    uint64_t last_uac2_output_errors = 0;
+    uint64_t last_playback_input_errors = 0;
+    uint64_t last_local_playback_errors = 0;
 
     // Log one summary per configured interval. Stable operation should keep
     // small queue depth and near-zero diff/lag counters over time.
@@ -414,42 +421,79 @@ void StatsLoop(const RuntimeStats* stats,
         const uint64_t pending_output = stats->pending_output_frames.load();
         const uint64_t playback_input = stats->playback_input_frames.load();
         const uint64_t local_playback = stats->local_playback_frames.load();
+        const uint64_t input8_errors = stats->input8_errors.load();
+        const uint64_t input2_errors = stats->input2_errors.load();
+        const uint64_t mux_errors = stats->mux_errors.load();
+        const uint64_t uac2_output_errors = stats->uac2_output_errors.load();
+        const uint64_t playback_input_errors = stats->playback_input_errors.load();
+        const uint64_t local_playback_errors = stats->local_playback_errors.load();
 
-        std::ostringstream message;
-        message << "stats"
-                << " interval_seconds=" << interval_seconds
-                << " input8_total=" << input8
-                << " input8_interval_frames=" << (input8 - last_input8)
-                << " input2_total=" << input2
-                << " input2_interval_frames=" << (input2 - last_input2)
-                << " capture_diff_frames=" << Diff(input8, input2)
-                << " mux_total=" << mux
-                << " uac2_out_total=" << uac2_output
-                << " uac2_out_interval_frames=" << (uac2_output - last_uac2_output)
-                << " uac2_lag_frames=" << Diff(mux, uac2_output)
-                << " pending_out_frames=" << pending_output
-                << " playback_in_total=" << playback_input
-                << " playback_in_interval_frames=" << (playback_input - last_playback_input)
-                << " local_playback_total=" << local_playback
-                << " local_playback_interval_frames=" << (local_playback - last_local_playback)
-                << " playback_diff_frames=" << Diff(playback_input, local_playback)
-                << " q8=" << input8ch_queue->Size() << "/" << input8ch_queue->Capacity()
-                << " q2=" << input2ch_queue->Size() << "/" << input2ch_queue->Capacity()
-                << " qplay=" << playback_queue->Size() << "/" << playback_queue->Capacity()
-                << " errors="
-                << "i8:" << stats->input8_errors.load()
-                << ",i2:" << stats->input2_errors.load()
-                << ",mux:" << stats->mux_errors.load()
-                << ",uac2out:" << stats->uac2_output_errors.load()
-                << ",playin:" << stats->playback_input_errors.load()
-                << ",playout:" << stats->local_playback_errors.load();
-        logger->Log(message.str());
+        const uint64_t input8_interval = input8 - last_input8;
+        const uint64_t input2_interval = input2 - last_input2;
+        const uint64_t mux_interval = mux - last_mux;
+        const uint64_t uac2_output_interval = uac2_output - last_uac2_output;
+        const uint64_t playback_input_interval = playback_input - last_playback_input;
+        const uint64_t local_playback_interval = local_playback - last_local_playback;
+
+        std::ostringstream total_message;
+        total_message << "stats_total"
+                      << " interval_seconds=" << interval_seconds
+                      << " input8_total=" << input8
+                      << " input2_total=" << input2
+                      << " capture_diff_frames=" << Diff(input8, input2)
+                      << " mux_total=" << mux
+                      << " uac2_out_total=" << uac2_output
+                      << " uac2_lag_frames=" << Diff(mux, uac2_output)
+                      << " pending_out_frames=" << pending_output
+                      << " playback_in_total=" << playback_input
+                      << " local_playback_total=" << local_playback
+                      << " playback_diff_frames=" << Diff(playback_input, local_playback)
+                      << " q8=" << input8ch_queue->Size() << "/" << input8ch_queue->Capacity()
+                      << " q2=" << input2ch_queue->Size() << "/" << input2ch_queue->Capacity()
+                      << " qplay=" << playback_queue->Size() << "/" << playback_queue->Capacity()
+                      << " errors="
+                      << "i8:" << input8_errors
+                      << ",i2:" << input2_errors
+                      << ",mux:" << mux_errors
+                      << ",uac2out:" << uac2_output_errors
+                      << ",playin:" << playback_input_errors
+                      << ",playout:" << local_playback_errors;
+        logger->Log(total_message.str());
+
+        std::ostringstream interval_message;
+        interval_message << "stats_interval"
+                         << " interval_seconds=" << interval_seconds
+                         << " input8_interval_frames=" << input8_interval
+                         << " input2_interval_frames=" << input2_interval
+                         << " capture_interval_diff_frames=" << Diff(input8_interval, input2_interval)
+                         << " mux_interval_frames=" << mux_interval
+                         << " uac2_out_interval_frames=" << uac2_output_interval
+                         << " uac2_interval_lag_frames=" << Diff(mux_interval, uac2_output_interval)
+                         << " playback_in_interval_frames=" << playback_input_interval
+                         << " local_playback_interval_frames=" << local_playback_interval
+                         << " playback_interval_diff_frames="
+                         << Diff(playback_input_interval, local_playback_interval)
+                         << " interval_errors="
+                         << "i8:" << (input8_errors - last_input8_errors)
+                         << ",i2:" << (input2_errors - last_input2_errors)
+                         << ",mux:" << (mux_errors - last_mux_errors)
+                         << ",uac2out:" << (uac2_output_errors - last_uac2_output_errors)
+                         << ",playin:" << (playback_input_errors - last_playback_input_errors)
+                         << ",playout:" << (local_playback_errors - last_local_playback_errors);
+        logger->Log(interval_message.str());
 
         last_input8 = input8;
         last_input2 = input2;
+        last_mux = mux;
         last_uac2_output = uac2_output;
         last_playback_input = playback_input;
         last_local_playback = local_playback;
+        last_input8_errors = input8_errors;
+        last_input2_errors = input2_errors;
+        last_mux_errors = mux_errors;
+        last_uac2_output_errors = uac2_output_errors;
+        last_playback_input_errors = playback_input_errors;
+        last_local_playback_errors = local_playback_errors;
     }
 }
 
