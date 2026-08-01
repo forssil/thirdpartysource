@@ -24,7 +24,8 @@ struct AppConfig {
     const char* logDir = "/data/vendor/av_virtual";
     const char* logPath = "/data/vendor/av_virtual/av_virtual.log";
     unsigned int statsLogIntervalSeconds = 300;
-    unsigned int playbackQueueChunkFrames = 256;
+    unsigned int playbackQueueChunkFrames = 192;
+    unsigned int uacInputReadRetryMs = 10;
     float uacPlaybackGain = 0.5f;
     bool dry_run = true;
 };

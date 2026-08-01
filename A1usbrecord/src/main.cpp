@@ -310,6 +310,7 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
 void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
                          const a1usbrecord::PcmEndpoint input_endpoint,
                          std::size_t buffer_frames,
+                         unsigned int read_retry_ms,
                          float playback_gain,
                          a1usbrecord::PcmChunkQueue* playback_queue,
                          a1usbrecord::PcmChunkQueue* input8ch_queue,
@@ -327,9 +328,8 @@ void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
 
         if (!input->ReadFrames(chunk.samples.data(), chunk.frames)) {
             stats->playback_input_errors.fetch_add(1);
-            logger->Log(std::string("failed to read uac2Input: ") + input->LastError());
-            running->store(false);
-            break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(read_retry_ms));
+            continue;
         }
         stats->playback_input_frames.fetch_add(chunk.frames);
         ApplyGain(&chunk.samples, playback_gain);
@@ -469,6 +469,7 @@ int main(int argc, char** argv) {
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
     std::cout << "playbackQueueChunkFrames: " << config.playbackQueueChunkFrames << '\n';
+    std::cout << "uacInputReadRetryMs: " << config.uacInputReadRetryMs << '\n';
     std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
 
     if (config.dry_run) {
@@ -552,6 +553,7 @@ int main(int argc, char** argv) {
                                         &uac2Input,
                                         config.uac2Input,
                                         config.playbackQueueChunkFrames,
+                                        config.uacInputReadRetryMs,
                                         config.uacPlaybackGain,
                                         &playback_queue,
                                         &input8ch_queue,
