@@ -90,6 +90,10 @@ A1usbrecord/
   - `card0` 采集线程：阻塞读取 1024 帧并推入队列
   - `card1` 采集线程：阻塞读取 1024 帧并推入队列
   - mux/write 线程：合成 10ch 后按 192 帧分块写入 `pcmC4D0p`
+- UAC2 `card4` 设备延时打开：
+  - 启动后先打开 `card0` / `card1` 采集和 `card1` 本地播放。
+  - 默认延时 `uacOpenDelayMs=500` 后再打开 `pcmC4D0p` / `pcmC4D0c`。
+  - card4 打开前 mux 线程只消费并丢弃合成数据，不写入 UAC2，避免把启动阶段旧数据送到 PC。
 - 已新增 PC 播放转发线程：
   - UAC2 playback capture 线程从 `pcmC4D0c` 读取 2ch/48k/S16_LE
   - 使用 192 帧播放队列 chunk 阻塞读取播放数据
@@ -103,6 +107,18 @@ A1usbrecord/
   - 默认每 5 分钟记录采集帧数、播放帧数、采集两路帧数差、UAC2 输出滞后、播放读写差、队列深度和错误计数
 - 程序默认直接运行，便于替换 `/vendor/bin/av_virtual` 后由现有 init service 自动启动
 - 手动检查配置时可传入 `--dry-run`，此模式只打印配置，不打开 PCM 设备
+
+### 当前问题记录
+
+- 现场出现过 `av_virtual` 进程仍在运行但无声的状态：
+  - `pcmC1D0p` 本地播放侧保持 `RUNNING`。
+  - `pcmC4D0p` / `pcmC4D0c` 在进程 fd 中显示为 `/dev/snd/pcmC4D0p (deleted)` / `/dev/snd/pcmC4D0c (deleted)`。
+  - 当前系统节点 `/proc/asound/card4/pcm0p` / `/proc/asound/card4/pcm0c` 显示为 `closed`。
+- 该现象说明 UAC gadget 或声卡节点可能发生过重建，进程仍持有旧的 card4 fd，UAC2 输入/输出侧失效，本地播放线程只能写静音。
+- 当前临时规避方向：
+  - 启动后延时 `uacOpenDelayMs=500` 再打开 card4，打开前丢弃 mux 数据。
+  - 后续更完整的修复应在 `pcmC4D0c` 读失败或 `pcmC4D0p` 写失败持续发生时，支持 close/reopen UAC2 PCM，避免 stale fd 长时间保留。
+- 日志文件权限仍依赖 SELinux 策略。若 `/data/vendor/av_virtual/av_virtual.log` 未更新，需要优先确认目录 label 和 `u:r:av_virtual:s0` 对 data 目录的写权限。
 
 ## av_virtual 修改方案
 
@@ -137,8 +153,10 @@ on property:vendor.all.modules.ready=1
   - 读取 `pcmC0D0c` 的 8ch 本地采集。
   - 读取 `pcmC1D0c` 的 2ch 本地采集。
   - 合成为 10ch interleaved S16_LE。
+  - 启动后默认等待 `uacOpenDelayMs=500` 再打开 `pcmC4D0p`；打开前 mux 数据直接丢弃。
   - 写入 `pcmC4D0p`，供 PC 端作为 UAC2 录音设备采集。
 - PC 播放方向：
+  - 启动后默认等待 `uacOpenDelayMs=500` 再打开 `pcmC4D0c`。
   - 从 `pcmC4D0c` 读取 PC 下发的 2ch 播放音频。
   - 使用 192 帧播放队列 chunk 阻塞读取播放数据。
   - 在 UAC2 capture 和本地 playback 之间增加播放队列，队列只保存真实 UAC 播放数据，写线程从队列取数据后写入 `pcmC1D0p`。

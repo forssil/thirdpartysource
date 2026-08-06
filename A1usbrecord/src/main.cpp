@@ -252,6 +252,7 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
                   a1usbrecord::PcmChunkQueue* input2ch_queue,
                   a1usbrecord::PcmDevice* output,
                   const a1usbrecord::PcmEndpoint output_endpoint,
+                  const std::atomic<bool>* uac2_ready,
                   RuntimeStats* stats,
                   FileLogger* logger,
                   std::atomic<bool>* running) {
@@ -277,6 +278,11 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
             logger->Log(message.str());
             running->store(false);
             break;
+        }
+
+        if (!uac2_ready->load()) {
+            stats->pending_output_frames.store(0);
+            continue;
         }
 
         std::vector<int16_t> merged(chunk8ch.frames * output_endpoint.channels);
@@ -512,6 +518,7 @@ int main(int argc, char** argv) {
     std::cout << "logDir: " << config.logDir << '\n';
     std::cout << "logPath: " << config.logPath << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
+    std::cout << "uacOpenDelayMs: " << config.uacOpenDelayMs << '\n';
     std::cout << "playbackQueueChunkFrames: " << config.playbackQueueChunkFrames << '\n';
     std::cout << "uacInputReadRetryMs: " << config.uacInputReadRetryMs << '\n';
     std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
@@ -535,14 +542,6 @@ int main(int argc, char** argv) {
         std::cerr << "failed to open input2ch: " << input2ch.LastError() << '\n';
         return 1;
     }
-    if (!uac2Output.Open()) {
-        std::cerr << "failed to open uac2Output: " << uac2Output.LastError() << '\n';
-        return 1;
-    }
-    if (!uac2Input.Open()) {
-        std::cerr << "failed to open uac2Input: " << uac2Input.LastError() << '\n';
-        return 1;
-    }
     if (!localPlayback.Open()) {
         std::cerr << "failed to open localPlayback: " << localPlayback.LastError() << '\n';
         return 1;
@@ -560,6 +559,7 @@ int main(int argc, char** argv) {
 
     constexpr std::size_t kQueueCapacity = 8;
     std::atomic<bool> running{true};
+    std::atomic<bool> uac2_ready{false};
     RuntimeStats stats;
     std::mutex stop_mutex;
     std::condition_variable stop_condition;
@@ -590,21 +590,10 @@ int main(int argc, char** argv) {
                                  &input2ch_queue,
                                  &uac2Output,
                                  config.uac2Output,
+                                 &uac2_ready,
                                  &stats,
                                  &logger,
                                  &running);
-    std::thread playback_capture_thread(PlaybackCaptureLoop,
-                                        &uac2Input,
-                                        config.uac2Input,
-                                        config.playbackQueueChunkFrames,
-                                        config.uacInputReadRetryMs,
-                                        config.uacPlaybackGain,
-                                        &playback_queue,
-                                        &input8ch_queue,
-                                        &input2ch_queue,
-                                        &stats,
-                                        &logger,
-                                        &running);
     std::thread playback_write_thread(PlaybackWriteLoop,
                                       &localPlayback,
                                       config.localPlayback,
@@ -626,6 +615,42 @@ int main(int argc, char** argv) {
                              &stop_mutex,
                              &running);
 
+    logger.Log("delay opening card4 UAC2 devices and drop pre-open data");
+    std::this_thread::sleep_for(std::chrono::milliseconds(config.uacOpenDelayMs));
+
+    if (!uac2Output.Open()) {
+        logger.Log(std::string("failed to open uac2Output: ") + uac2Output.LastError());
+        running.store(false);
+    }
+    if (running.load() && !uac2Input.Open()) {
+        logger.Log(std::string("failed to open uac2Input: ") + uac2Input.LastError());
+        running.store(false);
+    }
+
+    std::thread playback_capture_thread;
+    if (running.load()) {
+        uac2_ready.store(true);
+        logger.Log("card4 UAC2 devices opened");
+        playback_capture_thread = std::thread(PlaybackCaptureLoop,
+                                              &uac2Input,
+                                              config.uac2Input,
+                                              config.playbackQueueChunkFrames,
+                                              config.uacInputReadRetryMs,
+                                              config.uacPlaybackGain,
+                                              &playback_queue,
+                                              &input8ch_queue,
+                                              &input2ch_queue,
+                                              &stats,
+                                              &logger,
+                                              &running);
+    }
+
+    if (!running.load()) {
+        input8ch_queue.Stop();
+        input2ch_queue.Stop();
+        playback_queue.Stop();
+    }
+
     mux_write_thread.join();
     running.store(false);
     stop_condition.notify_all();
@@ -634,7 +659,9 @@ int main(int argc, char** argv) {
     playback_queue.Stop();
     input8ch_thread.join();
     input2ch_thread.join();
-    playback_capture_thread.join();
+    if (playback_capture_thread.joinable()) {
+        playback_capture_thread.join();
+    }
     playback_write_thread.join();
     stats_thread.join();
     logger.Log("av_virtual stopped");

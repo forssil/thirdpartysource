@@ -32,6 +32,8 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
 ## 阶段 4：桥接进程实现
 
 - 同时打开 card0 8ch capture 和 card1 2ch capture。
+- 启动后先打开 `card0` / `card1` 采集和 `card1` 本地播放，默认延时 `uacOpenDelayMs=500` 后再打开 UAC2 `card4`。
+- card4 打开前 mux 线程继续消费 card0/card1 队列，但只丢弃合成数据，不写入 UAC2。
 - 使用三线程结构：
   - card0 capture thread：按 1024 帧阻塞读取 8ch PCM，推入队列。
   - card1 capture thread：按 1024 帧阻塞读取 2ch PCM，推入队列。
