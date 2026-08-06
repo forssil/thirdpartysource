@@ -54,7 +54,7 @@ PC playback ── UAC2 gadget ── pcmC4D0c 2ch capture ── A1usbrecord na
 - 将 8ch + 2ch 合成为 10ch interleaved PCM
 - 写入 UAC2 gadget，使 PC 端枚举并采集 10 channel
 - 从 UAC2 gadget 读取 PC 播放方向 2ch PCM，并写入本地播放设备
-- 修改 UAC2 configfs/init 配置中的 `p_chmask`、`p_srate`、`p_ssize`
+- 修改 UAC2 configfs/init 配置中的 `p_chmask`、`p_srate`、`p_ssize`，设备目录为 `/config/usb_gadget/g1/functions/uac2.gs0/`
 - PC 播放方向由 `c_chmask`、`c_srate`、`c_ssize` 控制，当前按 2ch/48k/S16_LE 处理
 - 处理 `card0` 与 `card1` 之间可能存在的时钟漂移、读写阻塞和缓冲区水位问题
 - 避免与系统现有 `/vendor/bin/av_virtual` 同时抢占 ALSA PCM 设备
