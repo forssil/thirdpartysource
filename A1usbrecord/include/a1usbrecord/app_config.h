@@ -23,8 +23,11 @@ struct AppConfig {
 
     const char* logDir = "/data/vendor/av_virtual";
     const char* logPath = "/data/vendor/av_virtual/av_virtual.log";
+    const char* uac2OutputNode = "/dev/snd/pcmC4D0p";
+    const char* uac2InputNode = "/dev/snd/pcmC4D0c";
     unsigned int statsLogIntervalSeconds = 300;
     unsigned int uacOpenDelayMs = 500;
+    unsigned int uacStatePollMs = 150;
     unsigned int playbackQueueChunkFrames = 192;
     unsigned int uacInputReadRetryMs = 10;
     float uacPlaybackGain = 0.5f;

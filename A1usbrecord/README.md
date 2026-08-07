@@ -94,6 +94,8 @@ A1usbrecord/
   - 启动后先打开 `card0` / `card1` 采集和 `card1` 本地播放。
   - 默认延时 `uacOpenDelayMs=500` 后再打开 `pcmC4D0p` / `pcmC4D0c`。
   - card4 打开前 mux 线程只消费并丢弃合成数据，不写入 UAC2，避免把启动阶段旧数据送到 PC。
+  - `StatsLoop` 每 `uacStatePollMs=150` ms 检查 `/dev/snd/pcmC4D0p` / `/dev/snd/pcmC4D0c` 是否存在以及节点身份是否变化。
+  - 发现 UAC2 节点缺失、节点重建或读写失败请求恢复时，`StatsLoop` 只更新 UAC2 启停状态；mux/write 线程和 UAC2 playback capture 线程在各自线程内 open/close 对应 PCM。
 - 已新增 PC 播放转发线程：
   - UAC2 playback capture 线程从 `pcmC4D0c` 读取 2ch/48k/S16_LE
   - 使用 192 帧播放队列 chunk 阻塞读取播放数据
@@ -117,7 +119,7 @@ A1usbrecord/
 - 该现象说明 UAC gadget 或声卡节点可能发生过重建，进程仍持有旧的 card4 fd，UAC2 输入/输出侧失效，本地播放线程只能写静音。
 - 当前临时规避方向：
   - 启动后延时 `uacOpenDelayMs=500` 再打开 card4，打开前丢弃 mux 数据。
-  - 后续更完整的修复应在 `pcmC4D0c` 读失败或 `pcmC4D0p` 写失败持续发生时，支持 close/reopen UAC2 PCM，避免 stale fd 长时间保留。
+  - `StatsLoop` 复用为 UAC2 状态检查线程，每 150ms 检查 `/dev/snd` 节点，并在 `pcmC4D0c` 读失败、`pcmC4D0p` 写失败、节点缺失或节点身份变化时控制 UAC2 线程停用/重启；实际 PCM close/open 在对应音频线程内完成，避免 stale fd 长时间保留。
 - 日志文件权限仍依赖 SELinux 策略。若 `/data/vendor/av_virtual/av_virtual.log` 未更新，需要优先确认目录 label 和 `u:r:av_virtual:s0` 对 data 目录的写权限。
 
 ## av_virtual 修改方案

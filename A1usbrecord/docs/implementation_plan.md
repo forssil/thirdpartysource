@@ -34,6 +34,8 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
 - 同时打开 card0 8ch capture 和 card1 2ch capture。
 - 启动后先打开 `card0` / `card1` 采集和 `card1` 本地播放，默认延时 `uacOpenDelayMs=500` 后再打开 UAC2 `card4`。
 - card4 打开前 mux 线程继续消费 card0/card1 队列，但只丢弃合成数据，不写入 UAC2。
+- 复用 `StatsLoop` 每 `uacStatePollMs=150` ms 检查 `/dev/snd/pcmC4D0p` / `/dev/snd/pcmC4D0c` 是否存在以及节点身份是否变化。
+- 当 UAC2 节点缺失、节点重建、`pcmC4D0p` 写失败或 `pcmC4D0c` 读失败请求恢复时，`StatsLoop` 控制 UAC2 启停状态；mux/write thread 和 UAC2 playback capture thread 在各自线程内 open/close 对应 card4 PCM。
 - 使用三线程结构：
   - card0 capture thread：按 1024 帧阻塞读取 8ch PCM，推入队列。
   - card1 capture thread：按 1024 帧阻塞读取 2ch PCM，推入队列。
@@ -55,6 +57,7 @@ out[8..9] = card1 ch0..ch1
 - 写入 UAC2 gadget。
 - 增加退出信号处理、错误日志和统计信息。
 - `pcmC4D0p` 写失败只累计 `uac2out` 错误并丢弃当前 pending 数据，不逐条写日志，不作为停止整个进程的条件；错误数由 300s 统计日志汇总。
+- UAC2 停用/重启期间，mux/write thread 继续消费 card0/card1 队列并丢弃 UAC2 输出数据，local playback write thread 继续写静音保持本地播放不断流。
 - 本地日志写入 `/data/vendor/av_virtual/av_virtual.log`，由独立日志线程异步落盘，避免文件 I/O 阻塞音频线程。默认每 5 分钟分别记录 `stats_total` 和 `stats_interval`：
   - `capture_diff_frames`：card0 与 card1 累计采集帧数差。
   - `capture_interval_diff_frames`：当前 300s 周期内 card0 与 card1 采集帧数差。

@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 
@@ -132,6 +133,19 @@ struct RuntimeStats {
     std::atomic<uint64_t> local_playback_errors{0};
 };
 
+struct Uac2DeviceState {
+    std::atomic<bool> enabled{false};
+    std::atomic<bool> recover_requested{false};
+    std::atomic<uint64_t> generation{0};
+};
+
+struct DeviceNodeSnapshot {
+    bool valid = false;
+    dev_t dev = 0;
+    ino_t ino = 0;
+    dev_t rdev = 0;
+};
+
 void PrintEndpoint(const char* name, const a1usbrecord::PcmEndpoint& endpoint) {
     std::cout << name << ": card=" << endpoint.card
               << ", device=" << endpoint.device
@@ -153,6 +167,147 @@ bool HasArg(int argc, char** argv, const std::string& expected) {
 
 int64_t Diff(uint64_t lhs, uint64_t rhs) {
     return static_cast<int64_t>(lhs) - static_cast<int64_t>(rhs);
+}
+
+bool FileExists(const char* path) {
+    return path != nullptr && access(path, F_OK) == 0;
+}
+
+bool ReadNodeSnapshot(const char* path, DeviceNodeSnapshot* snapshot) {
+    if (path == nullptr || snapshot == nullptr) {
+        return false;
+    }
+
+    struct stat info {};
+    if (stat(path, &info) != 0) {
+        snapshot->valid = false;
+        return false;
+    }
+
+    snapshot->valid = true;
+    snapshot->dev = info.st_dev;
+    snapshot->ino = info.st_ino;
+    snapshot->rdev = info.st_rdev;
+    return true;
+}
+
+bool SameNodeSnapshot(const DeviceNodeSnapshot& lhs, const DeviceNodeSnapshot& rhs) {
+    return lhs.valid && rhs.valid &&
+           lhs.dev == rhs.dev &&
+           lhs.ino == rhs.ino &&
+           lhs.rdev == rhs.rdev;
+}
+
+void RequestUac2Recover(Uac2DeviceState* state) {
+    if (state != nullptr) {
+        state->recover_requested.store(true);
+    }
+}
+
+bool Uac2NodesExist(const a1usbrecord::AppConfig& config) {
+    return FileExists(config.uac2OutputNode) && FileExists(config.uac2InputNode);
+}
+
+void SetUac2Enabled(Uac2DeviceState* state, bool enabled) {
+    if (state == nullptr) {
+        return;
+    }
+    const bool old_enabled = state->enabled.exchange(enabled);
+    if (old_enabled != enabled || enabled) {
+        state->generation.fetch_add(1);
+    }
+}
+
+bool SyncUac2DeviceState(a1usbrecord::PcmDevice* device,
+                         Uac2DeviceState* state,
+                         uint64_t* local_generation,
+                         bool* open_failure_logged,
+                         const char* name,
+                         FileLogger* logger) {
+    const uint64_t generation = state->generation.load();
+    if (!state->enabled.load() || state->recover_requested.load()) {
+        if (device->IsOpen()) {
+            logger->Log(std::string("close ") + name);
+            device->Close();
+        }
+        *local_generation = generation;
+        *open_failure_logged = false;
+        return false;
+    }
+
+    if (device->IsOpen() && *local_generation == generation) {
+        return true;
+    }
+
+    device->Close();
+    if (!device->Open()) {
+        if (!*open_failure_logged) {
+            logger->Log(std::string("failed to open ") + name + ": " + device->LastError());
+        }
+        *open_failure_logged = true;
+        return false;
+    }
+
+    logger->Log(std::string("opened ") + name);
+    *local_generation = generation;
+    *open_failure_logged = false;
+    return true;
+}
+
+void HandleUac2State(const a1usbrecord::AppConfig& config,
+                     Uac2DeviceState* state,
+                     FileLogger* logger,
+                     bool* nodes_missing_logged,
+                     DeviceNodeSnapshot* output_snapshot,
+                     DeviceNodeSnapshot* input_snapshot) {
+    const bool nodes_exist = Uac2NodesExist(config);
+    bool recover_requested = state->recover_requested.exchange(false);
+
+    if (!nodes_exist) {
+        if (state->enabled.load() || !*nodes_missing_logged) {
+            logger->Log("UAC2 snd nodes missing; stop card4 devices");
+        }
+        SetUac2Enabled(state, false);
+        output_snapshot->valid = false;
+        input_snapshot->valid = false;
+        *nodes_missing_logged = true;
+        return;
+    }
+
+    if (*nodes_missing_logged) {
+        logger->Log("UAC2 snd nodes restored");
+    }
+    *nodes_missing_logged = false;
+
+    DeviceNodeSnapshot current_output;
+    DeviceNodeSnapshot current_input;
+    if (!ReadNodeSnapshot(config.uac2OutputNode, &current_output) ||
+        !ReadNodeSnapshot(config.uac2InputNode, &current_input)) {
+        return;
+    }
+
+    if (state->enabled.load() &&
+        output_snapshot->valid &&
+        input_snapshot->valid &&
+        (!SameNodeSnapshot(*output_snapshot, current_output) ||
+         !SameNodeSnapshot(*input_snapshot, current_input))) {
+        logger->Log("UAC2 snd nodes changed; restart card4 devices");
+        recover_requested = true;
+    }
+
+    if (!recover_requested && state->enabled.load()) {
+        *output_snapshot = current_output;
+        *input_snapshot = current_input;
+        return;
+    }
+
+    if (recover_requested) {
+        logger->Log("UAC2 recover requested; restart card4 devices");
+    }
+
+    *output_snapshot = current_output;
+    *input_snapshot = current_input;
+    SetUac2Enabled(state, true);
 }
 
 void ApplyGain(std::vector<int16_t>* samples, float gain) {
@@ -229,12 +384,14 @@ bool WritePendingFrames(a1usbrecord::PcmDevice* output,
                         std::vector<int16_t>* pending,
                         std::size_t channels,
                         std::size_t frames_per_write,
-                        RuntimeStats* stats) {
+                        RuntimeStats* stats,
+                        Uac2DeviceState* uac2_state) {
     // UAC2 accepts a smaller period than the capture sources. Keep a pending
     // buffer and write only complete output periods.
     while (pending->size() >= frames_per_write * channels) {
         if (!output->WriteFrames(pending->data(), frames_per_write)) {
             stats->uac2_output_errors.fetch_add(1);
+            RequestUac2Recover(uac2_state);
             pending->clear();
             stats->pending_output_frames.store(0);
             return true;
@@ -250,14 +407,16 @@ bool WritePendingFrames(a1usbrecord::PcmDevice* output,
 
 void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
                   a1usbrecord::PcmChunkQueue* input2ch_queue,
-                  a1usbrecord::PcmDevice* output,
                   const a1usbrecord::PcmEndpoint output_endpoint,
-                  const std::atomic<bool>* uac2_ready,
+                  Uac2DeviceState* uac2_state,
                   RuntimeStats* stats,
                   FileLogger* logger,
                   std::atomic<bool>* running) {
     a1usbrecord::AudioMuxer muxer;
+    a1usbrecord::PcmDevice output(output_endpoint, a1usbrecord::PcmDirection::Playback);
     std::vector<int16_t> pending_output;
+    uint64_t local_generation = 0;
+    bool open_failure_logged = false;
 
     // Combine card0 8ch and card1 2ch chunks into 10ch interleaved frames, then
     // write them to the UAC2 playback PCM exposed as the PC recording device.
@@ -280,7 +439,12 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
             break;
         }
 
-        if (!uac2_ready->load()) {
+        if (!SyncUac2DeviceState(&output,
+                                 uac2_state,
+                                 &local_generation,
+                                 &open_failure_logged,
+                                 "uac2Output",
+                                 logger)) {
             stats->pending_output_frames.store(0);
             continue;
         }
@@ -299,25 +463,27 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
         stats->mux_frames.fetch_add(chunk8ch.frames);
         AppendSamples(&pending_output, merged);
         stats->pending_output_frames.store(pending_output.size() / output_endpoint.channels);
-        if (!WritePendingFrames(output,
+        if (!WritePendingFrames(&output,
                                 &pending_output,
                                 output_endpoint.channels,
                                 output_endpoint.period_size,
-                                stats)) {
+                                stats,
+                                uac2_state)) {
             running->store(false);
             break;
         }
     }
 
+    output.Close();
     input8ch_queue->Stop();
     input2ch_queue->Stop();
 }
 
-void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
-                         const a1usbrecord::PcmEndpoint input_endpoint,
+void PlaybackCaptureLoop(const a1usbrecord::PcmEndpoint input_endpoint,
                          std::size_t buffer_frames,
                          unsigned int read_retry_ms,
                          float playback_gain,
+                         Uac2DeviceState* uac2_state,
                          a1usbrecord::PcmChunkQueue* playback_queue,
                          a1usbrecord::PcmChunkQueue* input8ch_queue,
                          a1usbrecord::PcmChunkQueue* input2ch_queue,
@@ -326,14 +492,30 @@ void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
                          std::atomic<bool>* running) {
     // PC playback is the reverse UAC2 direction: read pcmC4D0c and push chunks
     // to a queue consumed by the local playback writer.
+    a1usbrecord::PcmDevice input(input_endpoint, a1usbrecord::PcmDirection::Capture);
+    uint64_t local_generation = 0;
+    bool open_failure_logged = false;
+
     while (running->load()) {
+        if (!SyncUac2DeviceState(&input,
+                                 uac2_state,
+                                 &local_generation,
+                                 &open_failure_logged,
+                                 "uac2Input",
+                                 logger)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(read_retry_ms));
+            continue;
+        }
+
         a1usbrecord::PcmChunk chunk;
         chunk.frames = buffer_frames;
         chunk.channels = input_endpoint.channels;
         chunk.samples.resize(chunk.frames * chunk.channels);
 
-        if (!input->ReadFrames(chunk.samples.data(), chunk.frames)) {
+        if (!input.ReadFrames(chunk.samples.data(), chunk.frames)) {
             stats->playback_input_errors.fetch_add(1);
+            RequestUac2Recover(uac2_state);
+            input.Close();
             std::this_thread::sleep_for(std::chrono::milliseconds(read_retry_ms));
             continue;
         }
@@ -345,6 +527,7 @@ void PlaybackCaptureLoop(a1usbrecord::PcmDevice* input,
         }
     }
 
+    input.Close();
     playback_queue->Stop();
     input8ch_queue->Stop();
     input2ch_queue->Stop();
@@ -390,8 +573,11 @@ void StatsLoop(const RuntimeStats* stats,
                const a1usbrecord::PcmChunkQueue* input8ch_queue,
                const a1usbrecord::PcmChunkQueue* input2ch_queue,
                const a1usbrecord::PcmChunkQueue* playback_queue,
+               const a1usbrecord::AppConfig config,
+               Uac2DeviceState* uac2_state,
                FileLogger* logger,
                unsigned int interval_seconds,
+               unsigned int state_poll_ms,
                std::condition_variable* stop_condition,
                std::mutex* stop_mutex,
                std::atomic<bool>* running) {
@@ -407,99 +593,116 @@ void StatsLoop(const RuntimeStats* stats,
     uint64_t last_uac2_output_errors = 0;
     uint64_t last_playback_input_errors = 0;
     uint64_t last_local_playback_errors = 0;
+    bool nodes_missing_logged = false;
+    DeviceNodeSnapshot output_snapshot;
+    DeviceNodeSnapshot input_snapshot;
+    auto next_stats_time = std::chrono::steady_clock::now() + std::chrono::seconds(interval_seconds);
 
-    // Log one summary per configured interval. Stable operation should keep
-    // small queue depth and near-zero diff/lag counters over time.
+    // Wake frequently to monitor UAC2 node recreation, but keep stats logging
+    // at the configured long interval.
     while (running->load()) {
         {
             std::unique_lock<std::mutex> lock(*stop_mutex);
             if (stop_condition->wait_for(lock,
-                                         std::chrono::seconds(interval_seconds),
+                                         std::chrono::milliseconds(state_poll_ms),
                                          [running]() { return !running->load(); })) {
                 break;
             }
         }
 
-        const uint64_t input8 = stats->input8_frames.load();
-        const uint64_t input2 = stats->input2_frames.load();
-        const uint64_t mux = stats->mux_frames.load();
-        const uint64_t uac2_output = stats->uac2_output_frames.load();
-        const uint64_t pending_output = stats->pending_output_frames.load();
-        const uint64_t playback_input = stats->playback_input_frames.load();
-        const uint64_t local_playback = stats->local_playback_frames.load();
-        const uint64_t input8_errors = stats->input8_errors.load();
-        const uint64_t input2_errors = stats->input2_errors.load();
-        const uint64_t mux_errors = stats->mux_errors.load();
-        const uint64_t uac2_output_errors = stats->uac2_output_errors.load();
-        const uint64_t playback_input_errors = stats->playback_input_errors.load();
-        const uint64_t local_playback_errors = stats->local_playback_errors.load();
+        HandleUac2State(config,
+                        uac2_state,
+                        logger,
+                        &nodes_missing_logged,
+                        &output_snapshot,
+                        &input_snapshot);
 
-        const uint64_t input8_interval = input8 - last_input8;
-        const uint64_t input2_interval = input2 - last_input2;
-        const uint64_t mux_interval = mux - last_mux;
-        const uint64_t uac2_output_interval = uac2_output - last_uac2_output;
-        const uint64_t playback_input_interval = playback_input - last_playback_input;
-        const uint64_t local_playback_interval = local_playback - last_local_playback;
+        const auto now = std::chrono::steady_clock::now();
+        if (now >= next_stats_time) {
+            // Keep polling UAC2 state until the next stats interval.
+            next_stats_time = now + std::chrono::seconds(interval_seconds);
 
-        std::ostringstream total_message;
-        total_message << "stats_total"
-                      << " interval_seconds=" << interval_seconds
-                      << " input8_total=" << input8
-                      << " input2_total=" << input2
-                      << " capture_diff_frames=" << Diff(input8, input2)
-                      << " mux_total=" << mux
-                      << " uac2_out_total=" << uac2_output
-                      << " uac2_lag_frames=" << Diff(mux, uac2_output)
-                      << " pending_out_frames=" << pending_output
-                      << " playback_in_total=" << playback_input
-                      << " local_playback_total=" << local_playback
-                      << " playback_diff_frames=" << Diff(playback_input, local_playback)
-                      << " q8=" << input8ch_queue->Size() << "/" << input8ch_queue->Capacity()
-                      << " q2=" << input2ch_queue->Size() << "/" << input2ch_queue->Capacity()
-                      << " qplay=" << playback_queue->Size() << "/" << playback_queue->Capacity()
-                      << " errors="
-                      << "i8:" << input8_errors
-                      << ",i2:" << input2_errors
-                      << ",mux:" << mux_errors
-                      << ",uac2out:" << uac2_output_errors
-                      << ",playin:" << playback_input_errors
-                      << ",playout:" << local_playback_errors;
-        logger->Log(total_message.str());
+            const uint64_t input8 = stats->input8_frames.load();
+            const uint64_t input2 = stats->input2_frames.load();
+            const uint64_t mux = stats->mux_frames.load();
+            const uint64_t uac2_output = stats->uac2_output_frames.load();
+            const uint64_t pending_output = stats->pending_output_frames.load();
+            const uint64_t playback_input = stats->playback_input_frames.load();
+            const uint64_t local_playback = stats->local_playback_frames.load();
+            const uint64_t input8_errors = stats->input8_errors.load();
+            const uint64_t input2_errors = stats->input2_errors.load();
+            const uint64_t mux_errors = stats->mux_errors.load();
+            const uint64_t uac2_output_errors = stats->uac2_output_errors.load();
+            const uint64_t playback_input_errors = stats->playback_input_errors.load();
+            const uint64_t local_playback_errors = stats->local_playback_errors.load();
 
-        std::ostringstream interval_message;
-        interval_message << "stats_interval"
-                         << " interval_seconds=" << interval_seconds
-                         << " input8_interval_frames=" << input8_interval
-                         << " input2_interval_frames=" << input2_interval
-                         << " capture_interval_diff_frames=" << Diff(input8_interval, input2_interval)
-                         << " mux_interval_frames=" << mux_interval
-                         << " uac2_out_interval_frames=" << uac2_output_interval
-                         << " uac2_interval_lag_frames=" << Diff(mux_interval, uac2_output_interval)
-                         << " playback_in_interval_frames=" << playback_input_interval
-                         << " local_playback_interval_frames=" << local_playback_interval
-                         << " playback_interval_diff_frames="
-                         << Diff(playback_input_interval, local_playback_interval)
-                         << " interval_errors="
-                         << "i8:" << (input8_errors - last_input8_errors)
-                         << ",i2:" << (input2_errors - last_input2_errors)
-                         << ",mux:" << (mux_errors - last_mux_errors)
-                         << ",uac2out:" << (uac2_output_errors - last_uac2_output_errors)
-                         << ",playin:" << (playback_input_errors - last_playback_input_errors)
-                         << ",playout:" << (local_playback_errors - last_local_playback_errors);
-        logger->Log(interval_message.str());
+            const uint64_t input8_interval = input8 - last_input8;
+            const uint64_t input2_interval = input2 - last_input2;
+            const uint64_t mux_interval = mux - last_mux;
+            const uint64_t uac2_output_interval = uac2_output - last_uac2_output;
+            const uint64_t playback_input_interval = playback_input - last_playback_input;
+            const uint64_t local_playback_interval = local_playback - last_local_playback;
 
-        last_input8 = input8;
-        last_input2 = input2;
-        last_mux = mux;
-        last_uac2_output = uac2_output;
-        last_playback_input = playback_input;
-        last_local_playback = local_playback;
-        last_input8_errors = input8_errors;
-        last_input2_errors = input2_errors;
-        last_mux_errors = mux_errors;
-        last_uac2_output_errors = uac2_output_errors;
-        last_playback_input_errors = playback_input_errors;
-        last_local_playback_errors = local_playback_errors;
+            std::ostringstream total_message;
+            total_message << "stats_total"
+                          << " interval_seconds=" << interval_seconds
+                          << " input8_total=" << input8
+                          << " input2_total=" << input2
+                          << " capture_diff_frames=" << Diff(input8, input2)
+                          << " mux_total=" << mux
+                          << " uac2_out_total=" << uac2_output
+                          << " uac2_lag_frames=" << Diff(mux, uac2_output)
+                          << " pending_out_frames=" << pending_output
+                          << " playback_in_total=" << playback_input
+                          << " local_playback_total=" << local_playback
+                          << " playback_diff_frames=" << Diff(playback_input, local_playback)
+                          << " q8=" << input8ch_queue->Size() << "/" << input8ch_queue->Capacity()
+                          << " q2=" << input2ch_queue->Size() << "/" << input2ch_queue->Capacity()
+                          << " qplay=" << playback_queue->Size() << "/" << playback_queue->Capacity()
+                          << " errors="
+                          << "i8:" << input8_errors
+                          << ",i2:" << input2_errors
+                          << ",mux:" << mux_errors
+                          << ",uac2out:" << uac2_output_errors
+                          << ",playin:" << playback_input_errors
+                          << ",playout:" << local_playback_errors;
+            logger->Log(total_message.str());
+
+            std::ostringstream interval_message;
+            interval_message << "stats_interval"
+                             << " interval_seconds=" << interval_seconds
+                             << " input8_interval_frames=" << input8_interval
+                             << " input2_interval_frames=" << input2_interval
+                             << " capture_interval_diff_frames=" << Diff(input8_interval, input2_interval)
+                             << " mux_interval_frames=" << mux_interval
+                             << " uac2_out_interval_frames=" << uac2_output_interval
+                             << " uac2_interval_lag_frames=" << Diff(mux_interval, uac2_output_interval)
+                             << " playback_in_interval_frames=" << playback_input_interval
+                             << " local_playback_interval_frames=" << local_playback_interval
+                             << " playback_interval_diff_frames="
+                             << Diff(playback_input_interval, local_playback_interval)
+                             << " interval_errors="
+                             << "i8:" << (input8_errors - last_input8_errors)
+                             << ",i2:" << (input2_errors - last_input2_errors)
+                             << ",mux:" << (mux_errors - last_mux_errors)
+                             << ",uac2out:" << (uac2_output_errors - last_uac2_output_errors)
+                             << ",playin:" << (playback_input_errors - last_playback_input_errors)
+                             << ",playout:" << (local_playback_errors - last_local_playback_errors);
+            logger->Log(interval_message.str());
+
+            last_input8 = input8;
+            last_input2 = input2;
+            last_mux = mux;
+            last_uac2_output = uac2_output;
+            last_playback_input = playback_input;
+            last_local_playback = local_playback;
+            last_input8_errors = input8_errors;
+            last_input2_errors = input2_errors;
+            last_mux_errors = mux_errors;
+            last_uac2_output_errors = uac2_output_errors;
+            last_playback_input_errors = playback_input_errors;
+            last_local_playback_errors = local_playback_errors;
+        }
     }
 }
 
@@ -517,8 +720,11 @@ int main(int argc, char** argv) {
     PrintEndpoint("localPlayback", config.localPlayback);
     std::cout << "logDir: " << config.logDir << '\n';
     std::cout << "logPath: " << config.logPath << '\n';
+    std::cout << "uac2OutputNode: " << config.uac2OutputNode << '\n';
+    std::cout << "uac2InputNode: " << config.uac2InputNode << '\n';
     std::cout << "statsLogIntervalSeconds: " << config.statsLogIntervalSeconds << '\n';
     std::cout << "uacOpenDelayMs: " << config.uacOpenDelayMs << '\n';
+    std::cout << "uacStatePollMs: " << config.uacStatePollMs << '\n';
     std::cout << "playbackQueueChunkFrames: " << config.playbackQueueChunkFrames << '\n';
     std::cout << "uacInputReadRetryMs: " << config.uacInputReadRetryMs << '\n';
     std::cout << "uacPlaybackGain: " << config.uacPlaybackGain << '\n';
@@ -530,8 +736,6 @@ int main(int argc, char** argv) {
 
     a1usbrecord::PcmDevice input8ch(config.input8ch, a1usbrecord::PcmDirection::Capture);
     a1usbrecord::PcmDevice input2ch(config.input2ch, a1usbrecord::PcmDirection::Capture);
-    a1usbrecord::PcmDevice uac2Output(config.uac2Output, a1usbrecord::PcmDirection::Playback);
-    a1usbrecord::PcmDevice uac2Input(config.uac2Input, a1usbrecord::PcmDirection::Capture);
     a1usbrecord::PcmDevice localPlayback(config.localPlayback, a1usbrecord::PcmDirection::Playback);
 
     if (!input8ch.Open()) {
@@ -559,7 +763,7 @@ int main(int argc, char** argv) {
 
     constexpr std::size_t kQueueCapacity = 8;
     std::atomic<bool> running{true};
-    std::atomic<bool> uac2_ready{false};
+    Uac2DeviceState uac2_state;
     RuntimeStats stats;
     std::mutex stop_mutex;
     std::condition_variable stop_condition;
@@ -588,9 +792,8 @@ int main(int argc, char** argv) {
     std::thread mux_write_thread(MuxWriteLoop,
                                  &input8ch_queue,
                                  &input2ch_queue,
-                                 &uac2Output,
                                  config.uac2Output,
-                                 &uac2_ready,
+                                 &uac2_state,
                                  &stats,
                                  &logger,
                                  &running);
@@ -604,39 +807,17 @@ int main(int argc, char** argv) {
                                       &stats,
                                       &logger,
                                       &running);
-    std::thread stats_thread(StatsLoop,
-                             &stats,
-                             &input8ch_queue,
-                             &input2ch_queue,
-                             &playback_queue,
-                             &logger,
-                             config.statsLogIntervalSeconds,
-                             &stop_condition,
-                             &stop_mutex,
-                             &running);
-
     logger.Log("delay opening card4 UAC2 devices and drop pre-open data");
     std::this_thread::sleep_for(std::chrono::milliseconds(config.uacOpenDelayMs));
 
-    if (!uac2Output.Open()) {
-        logger.Log(std::string("failed to open uac2Output: ") + uac2Output.LastError());
-        running.store(false);
-    }
-    if (running.load() && !uac2Input.Open()) {
-        logger.Log(std::string("failed to open uac2Input: ") + uac2Input.LastError());
-        running.store(false);
-    }
-
     std::thread playback_capture_thread;
     if (running.load()) {
-        uac2_ready.store(true);
-        logger.Log("card4 UAC2 devices opened");
         playback_capture_thread = std::thread(PlaybackCaptureLoop,
-                                              &uac2Input,
                                               config.uac2Input,
                                               config.playbackQueueChunkFrames,
                                               config.uacInputReadRetryMs,
                                               config.uacPlaybackGain,
+                                              &uac2_state,
                                               &playback_queue,
                                               &input8ch_queue,
                                               &input2ch_queue,
@@ -644,6 +825,19 @@ int main(int argc, char** argv) {
                                               &logger,
                                               &running);
     }
+    std::thread stats_thread(StatsLoop,
+                             &stats,
+                             &input8ch_queue,
+                             &input2ch_queue,
+                             &playback_queue,
+                             config,
+                             &uac2_state,
+                             &logger,
+                             config.statsLogIntervalSeconds,
+                             config.uacStatePollMs,
+                             &stop_condition,
+                             &stop_mutex,
+                             &running);
 
     if (!running.load()) {
         input8ch_queue.Stop();
@@ -663,7 +857,9 @@ int main(int argc, char** argv) {
         playback_capture_thread.join();
     }
     playback_write_thread.join();
-    stats_thread.join();
+    if (stats_thread.joinable()) {
+        stats_thread.join();
+    }
     logger.Log("av_virtual stopped");
 
     return 1;
