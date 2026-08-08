@@ -180,7 +180,7 @@ void T2Ftransformer::InitFDanaly(const int size,const int fft_size) {
 #ifdef ARM_NEON
 	if (ne10_init() != NE10_OK)
 	{
-		return 1;
+		return;
 	}
 
 	m_cfg = ne10_fft_alloc_r2c_float32(m_fft_len);

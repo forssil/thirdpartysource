@@ -5,6 +5,7 @@ set -e
 
 # 获取脚本所在目录，确保在 Makefile 所在目录下执行
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TRUNK_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$SCRIPT_DIR"
 
 # 打印帮助信息
@@ -101,12 +102,14 @@ while [[ $# -gt 0 ]]; do
                 export CXX="$NDK_BIN/aarch64-linux-android28-clang++"
                 DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_arm64_v8a"
                 NDK_RUNTIME_COPY="aarch64-linux-android"
+                NE10_VARIANT="android_arm64_v8a"
                 echo "=> Using NDK environment for Android aarch64 (API 28)"
             elif [ "$NDK_ARCH" == "arm" ]; then
                 export CC="$NDK_BIN/armv7a-linux-androideabi28-clang"
                 export CXX="$NDK_BIN/armv7a-linux-androideabi28-clang++"
                 DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_armeabi_v7a"
                 NDK_RUNTIME_COPY="arm-linux-androideabi"
+                NE10_VARIANT="android_armeabi_v7a"
                 echo "=> Using NDK environment for Android arm (API 28)"
             else
                 echo "Error: Invalid architecture for --ndk. Supported values are: aarch64, arm"
@@ -115,6 +118,17 @@ while [[ $# -gt 0 ]]; do
             
             export LD="$NDK_BIN/ld.lld"
             export AR="$NDK_BIN/llvm-ar"
+
+            NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/$NE10_VARIANT"
+            if [ ! -f "$NE10_ROOT/include/NE10.h" ] || [ ! -f "$NE10_ROOT/lib/libNE10.a" ]; then
+                echo "Error: NE10 for $NDK_ARCH was not found at $NE10_ROOT"
+                echo "Build it first with: $TRUNK_DIR/thirdparty/ne10/build.sh all --abi $([ "$NDK_ARCH" == "aarch64" ] && echo "arm64-v8a" || echo "armeabi-v7a")"
+                exit 1
+            fi
+
+            export NE10_INCLUDE_DIR="$NE10_ROOT/include"
+            export NE10_LIBS="-L$NE10_ROOT/lib -lNE10 -lm"
+            export DEFINES="-fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON"
             
             # 只有当用户没有显式传入 OUTDIR 时，才使用 NDK 的默认输出目录
             if [ -z "$OUTDIR" ]; then
@@ -126,6 +140,9 @@ while [[ $# -gt 0 ]]; do
             echo "   LD: $LD"
             echo "   AR: $AR"
             echo "   OUTDIR: $OUTDIR"
+            echo "   NE10_INCLUDE_DIR: $NE10_INCLUDE_DIR"
+            echo "   NE10_LIBS: $NE10_LIBS"
+            echo "   DEFINES: $DEFINES"
             AUTO_CLEAN="yes"
             shift 2
             ;;

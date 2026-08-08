@@ -9,6 +9,8 @@ OBJ_PATH     = $(ROOT_PATH)/objs
 OUTDIR      ?= $(ROOT_PATH)/libs
 STATIC_LIB   = $(OUTDIR)/libAPF.a
 SHARED_LIB   = $(OUTDIR)/libAPF.so
+NE10_INCLUDE_DIR ?= $(ROOT_PATH)/thirdparty/ne10/inc
+NE10_LIBS ?=
 ####################################################################
 # Compile and link options
 LINK = ld
@@ -25,7 +27,7 @@ INCLUDES =\
 	-I./rnnoise/include\
 	-I./vad/include \
 	-I./beam_forming/include \
-	-I$(ROOT_PATH)/thirdparty/ne10/inc
+	-I$(NE10_INCLUDE_DIR)
 
 C_FILES = \
 	$(SRC_PATH)/common_audio/source/fft.c\
@@ -91,7 +93,7 @@ $(STATIC_LIB): checkbindir checkdir $(OBJ_FILES)
 	$(AR) rcs $(STATIC_LIB) $(OBJ_FILES)
 
 $(SHARED_LIB): checkbindir checkdir $(OBJ_FILES)
-	$(CXX) $(CXXFLAGS) -shared -fPIC -o $(SHARED_LIB) $(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $(SHARED_LIB) $(OBJ_FILES) $(NE10_LIBS)
 
 #$(OBJ_PATH)/%.o: $(SRC_PATH)/common_audio/source/%.c
 #	
