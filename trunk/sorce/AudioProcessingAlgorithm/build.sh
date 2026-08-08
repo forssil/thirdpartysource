@@ -128,7 +128,7 @@ while [[ $# -gt 0 ]]; do
 
             export NE10_INCLUDE_DIR="$NE10_ROOT/include"
             export NE10_LIBS="-L$NE10_ROOT/lib -lNE10 -lm"
-            export DEFINES="-fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON"
+            export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON}"
             
             # 只有当用户没有显式传入 OUTDIR 时，才使用 NDK 的默认输出目录
             if [ -z "$OUTDIR" ]; then
@@ -147,12 +147,21 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --sigmastar)
-            SIGMA_BIN="/Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0-"
+            SIGMA_BIN="/home/gaohua.karl/code/A1/arm-sigmastar-linux-uclibcgnueabihf-9.1.0/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0-"
             export CC="${SIGMA_BIN}gcc"
             export CXX="${SIGMA_BIN}g++"
             export LD="${SIGMA_BIN}ld"
             export AR="${SIGMA_BIN}ar"
-            DEFAULT_SIGMA_OUTDIR="/Users/bytedance/work/A1T1/output/sigmastar"
+            DEFAULT_SIGMA_OUTDIR="/home/gaohua.karl/code/A1/output/sigmastar"
+            NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/sigmastar"
+            if [ ! -f "$NE10_ROOT/include/NE10.h" ] || [ ! -f "$NE10_ROOT/lib/libNE10.a" ]; then
+                echo "Error: SigmaStar NE10 was not found at $NE10_ROOT"
+                echo "Build it first with: $TRUNK_DIR/thirdparty/ne10/build.sh all --sigmastar"
+                exit 1
+            fi
+            export NE10_INCLUDE_DIR="$NE10_ROOT/include"
+            export NE10_LIBS="-L$NE10_ROOT/lib -lNE10 -lm"
+            export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON}"
             
             if [ -z "$OUTDIR" ]; then
                 export OUTDIR="$DEFAULT_SIGMA_OUTDIR"
@@ -164,6 +173,9 @@ while [[ $# -gt 0 ]]; do
             echo "   LD: $LD"
             echo "   AR: $AR"
             echo "   OUTDIR: $OUTDIR"
+            echo "   NE10_INCLUDE_DIR: $NE10_INCLUDE_DIR"
+            echo "   NE10_LIBS: $NE10_LIBS"
+            echo "   DEFINES: $DEFINES"
             AUTO_CLEAN="yes"
             shift 1
             ;;
@@ -222,7 +234,7 @@ else
         
         # Build in Docker
         echo "=> Running: docker make -j${CORES}"
-        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm -j"${CORES}" OUTDIR=/work/libs/sigmastar 'DEFINES=-fPIC -fpermissive -Wl,-rpath=.'
+        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm -j"${CORES}" OUTDIR=/work/libs/sigmastar
         
         # 拷贝 SigmaStar 运行时库
         SIGMA_TOOLCHAIN="/Users/bytedance/work/A1T1/armbuild"

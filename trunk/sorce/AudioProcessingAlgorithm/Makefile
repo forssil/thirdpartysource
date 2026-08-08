@@ -10,7 +10,6 @@ OUTDIR      ?= $(ROOT_PATH)/libs
 STATIC_LIB   = $(OUTDIR)/libAPF.a
 SHARED_LIB   = $(OUTDIR)/libAPF.so
 NE10_INCLUDE_DIR ?= $(ROOT_PATH)/thirdparty/ne10/inc
-NE10_LIBS ?=
 ####################################################################
 # Compile and link options
 LINK = ld
@@ -80,9 +79,12 @@ CXX     ?= $(CROSS_COMPILE)g++
 LD      ?= $(CROSS_COMPILE)ld
 AR      ?= $(CROSS_COMPILE)ar
 
-#DEFINES := -fPIC -fpermissive -Wl,-rpath=. -DARM_NEON
-DEFINES ?= -fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so 
+DEFINES ?= -fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so
 INCLUDE := -Iinclude -I./extlib
+
+ifneq (,$(findstring -DARM_NEON,$(DEFINES)))
+NE10_LIBS ?= -L$(ROOT_PATH)/thirdparty/ne10/sigmastar/lib -lNE10 -lm
+endif
 #
 #CFLAGS  := -Wall -O3 -g -fno-omit-frame-pointer $(DEFINES) $(INCLUDE) $(INCLUDES)
 CFLAGS  := -Wall -O3 $(DEFINES) $(INCLUDE) $(INCLUDES)
