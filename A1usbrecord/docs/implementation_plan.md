@@ -35,7 +35,9 @@ c_chmask -> PC 播放设备通道数 -> Android 侧读 pcmC4D0c
 - 启动后先打开 `card0` / `card1` 采集和 `card1` 本地播放，默认延时 `uacOpenDelayMs=500` 后再打开 UAC2 `card4`。
 - card4 打开前 mux 线程继续消费 card0/card1 队列，但只丢弃合成数据，不写入 UAC2。
 - 复用 `StatsLoop` 每 `uacStatePollMs=150` ms 检查 `/dev/snd/pcmC4D0p` / `/dev/snd/pcmC4D0c` 是否存在以及节点身份是否变化。
-- 当 UAC2 节点缺失、节点重建、`pcmC4D0p` 写失败或 `pcmC4D0c` 读失败请求恢复时，`StatsLoop` 控制 UAC2 启停状态；mux/write thread 和 UAC2 playback capture thread 在各自线程内 open/close 对应 card4 PCM。
+- 当 UAC2 节点缺失或节点重建时，`StatsLoop` 控制 UAC2 启停状态；mux/write thread 和 UAC2 playback capture thread 在各自线程内 open/close 对应 card4 PCM。
+- `pcmC4D0p` 写失败只计数并丢弃当前 pending 数据，不 close PCM，不触发整组 UAC2 recover，避免影响 PC 播放方向。
+- `pcmC4D0c` 读失败只计数并按 `uacInputReadRetryMs` 间隔重试，不 close PCM，不触发整组 UAC2 recover，避免 PC 只采集时影响 `pcmC4D0p` 输出。
 - 使用三线程结构：
   - card0 capture thread：按 1024 帧阻塞读取 8ch PCM，推入队列。
   - card1 capture thread：按 1024 帧阻塞读取 2ch PCM，推入队列。

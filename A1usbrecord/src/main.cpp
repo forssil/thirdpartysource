@@ -135,7 +135,6 @@ struct RuntimeStats {
 
 struct Uac2DeviceState {
     std::atomic<bool> enabled{false};
-    std::atomic<bool> recover_requested{false};
     std::atomic<uint64_t> generation{0};
 };
 
@@ -198,12 +197,6 @@ bool SameNodeSnapshot(const DeviceNodeSnapshot& lhs, const DeviceNodeSnapshot& r
            lhs.rdev == rhs.rdev;
 }
 
-void RequestUac2Recover(Uac2DeviceState* state) {
-    if (state != nullptr) {
-        state->recover_requested.store(true);
-    }
-}
-
 bool Uac2NodesExist(const a1usbrecord::AppConfig& config) {
     return FileExists(config.uac2OutputNode) && FileExists(config.uac2InputNode);
 }
@@ -225,7 +218,11 @@ bool SyncUac2DeviceState(a1usbrecord::PcmDevice* device,
                          const char* name,
                          FileLogger* logger) {
     const uint64_t generation = state->generation.load();
-    if (!state->enabled.load() || state->recover_requested.load()) {
+    if (*local_generation == generation) {
+        return device->IsOpen();
+    }
+
+    if (!state->enabled.load()) {
         if (device->IsOpen()) {
             logger->Log(std::string("close ") + name);
             device->Close();
@@ -235,15 +232,12 @@ bool SyncUac2DeviceState(a1usbrecord::PcmDevice* device,
         return false;
     }
 
-    if (device->IsOpen() && *local_generation == generation) {
-        return true;
-    }
-
     device->Close();
     if (!device->Open()) {
         if (!*open_failure_logged) {
             logger->Log(std::string("failed to open ") + name + ": " + device->LastError());
         }
+        *local_generation = generation;
         *open_failure_logged = true;
         return false;
     }
@@ -261,7 +255,7 @@ void HandleUac2State(const a1usbrecord::AppConfig& config,
                      DeviceNodeSnapshot* output_snapshot,
                      DeviceNodeSnapshot* input_snapshot) {
     const bool nodes_exist = Uac2NodesExist(config);
-    bool recover_requested = state->recover_requested.exchange(false);
+    bool restart_required = false;
 
     if (!nodes_exist) {
         if (state->enabled.load() || !*nodes_missing_logged) {
@@ -292,17 +286,13 @@ void HandleUac2State(const a1usbrecord::AppConfig& config,
         (!SameNodeSnapshot(*output_snapshot, current_output) ||
          !SameNodeSnapshot(*input_snapshot, current_input))) {
         logger->Log("UAC2 snd nodes changed; restart card4 devices");
-        recover_requested = true;
+        restart_required = true;
     }
 
-    if (!recover_requested && state->enabled.load()) {
+    if (!restart_required && state->enabled.load()) {
         *output_snapshot = current_output;
         *input_snapshot = current_input;
         return;
-    }
-
-    if (recover_requested) {
-        logger->Log("UAC2 recover requested; restart card4 devices");
     }
 
     *output_snapshot = current_output;
@@ -384,14 +374,12 @@ bool WritePendingFrames(a1usbrecord::PcmDevice* output,
                         std::vector<int16_t>* pending,
                         std::size_t channels,
                         std::size_t frames_per_write,
-                        RuntimeStats* stats,
-                        Uac2DeviceState* uac2_state) {
+                        RuntimeStats* stats) {
     // UAC2 accepts a smaller period than the capture sources. Keep a pending
     // buffer and write only complete output periods.
     while (pending->size() >= frames_per_write * channels) {
         if (!output->WriteFrames(pending->data(), frames_per_write)) {
             stats->uac2_output_errors.fetch_add(1);
-            RequestUac2Recover(uac2_state);
             pending->clear();
             stats->pending_output_frames.store(0);
             return true;
@@ -467,8 +455,7 @@ void MuxWriteLoop(a1usbrecord::PcmChunkQueue* input8ch_queue,
                                 &pending_output,
                                 output_endpoint.channels,
                                 output_endpoint.period_size,
-                                stats,
-                                uac2_state)) {
+                                stats)) {
             running->store(false);
             break;
         }
@@ -514,8 +501,6 @@ void PlaybackCaptureLoop(const a1usbrecord::PcmEndpoint input_endpoint,
 
         if (!input.ReadFrames(chunk.samples.data(), chunk.frames)) {
             stats->playback_input_errors.fetch_add(1);
-            RequestUac2Recover(uac2_state);
-            input.Close();
             std::this_thread::sleep_for(std::chrono::milliseconds(read_retry_ms));
             continue;
         }
