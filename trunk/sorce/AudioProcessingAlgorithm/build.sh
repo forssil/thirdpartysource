@@ -1,274 +1,434 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# 发生错误时立即退出
-set -e
+set -euo pipefail
 
-# 获取脚本所在目录，确保在 Makefile 所在目录下执行
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TRUNK_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="$(cd "$TRUNK_DIR/../.." && pwd)"
 cd "$SCRIPT_DIR"
 
-# 打印帮助信息
-function show_help() {
-    echo "Usage: $0 [COMMAND] [OPTIONS]"
-    echo ""
-    echo "Commands:"
-    echo "  all       (Default) 编译整个项目"
-    echo "  clean     清理编译产物 (objs 和 libs)"
-    echo ""
-    echo "Options for 'all':"
-    echo "  -c, --cross-compile <prefix>  指定自定义的交叉编译工具链前缀"
-    echo "                                例如: $0 all -c /opt/toolchain/bin/arm-linux-"
-    echo "  -o, --outdir <path>           指定输出文件夹路径 (静态库将生成在此处)"
-    echo "  --cc <compiler>               指定 C 编译器 (例如: gcc, clang)"
-    echo "  --cxx <compiler>              指定 C++ 编译器 (例如: g++, clang++)"
-    echo "  --ld <linker>                 指定链接器 (例如: ld, ld.lld)"
-    echo "  --ar <archiver>               指定静态库打包工具 (例如: ar, llvm-ar)"
-    echo "  --ndk <arch>                  使用本地 Android NDK 环境编译，支持的架构: aarch64, arm"
-    echo "                                例如: $0 all --ndk aarch64"
-    echo "  --sigmastar                   使用 SigmaStar 交叉编译工具链编译"
-    echo "  --sigmastar-docker            使用 Docker 运行 SigmaStar 交叉编译 (macOS)"
-    echo ""
-    echo "Examples:"
-    echo "  $0                      # 使用 Makefile 中的默认工具链编译"
-    echo "  $0 clean                # 清理"
-    echo "  $0 all --cc gcc         # 仅覆盖 CC 编译器为系统 gcc"
-    echo "  $0 all -c aarch64-linux-gnu- # 使用指定的交叉编译工具链前缀"
-    echo "  $0 all -o /tmp/build_libs    # 指定输出目录"
-    echo "  $0 all --ndk aarch64         # 使用本地下载的 NDK 编译 Android aarch64 版本"
-    echo "  $0 all --ndk arm             # 使用本地下载的 NDK 编译 Android 32位 arm 版本"
-    echo "  $0 all --sigmastar           # 使用 SigmaStar 工具链编译"
-    echo "  $0 all --sigmastar-docker    # 使用 Docker 编译 SigmaStar 版本"
-    echo "  $0 all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm"
+show_help()
+{
+    cat <<EOF
+Usage: $0 [COMMAND] [OPTIONS]
+
+Commands:
+  all       Build shared and static libraries (default)
+  share     Build libAPF.so
+  static    Build libAPF.a
+  test      Run ARM64 source, parity, and benchmark tests
+  clean     Remove artifacts for the selected platform
+
+Toolchain options:
+  -c, --cross-compile <prefix>  Cross-compiler prefix
+  --cc <path>                   C compiler override
+  --cxx <path>                  C++ compiler override
+  --ld <path>                   Linker override
+  --ar <path>                   Archiver override
+
+Android options:
+  --ndk <aarch64|arm>           Build with Android NDK
+  --ndk-path <path>             NDK root (default: ANDROID_NDK_HOME or workspace NDK)
+  --api-level <level>           Android API level (default: 28)
+
+SigmaStar options:
+  --sigmastar                   Use the native SigmaStar cross-toolchain
+  --sigmastar-prefix <prefix>   SigmaStar compiler prefix
+  --sigmastar-docker            Build SigmaStar libraries through Docker
+
+Output options:
+  -o, --outdir <path>           Library output directory
+  --objdir <path>               Object output directory
+  -j, --jobs <count>            Parallel build jobs
+
+Examples:
+  $0 all --ndk aarch64
+  $0 static --ndk aarch64 --ndk-path /opt/android-ndk-r28
+  $0 test
+  $0 clean --ndk aarch64
+  $0 all --sigmastar-docker
+
+Detailed Android ARM64 API 21 example:
+  $0 all \\
+    --ndk aarch64 \\
+    --api-level 21 \\
+    --ndk-path "$WORKSPACE_ROOT/ndk/android-ndk-r28" \\
+    --objdir "$WORKSPACE_ROOT/output/obj/android_arm64_v8a_api21" \\
+    --outdir "$WORKSPACE_ROOT/output/android_arm64_v8a" \\
+    --jobs 8
+
+Outputs:
+  $WORKSPACE_ROOT/output/android_arm64_v8a/libAPF.so
+  $WORKSPACE_ROOT/output/android_arm64_v8a/libAPF.a
+  $WORKSPACE_ROOT/output/android_arm64_v8a/libc++_shared.so
+EOF
 }
 
-# 默认执行目标
-TARGET="all"
-MAKE_ARGS=()
-NDK_RUNTIME_COPY=""
-AUTO_CLEAN=""
+fail()
+{
+    echo "Error: $*" >&2
+    exit 1
+}
 
-# 解析第一个参数（如果是 clean，直接处理）
-if [ "$1" == "clean" ]; then
-    TARGET="clean"
-    shift
-elif [ "$1" == "all" ]; then
-    TARGET="all"
-    shift
-elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-    show_help
-    exit 0
-fi
+require_value()
+{
+    [ "$#" -ge 2 ] && [ -n "$2" ] || fail "Option $1 requires a value"
+}
 
-# 解析其余参数（处理外部传入的编译器变量）
-while [[ $# -gt 0 ]]; do
-    case $1 in
+detect_jobs()
+{
+    if command -v nproc >/dev/null 2>&1; then
+        nproc
+    elif command -v sysctl >/dev/null 2>&1; then
+        sysctl -n hw.ncpu
+    else
+        echo 4
+    fi
+}
+
+find_ndk_bin()
+{
+    local host_tag
+    local candidate
+
+    case "$(uname -s)-$(uname -m)" in
+        Darwin-arm64) host_tag="darwin-arm64" ;;
+        Darwin-*) host_tag="darwin-x86_64" ;;
+        Linux-*) host_tag="linux-x86_64" ;;
+        *) fail "Unsupported NDK host: $(uname -s)-$(uname -m)" ;;
+    esac
+
+    candidate="$NDK_PATH/toolchains/llvm/prebuilt/$host_tag/bin"
+    if [ ! -d "$candidate" ] && [ "$host_tag" = "darwin-arm64" ]; then
+        candidate="$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin"
+    fi
+    [ -d "$candidate" ] || fail "NDK toolchain directory not found under $NDK_PATH"
+    printf '%s\n' "$candidate"
+}
+
+check_executable()
+{
+    if [[ "$1" == */* ]]; then
+        [ -x "$1" ] || fail "Required executable not found: $1"
+    else
+        command -v "$1" >/dev/null 2>&1 ||
+            fail "Required executable not found in PATH: $1"
+    fi
+}
+
+COMMAND="all"
+case "${1:-}" in
+    all|share|static|test|clean)
+        COMMAND="$1"
+        shift
+        ;;
+    -h|--help)
+        show_help
+        exit 0
+        ;;
+esac
+
+PLATFORM="generic"
+NDK_ARCH=""
+NDK_PATH="${ANDROID_NDK_HOME:-$WORKSPACE_ROOT/ndk/android-ndk-r28}"
+API_LEVEL=28
+SIGMASTAR_PREFIX="${SIGMASTAR_TOOLCHAIN_PREFIX:-}"
+CROSS_PREFIX="${CROSS_COMPILE:-}"
+CC_OVERRIDE=""
+CXX_OVERRIDE=""
+LD_OVERRIDE=""
+AR_OVERRIDE=""
+OUTDIR_VALUE="${OUTDIR:-}"
+OBJDIR_VALUE="${OBJ_PATH:-}"
+JOBS="$(detect_jobs)"
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
         -c|--cross-compile)
-            export CROSS_COMPILE="$2"
-            echo "=> Set CROSS_COMPILE to: $CROSS_COMPILE"
+            require_value "$@"
+            CROSS_PREFIX="$2"
             shift 2
             ;;
         -o|--outdir)
-            export OUTDIR="$2"
-            echo "=> Set OUTDIR to: $OUTDIR"
+            require_value "$@"
+            OUTDIR_VALUE="$2"
+            shift 2
+            ;;
+        --objdir)
+            require_value "$@"
+            OBJDIR_VALUE="$2"
             shift 2
             ;;
         --cc)
-            export CC="$2"
-            echo "=> Set CC to: $CC"
+            require_value "$@"
+            CC_OVERRIDE="$2"
             shift 2
             ;;
         --cxx)
-            export CXX="$2"
-            echo "=> Set CXX to: $CXX"
+            require_value "$@"
+            CXX_OVERRIDE="$2"
             shift 2
             ;;
         --ld)
-            export LD="$2"
-            echo "=> Set LD to: $LD"
+            require_value "$@"
+            LD_OVERRIDE="$2"
             shift 2
             ;;
         --ar)
-            export AR="$2"
-            echo "=> Set AR to: $AR"
+            require_value "$@"
+            AR_OVERRIDE="$2"
             shift 2
             ;;
         --ndk)
-            NDK_BIN="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/bin"
+            require_value "$@"
+            [ "$PLATFORM" = "generic" ] || fail "Only one platform may be selected"
+            PLATFORM="android"
             NDK_ARCH="$2"
-            
-            if [ "$NDK_ARCH" == "aarch64" ]; then
-                export CC="$NDK_BIN/aarch64-linux-android28-clang"
-                export CXX="$NDK_BIN/aarch64-linux-android28-clang++"
-                DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_arm64_v8a"
-                NDK_RUNTIME_COPY="aarch64-linux-android"
-                NE10_VARIANT="android_arm64_v8a"
-                echo "=> Using NDK environment for Android aarch64 (API 28)"
-            elif [ "$NDK_ARCH" == "arm" ]; then
-                export CC="$NDK_BIN/armv7a-linux-androideabi28-clang"
-                export CXX="$NDK_BIN/armv7a-linux-androideabi28-clang++"
-                DEFAULT_NDK_OUTDIR="/Users/bytedance/work/A1T1/output/android_armeabi_v7a"
-                NDK_RUNTIME_COPY="arm-linux-androideabi"
-                NE10_VARIANT="android_armeabi_v7a"
-                echo "=> Using NDK environment for Android arm (API 28)"
-            else
-                echo "Error: Invalid architecture for --ndk. Supported values are: aarch64, arm"
-                exit 1
-            fi
-            
-            export LD="$NDK_BIN/ld.lld"
-            export AR="$NDK_BIN/llvm-ar"
-
-            NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/$NE10_VARIANT"
-            if [ ! -f "$NE10_ROOT/include/NE10.h" ] || [ ! -f "$NE10_ROOT/lib/libNE10.a" ]; then
-                echo "Error: NE10 for $NDK_ARCH was not found at $NE10_ROOT"
-                echo "Build it first with: $TRUNK_DIR/thirdparty/ne10/build.sh all --abi $([ "$NDK_ARCH" == "aarch64" ] && echo "arm64-v8a" || echo "armeabi-v7a")"
-                exit 1
-            fi
-
-            export NE10_INCLUDE_DIR="$NE10_ROOT/include"
-            export NE10_LIBS="-L$NE10_ROOT/lib -lNE10 -lm"
-            export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON}"
-            
-            # 只有当用户没有显式传入 OUTDIR 时，才使用 NDK 的默认输出目录
-            if [ -z "$OUTDIR" ]; then
-                export OUTDIR="$DEFAULT_NDK_OUTDIR"
-            fi
-            
-            echo "   CC: $CC"
-            echo "   CXX: $CXX"
-            echo "   LD: $LD"
-            echo "   AR: $AR"
-            echo "   OUTDIR: $OUTDIR"
-            echo "   NE10_INCLUDE_DIR: $NE10_INCLUDE_DIR"
-            echo "   NE10_LIBS: $NE10_LIBS"
-            echo "   DEFINES: $DEFINES"
-            AUTO_CLEAN="yes"
+            shift 2
+            ;;
+        --ndk-path)
+            require_value "$@"
+            NDK_PATH="$2"
+            shift 2
+            ;;
+        --api-level)
+            require_value "$@"
+            API_LEVEL="$2"
             shift 2
             ;;
         --sigmastar)
-            SIGMA_BIN="/home/gaohua.karl/code/A1/arm-sigmastar-linux-uclibcgnueabihf-9.1.0/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0-"
-            export CC="${SIGMA_BIN}gcc"
-            export CXX="${SIGMA_BIN}g++"
-            export LD="${SIGMA_BIN}ld"
-            export AR="${SIGMA_BIN}ar"
-            DEFAULT_SIGMA_OUTDIR="/home/gaohua.karl/code/A1/output/sigmastar"
-            NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/sigmastar"
-            if [ ! -f "$NE10_ROOT/include/NE10.h" ] || [ ! -f "$NE10_ROOT/lib/libNE10.a" ]; then
-                echo "Error: SigmaStar NE10 was not found at $NE10_ROOT"
-                echo "Build it first with: $TRUNK_DIR/thirdparty/ne10/build.sh all --sigmastar"
-                exit 1
-            fi
-            export NE10_INCLUDE_DIR="$NE10_ROOT/include"
-            export NE10_LIBS="-L$NE10_ROOT/lib -lNE10 -lm"
-            export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON}"
-            
-            if [ -z "$OUTDIR" ]; then
-                export OUTDIR="$DEFAULT_SIGMA_OUTDIR"
-            fi
-            
-            echo "=> Using SigmaStar cross-compile toolchain"
-            echo "   CC: $CC"
-            echo "   CXX: $CXX"
-            echo "   LD: $LD"
-            echo "   AR: $AR"
-            echo "   OUTDIR: $OUTDIR"
-            echo "   NE10_INCLUDE_DIR: $NE10_INCLUDE_DIR"
-            echo "   NE10_LIBS: $NE10_LIBS"
-            echo "   DEFINES: $DEFINES"
-            AUTO_CLEAN="yes"
-            shift 1
+            [ "$PLATFORM" = "generic" ] || fail "Only one platform may be selected"
+            PLATFORM="sigmastar"
+            shift
+            ;;
+        --sigmastar-prefix)
+            require_value "$@"
+            SIGMASTAR_PREFIX="$2"
+            shift 2
             ;;
         --sigmastar-docker)
-            USE_DOCKER="yes"
-            DEFAULT_SIGMA_OUTDIR="/Users/bytedance/work/A1T1/output/sigmastar"
-            
-            if [ -z "$OUTDIR" ]; then
-                export OUTDIR="$DEFAULT_SIGMA_OUTDIR"
-            fi
-            
-            echo "=> Using SigmaStar cross-compile toolchain via Docker"
-            echo "   OUTDIR: $OUTDIR"
-            AUTO_CLEAN="yes"
-            shift 1
+            [ "$PLATFORM" = "generic" ] || fail "Only one platform may be selected"
+            PLATFORM="sigmastar-docker"
+            shift
+            ;;
+        -j|--jobs)
+            require_value "$@"
+            JOBS="$2"
+            shift 2
             ;;
         *)
-            echo "Unknown option: $1"
-            show_help
-            exit 1
+            fail "Unknown option: $1"
             ;;
     esac
 done
 
-# 获取 CPU 核心数以加速编译 (-j 参数)
-# 兼容 macOS 和 Linux
-if command -v nproc > /dev/null 2>&1; then
-    CORES=$(nproc)
-elif command -v sysctl > /dev/null 2>&1; then
-    CORES=$(sysctl -n hw.ncpu)
-else
-    CORES=4
+case "$API_LEVEL" in
+    *[!0-9]*|"") fail "API level must be a positive integer" ;;
+esac
+[ "$API_LEVEL" -gt 0 ] || fail "API level must be a positive integer"
+case "$JOBS" in
+    *[!0-9]*|"") fail "Job count must be a positive integer" ;;
+esac
+[ "$JOBS" -gt 0 ] || fail "Job count must be a positive integer"
+
+TARGET_ARCH_VALUE="generic"
+PLATFORM_ID="generic"
+OBJ_PLATFORM_ID=""
+NDK_RUNTIME_TRIPLE=""
+NDK_READELF=""
+NE10_STATIC_LIB=""
+DOCKER_WRAPPER="${SIGMASTAR_DOCKER_WRAPPER:-$WORKSPACE_ROOT/docker/sigmastar/sigmastar-docker}"
+
+case "$PLATFORM" in
+    android)
+        [ -d "$NDK_PATH" ] || fail "NDK path not found: $NDK_PATH"
+        NDK_BIN="$(find_ndk_bin)"
+        case "$NDK_ARCH" in
+            aarch64)
+                PLATFORM_ID="android_arm64_v8a"
+                TARGET_ARCH_VALUE="arm64"
+                COMPILER_TRIPLE="aarch64-linux-android"
+                NDK_RUNTIME_TRIPLE="aarch64-linux-android"
+                ;;
+            arm)
+                PLATFORM_ID="android_armeabi_v7a"
+                TARGET_ARCH_VALUE="arm"
+                COMPILER_TRIPLE="armv7a-linux-androideabi"
+                NDK_RUNTIME_TRIPLE="arm-linux-androideabi"
+                ;;
+            *)
+                fail "Unsupported NDK architecture '$NDK_ARCH'; use aarch64 or arm"
+                ;;
+        esac
+        OBJ_PLATFORM_ID="${PLATFORM_ID}_api${API_LEVEL}"
+        CC_VALUE="$NDK_BIN/${COMPILER_TRIPLE}${API_LEVEL}-clang"
+        CXX_VALUE="$NDK_BIN/${COMPILER_TRIPLE}${API_LEVEL}-clang++"
+        LD_VALUE="$NDK_BIN/ld.lld"
+        AR_VALUE="$NDK_BIN/llvm-ar"
+        NDK_READELF="$NDK_BIN/llvm-readelf"
+        NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/$PLATFORM_ID"
+        NE10_STATIC_LIB="$NE10_ROOT/lib/libNE10.a"
+        [ -f "$NE10_ROOT/include/NE10.h" ] ||
+            fail "NE10 header not found: $NE10_ROOT/include/NE10.h"
+        [ -f "$NE10_STATIC_LIB" ] ||
+            fail "NE10 static library not found: $NE10_STATIC_LIB"
+        export NE10_INCLUDE_DIR="$NE10_ROOT/include"
+        export NE10_LIBS="$NE10_STATIC_LIB -lm"
+        export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-soname,libAPF.so -DARM_NEON}"
+        ;;
+    sigmastar)
+        PLATFORM_ID="sigmastar"
+        if [ -z "$SIGMASTAR_PREFIX" ]; then
+            SIGMASTAR_PREFIX="/home/gaohua.karl/code/A1/arm-sigmastar-linux-uclibcgnueabihf-9.1.0/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0-"
+        fi
+        CC_VALUE="${SIGMASTAR_PREFIX}gcc"
+        CXX_VALUE="${SIGMASTAR_PREFIX}g++"
+        LD_VALUE="${SIGMASTAR_PREFIX}ld"
+        AR_VALUE="${SIGMASTAR_PREFIX}ar"
+        NE10_ROOT="$TRUNK_DIR/thirdparty/ne10/sigmastar"
+        NE10_STATIC_LIB="$NE10_ROOT/lib/libNE10.a"
+        [ -f "$NE10_ROOT/include/NE10.h" ] ||
+            fail "NE10 header not found: $NE10_ROOT/include/NE10.h"
+        [ -f "$NE10_STATIC_LIB" ] ||
+            fail "NE10 static library not found: $NE10_STATIC_LIB"
+        export NE10_INCLUDE_DIR="$NE10_ROOT/include"
+        export NE10_LIBS="$NE10_STATIC_LIB -lm"
+        export DEFINES="${DEFINES:--fPIC -fpermissive -Wl,-rpath=. -Wl,-soname,libAPF.so -DARM_NEON}"
+        ;;
+    sigmastar-docker)
+        PLATFORM_ID="sigmastar"
+        [ -x "$DOCKER_WRAPPER" ] || fail "Docker wrapper not found: $DOCKER_WRAPPER"
+        ;;
+    generic)
+        CC_VALUE="${CC:-${CROSS_PREFIX}gcc}"
+        CXX_VALUE="${CXX:-${CROSS_PREFIX}g++}"
+        LD_VALUE="${LD:-${CROSS_PREFIX}ld}"
+        AR_VALUE="${AR:-${CROSS_PREFIX}ar}"
+        ;;
+esac
+
+if [ "$COMMAND" = "test" ]; then
+    [ "$PLATFORM" = "generic" ] ||
+        fail "The test command runs native ARM64 binaries and cannot be cross-compiled"
+    case "$(uname -m)" in
+        arm64|aarch64) ;;
+        *) fail "The test command requires an ARM64 host" ;;
+    esac
+    PLATFORM_ID="native_arm64_test"
+    TARGET_ARCH_VALUE="arm64"
+    CC_VALUE="${CC:-clang}"
+    CXX_VALUE="${CXX:-clang++}"
+    LD_VALUE="${LD:-ld}"
+    AR_VALUE="${AR:-ar}"
+    export DEFINES="${DEFINES:--fPIC -DHAVE_LRINT=1 -DHAVE_LRINTF=1}"
 fi
 
-echo "---------------------------------------------------"
-if [ "$TARGET" == "clean" ]; then
-    if [ -n "$USE_DOCKER" ]; then
-        echo "=> Running: docker make clean"
-        SIGMA_DOCKER_SCRIPT="/Users/bytedance/work/A1T1/docker/sigmastar/sigmastar-docker"
-        mkdir -p "$OUTDIR"
-        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm clean OUTDIR=/work/libs/sigmastar
+[ -n "$CC_OVERRIDE" ] && CC_VALUE="$CC_OVERRIDE"
+[ -n "$CXX_OVERRIDE" ] && CXX_VALUE="$CXX_OVERRIDE"
+[ -n "$LD_OVERRIDE" ] && LD_VALUE="$LD_OVERRIDE"
+[ -n "$AR_OVERRIDE" ] && AR_VALUE="$AR_OVERRIDE"
+
+if [ "$PLATFORM" != "sigmastar-docker" ]; then
+    check_executable "$CC_VALUE"
+    check_executable "$CXX_VALUE"
+    check_executable "$AR_VALUE"
+fi
+
+if [ -z "$OUTDIR_VALUE" ]; then
+    if [ "$PLATFORM" = "generic" ] && [ "$COMMAND" != "test" ]; then
+        OUTDIR_VALUE="$TRUNK_DIR/libs"
     else
-        echo "=> Running: make clean"
-        make clean
+        OUTDIR_VALUE="$WORKSPACE_ROOT/output/$PLATFORM_ID"
+    fi
+fi
+if [ -z "$OBJDIR_VALUE" ]; then
+    OBJDIR_VALUE="$WORKSPACE_ROOT/output/obj/${OBJ_PLATFORM_ID:-$PLATFORM_ID}"
+fi
+
+export CC="$CC_VALUE"
+export CXX="$CXX_VALUE"
+export LD="$LD_VALUE"
+export AR="$AR_VALUE"
+export CROSS_COMPILE="$CROSS_PREFIX"
+export TARGET_ARCH="$TARGET_ARCH_VALUE"
+export OUTDIR="$OUTDIR_VALUE"
+export OBJ_PATH="$OBJDIR_VALUE"
+
+echo "---------------------------------------------------"
+echo "Command:       $COMMAND"
+echo "Platform:      $PLATFORM_ID"
+echo "CC:            $CC"
+echo "CXX:           $CXX"
+echo "AR:            $AR"
+echo "TARGET_ARCH:   $TARGET_ARCH"
+echo "OBJ_PATH:      $OBJ_PATH"
+echo "OUTDIR:        $OUTDIR"
+[ -n "$NE10_STATIC_LIB" ] && echo "NE10 archive:  $NE10_STATIC_LIB"
+echo "Jobs:          $JOBS"
+echo "---------------------------------------------------"
+
+mkdir -p "$OBJ_PATH" "$OUTDIR"
+
+if [ "$PLATFORM" = "sigmastar-docker" ]; then
+    DOCKER_OUTDIR="$TRUNK_DIR/libs/sigmastar"
+    "$DOCKER_WRAPPER" make "$TRUNK_DIR" \
+        -C sorce/AudioProcessingAlgorithm clean \
+        OUTDIR=/work/libs/sigmastar \
+        OBJ_PATH=/work/objs/sigmastar
+    if [ "$COMMAND" != "clean" ]; then
+        "$DOCKER_WRAPPER" make "$TRUNK_DIR" \
+            -C sorce/AudioProcessingAlgorithm "-j$JOBS" "$COMMAND" \
+            OUTDIR=/work/libs/sigmastar \
+            OBJ_PATH=/work/objs/sigmastar \
+            "NE10_LIBS=/work/thirdparty/ne10/sigmastar/lib/libNE10.a -lm"
+        mkdir -p "$OUTDIR"
+        [ ! -f "$DOCKER_OUTDIR/libAPF.so" ] ||
+            cp "$DOCKER_OUTDIR/libAPF.so" "$OUTDIR/"
+        [ ! -f "$DOCKER_OUTDIR/libAPF.a" ] ||
+            cp "$DOCKER_OUTDIR/libAPF.a" "$OUTDIR/"
     fi
 else
-    # 切换平台编译前先 clean，避免复用其它平台的 .o 文件
-    if [ -n "$USE_DOCKER" ]; then
-        echo "=> Running: SigmaStar compilation via Docker"
-        SIGMA_DOCKER_SCRIPT="/Users/bytedance/work/A1T1/docker/sigmastar/sigmastar-docker"
-        mkdir -p "$OUTDIR"
-        
-        # Clean in Docker
-        echo "=> Running: docker make clean"
-        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm clean OUTDIR=/work/libs/sigmastar
-        
-        # Build in Docker
-        echo "=> Running: docker make -j${CORES}"
-        "$SIGMA_DOCKER_SCRIPT" make "$(dirname "$SCRIPT_DIR")" -C sorce/AudioProcessingAlgorithm -j"${CORES}" OUTDIR=/work/libs/sigmastar
-        
-        # 拷贝 SigmaStar 运行时库
-        SIGMA_TOOLCHAIN="/Users/bytedance/work/A1T1/armbuild"
-        if [ -f "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libgcc_s.so.1" ]; then
-            cp "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libgcc_s.so.1" "$OUTDIR/"
-            echo "=> Copied libgcc_s.so.1 to $OUTDIR"
-        fi
-        if [ -f "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libstdc++.so.6.0.26" ]; then
-            cp "$SIGMA_TOOLCHAIN/arm-sigmastar-linux-uclibcgnueabihf/sysroot/lib/libstdc++.so.6.0.26" "$OUTDIR/libstdc++.so.6"
-            echo "=> Copied libstdc++.so.6 to $OUTDIR"
-        fi
-    else
-        if [ -n "$AUTO_CLEAN" ]; then
-            echo "=> Running: make clean (auto clean before cross-compile)"
-            make clean
-        fi
-        echo "=> Running: make -j${CORES} ${TARGET} ${MAKE_ARGS[*]}"
-        make -j"${CORES}" "$TARGET" "${MAKE_ARGS[@]}"
+    MAKE_TARGET="$COMMAND"
+    [ "$COMMAND" != "test" ] || MAKE_TARGET="arm64-function-parity-test"
+    make -j"$JOBS" "$MAKE_TARGET"
+fi
 
-        # 拷贝 NDK 运行时库 libc++_shared.so 到输出目录
-        if [ -n "$NDK_RUNTIME_COPY" ] && [ -n "$OUTDIR" ]; then
-            NDK_SYSROOT="/Users/bytedance/work/A1T1/ndk/android-ndk-r28/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${NDK_RUNTIME_COPY}/libc++_shared.so"
-            if [ -f "$NDK_SYSROOT" ]; then
-                cp "$NDK_SYSROOT" "$OUTDIR/"
-                echo "=> Copied libc++_shared.so to $OUTDIR"
-            else
-                echo "Warning: libc++_shared.so not found at $NDK_SYSROOT"
-            fi
+if [ "$COMMAND" != "clean" ] && [ "$COMMAND" != "test" ]; then
+    case "$COMMAND" in
+        all|share)
+            [ -f "$OUTDIR/libAPF.so" ] || fail "Missing output: $OUTDIR/libAPF.so"
+            file "$OUTDIR/libAPF.so"
+            ;;
+    esac
+    case "$COMMAND" in
+        all|static)
+            [ -f "$OUTDIR/libAPF.a" ] || fail "Missing output: $OUTDIR/libAPF.a"
+            file "$OUTDIR/libAPF.a"
+            ;;
+    esac
+fi
+
+if [ "$PLATFORM" = "android" ] && [ "$COMMAND" != "clean" ]; then
+    if [ -f "$OUTDIR/libAPF.so" ]; then
+        DYNAMIC_INFO="$("$NDK_READELF" -d "$OUTDIR/libAPF.so")"
+        if printf '%s\n' "$DYNAMIC_INFO" | grep -q 'libNE10\.so'; then
+            fail "libAPF.so has an unexpected dynamic dependency on libNE10.so"
+        fi
+        echo "Verified: libAPF.so links NE10 statically"
+    fi
+    if [ -f "$OUTDIR/libAPF.so" ]; then
+        NDK_RUNTIME="$NDK_PATH/toolchains/llvm/prebuilt/$(basename "$(dirname "$(dirname "$CC")")")/sysroot/usr/lib/$NDK_RUNTIME_TRIPLE/libc++_shared.so"
+        if [ -f "$NDK_RUNTIME" ]; then
+            cp "$NDK_RUNTIME" "$OUTDIR/"
+            echo "Copied: $OUTDIR/libc++_shared.so"
+        else
+            echo "Warning: libc++_shared.so not found at $NDK_RUNTIME" >&2
         fi
     fi
 fi
-echo "---------------------------------------------------"
-echo "Done!"
 
-
-#./build.sh all  -c /Users/bytedance/work/A1T1/clangbuild/bin/llvm- -o /Users/bytedance/work/A1T1/output/android
-#./build.sh all -c /Users/bytedance/work/A1T1/armbuild/bin/arm-sigmastar-linux-uclibcgnueabihf-9.1.0- -o /Users/bytedance/work/A1T1/output/arm
+echo "Done."
